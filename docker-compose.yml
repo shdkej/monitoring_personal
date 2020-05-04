@@ -1,23 +1,31 @@
 version: '2'
 services:
-  telegraf:
-    image: telegraf
-    volumes:
-      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
-      - /var/run/docker.sock:/var/run/docker.sock
-
   grafana:
     image: grafana/grafana
     container_name: grafana
     environment:
       - GF_INSTALL_PLUGINS=https://grafana.com/api/plugins/jdbranham-diagram-panel/versions/1.6.1/download;diagram-panel,https://grafana.com/api/plugins/grafana-polystat-panel/versions/1.1.0/download;polystat
+    volumes:
+      - grafana_data:/var/lib/grafana
     ports:
       - 3000:3000
 
-  influxdb:
-    image: influxdb
-    container_name: influxdb
-    ports:
-      - 8086:8086
+  prometheus:
+    image: prom/prometheus
     volumes:
-      - ./influxdb:/var/lib/influxdb
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - prometheus_data:/prometheus
+    ports:
+      - 9090:9090
+
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - 9100:9100
+
+volumes:
+  grafana_data: {}
+  prometheus_data: {}
