@@ -7,17 +7,17 @@ services:
       - GF_INSTALL_PLUGINS=https://grafana.com/api/plugins/jdbranham-diagram-panel/versions/1.6.1/download;diagram-panel,https://grafana.com/api/plugins/grafana-polystat-panel/versions/1.1.0/download;polystat
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     ports:
       - 3000:3000
 
   prometheus:
     image: prom/prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-    volumes:
-      - prometheus_data:/prometheus
     ports:
       - 9090:9090
 
