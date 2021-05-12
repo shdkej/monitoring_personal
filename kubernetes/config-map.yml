@@ -1,0 +1,23 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: example-configmap
+data:
+  key: value
+
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: example-pod
+spec:
+  volumes:
+    - name: example-configmap-volume
+      configMap:
+        name: example-configmap
+  containers:
+    - name: example-container
+      image: nginx
+      vloumeMounts:
+      - name: example-configmap-volume
+        mountPath: /etc/config
