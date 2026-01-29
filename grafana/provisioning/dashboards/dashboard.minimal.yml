@@ -1,0 +1,35 @@
+# Grafana 대시보드 프로비저닝 설정
+# Grafana 시작 시 자동으로 대시보드를 로드함
+
+# apiVersion: Grafana 프로비저닝 API 버전
+apiVersion: 1
+
+# 대시보드 제공자 목록
+providers:
+  # 미니멀 모니터링 대시보드 제공자
+  - name: 'minimal-dashboards'        # 프로바이더 이름 (내부 식별용)
+
+    # orgId: 조직 ID (1은 기본 조직)
+    orgId: 1
+
+    # folder: Grafana UI에서 대시보드가 저장될 폴더명
+    folder: 'Minimal Monitoring'
+
+    # type: 프로바이더 타입 (file은 로컬 파일시스템에서 로드)
+    type: file
+
+    # disableDeletion: UI에서 대시보드 삭제 방지
+    # true로 설정하면 코드로만 관리 (권장)
+    disableDeletion: true
+
+    # updateIntervalSeconds: 파일 시스템의 변경사항을 확인하는 주기 (초)
+    # 0으로 설정하면 시작 시에만 로드
+    updateIntervalSeconds: 10
+
+    # allowUiUpdates: UI에서 대시보드 수정 허용 여부
+    # false로 설정하면 코드로만 관리 (권장)
+    allowUiUpdates: false
+
+    # options.path: 대시보드 JSON 파일들이 위치한 디렉토리 경로
+    options:
+      path: /etc/grafana/provisioning/dashboards

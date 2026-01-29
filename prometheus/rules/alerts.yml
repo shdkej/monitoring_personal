@@ -1,0 +1,112 @@
+# Prometheus Alert Rules
+# 시스템 모니터링을 위한 기본 알림 규칙
+
+groups:
+  # 시스템 리소스 알림
+  - name: system_alerts
+    rules:
+      # CPU 사용률 높음 경고
+      - alert: HighCpuUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 3
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 CPU 사용률 감지"
+          description: '{{ $labels.instance }}의 CPU 사용률이 5분 이상 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+
+      # CPU 사용률 위험
+      - alert: CriticalCpuUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "위험 수준의 CPU 사용률"
+          description: '{{ $labels.instance }}의 CPU 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+
+      # 메모리 사용률 높음 경고
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 메모리 사용률 감지"
+          description: '{{ $labels.instance }}의 메모리 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+
+      # 메모리 사용률 위험
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "위험 수준의 메모리 사용률"
+          description: '{{ $labels.instance }}의 메모리 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+
+      # 디스크 사용률 높음 경고
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 디스크 사용률 감지"
+          description: '{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+
+      # 디스크 사용률 위험
+      - alert: CriticalDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "위험 수준의 디스크 사용률"
+          description: '{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크가 거의 가득 찼습니다. (현재: {{ $value | printf "%.1f" }}%)'
+
+  # 서비스 상태 알림
+  - name: service_alerts
+    rules:
+      # 타겟 다운
+      - alert: TargetDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "모니터링 타겟 다운"
+          description: "{{ $labels.job }}의 {{ $labels.instance }}가 1분 이상 응답하지 않습니다."
+
+      # Prometheus 설정 리로드 실패
+      - alert: PrometheusConfigReloadFailed
+        expr: prometheus_config_last_reload_successful == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus 설정 리로드 실패"
+          description: "Prometheus 설정 파일 리로드에 실패했습니다. 설정 파일을 확인하세요."
+
+  # 네트워크 알림
+  - name: network_alerts
+    rules:
+      # 네트워크 수신 트래픽 급증
+      - alert: HighNetworkReceive
+        expr: rate(node_network_receive_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) > 100000000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 네트워크 수신 트래픽"
+          description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스에서 높은 수신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
+
+      # 네트워크 송신 트래픽 급증
+      - alert: HighNetworkTransmit
+        expr: rate(node_network_transmit_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) > 100000000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 네트워크 송신 트래픽"
+          description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스에서 높은 송신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
