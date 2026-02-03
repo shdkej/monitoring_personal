@@ -62,7 +62,7 @@ services:
       - grafana_minimal_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
     ports:
-      - "3000:3000"  # Grafana Web UI 포트
+      - "3050:3000"  # Grafana Web UI 포트
     networks:
       - monitoring
     depends_on:

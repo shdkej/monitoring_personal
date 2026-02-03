@@ -7,8 +7,8 @@ groups:
     rules:
       # CPU 사용률 높음 경고
       - alert: HighCpuUsage
-        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 3
-        for: 1m
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 70
+        for: 5m
         labels:
           severity: warning
         annotations:
@@ -47,7 +47,7 @@ groups:
 
       # 디스크 사용률 높음 경고
       - alert: HighDiskUsage
-        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 80
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|devfs|autofs",mountpoint!~"/Library/Developer/CoreSimulator/.*"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|devfs|autofs",mountpoint!~"/Library/Developer/CoreSimulator/.*"})) * 100 > 80
         for: 5m
         labels:
           severity: warning
@@ -57,7 +57,7 @@ groups:
 
       # 디스크 사용률 위험
       - alert: CriticalDiskUsage
-        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 95
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|devfs|autofs",mountpoint!~"/Library/Developer/CoreSimulator/.*"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|devfs|autofs",mountpoint!~"/Library/Developer/CoreSimulator/.*"})) * 100 > 95
         for: 2m
         labels:
           severity: critical
