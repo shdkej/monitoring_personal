@@ -88,6 +88,29 @@ groups:
           summary: "Prometheus 설정 리로드 실패"
           description: "Prometheus 설정 파일 리로드에 실패했습니다. 설정 파일을 확인하세요."
 
+  # 노드 생존 알림 (Blackbox TCP probe)
+  - name: blackbox_alerts
+    rules:
+      # TCP probe 실패 - 노드 다운
+      - alert: NodeDown
+        expr: probe_success{job="blackbox-tcp"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "노드 다운 감지"
+          description: "{{ $labels.instance }}가 1분 이상 TCP 연결에 응답하지 않습니다."
+
+      # TCP probe 응답 지연
+      - alert: NodeHighLatency
+        expr: probe_duration_seconds{job="blackbox-tcp"} > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "노드 응답 지연"
+          description: '{{ $labels.instance }}의 TCP 응답 시간이 2초를 초과했습니다. (현재: {{ $value | printf "%.2f" }}초)'
+
   # 네트워크 알림
   - name: network_alerts
     rules:

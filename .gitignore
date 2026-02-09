@@ -3,3 +3,4 @@
 # 민감 정보 포함 파일
 alertmanager/alertmanager.yml
 .env
+ga4-exporter/credentials.json

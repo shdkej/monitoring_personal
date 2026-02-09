@@ -38,7 +38,41 @@ scrape_configs:
   # Job 2: Node Exporter - 시스템 메트릭 수집
   - job_name: 'node-exporter'
     static_configs:
-      - targets: ['node-exporter:9100']  # Docker Compose 네트워크 내 서비스명 사용
+      # 로컬 노드 (Docker Compose 내부)
+      - targets: ['node-exporter:9100']
         labels:
-          instance: 'local-node'         # 노드 인스턴스 식별자
-          app: 'system-monitoring'       # 시스템 모니터링 레이블
+          instance: 'local-mac'
+          app: 'system-monitoring'
+
+
+  # Job 3: Blackbox Exporter - 원격 노드 TCP 생존 확인
+  # node-exporter 없이 SSH 포트(22)로 노드 up/down 판별
+  - job_name: 'blackbox-tcp'
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]  # blackbox.yml의 tcp_connect 모듈 사용
+    static_configs:
+      - targets:
+          - '146.56.164.125:22'   # oci-arm1-worker SSH
+          - '193.122.121.37:22'   # oci-arm2-system SSH
+          - '152.70.93.64:22'     # oci-amd1-worker SSH
+        labels:
+          app: 'node-alive-check'
+    relabel_configs:
+      # probe 대상 주소를 __param_target에 설정
+      - source_labels: [__address__]
+        target_label: __param_target
+      # instance 레이블을 probe 대상 주소로 설정
+      - source_labels: [__param_target]
+        target_label: instance
+      # 실제 scrape 대상을 blackbox exporter로 변경
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # Job 4: Mock Exporter - 프로덕트/비즈니스 메트릭 시뮬레이터
+  - job_name: 'mock-metrics'
+    static_configs:
+      - targets: ['mock-exporter:9999']
+        labels:
+          instance: 'mock-exporter'
+          app: 'demo-metrics'

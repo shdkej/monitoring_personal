@@ -5,6 +5,9 @@ version: '3.8'
 # - Alertmanager: 알림 관리 및 Slack 연동
 # - Grafana: 시각화 대시보드
 # - Node Exporter: 시스템 메트릭 수집
+# - Loki: 로그 수집 및 저장
+# - Promtail: 로그 수집 에이전트
+# - Mock Exporter: 프로덕트/비즈니스 메트릭 시뮬레이터
 
 services:
   # Prometheus: 메트릭 수집 시계열 데이터베이스
@@ -67,6 +70,7 @@ services:
       - monitoring
     depends_on:
       - prometheus  # Prometheus가 먼저 시작되어야 함
+      - loki        # Loki가 먼저 시작되어야 함
 
   # Node Exporter: 호스트 시스템 메트릭 수집
   node-exporter:
@@ -89,6 +93,78 @@ services:
     networks:
       - monitoring
 
+  # Loki: 로그 수집 및 저장
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki-minimal
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki:/etc/loki
+      - loki_minimal_data:/loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - monitoring
+
+  # Promtail: 로그 수집 에이전트
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail-minimal
+    restart: unless-stopped
+    volumes:
+      - ./promtail:/etc/promtail
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - monitoring
+    depends_on:
+      - loki
+
+  # Blackbox Exporter: 원격 노드 생존 확인 (TCP probe)
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    container_name: blackbox-exporter-minimal
+    restart: unless-stopped
+    volumes:
+      - ./blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    ports:
+      - "9115:9115"  # Blackbox Exporter 메트릭 포트
+    networks:
+      - monitoring
+
+  # Mock Exporter: 프로덕트/비즈니스 메트릭 시뮬레이터
+  mock-exporter:
+    build: ./mock-exporter
+    container_name: mock-exporter-minimal
+    restart: unless-stopped
+    profiles:
+      - mock
+    ports:
+      - "9999:9999"
+    networks:
+      monitoring:
+        aliases:
+          - mock-exporter
+
+  # GA4 Exporter: GA4 실제 데이터 + 프로덕트 mock 메트릭 (기본 실행)
+  ga4-exporter:
+    build: ./ga4-exporter
+    container_name: ga4-exporter-minimal
+    restart: unless-stopped
+    environment:
+      - GA4_PROPERTIES=${GA4_PROPERTIES:-blog:252603434,site2:13582691061}
+      - GA4_KEY_FILE=/app/credentials.json
+    volumes:
+      - ./ga4-exporter/credentials/credentials.json:/app/credentials.json:ro
+    ports:
+      - "9999:9999"
+    networks:
+      monitoring:
+        aliases:
+          - mock-exporter
+
 # 네트워크 정의: 서비스 간 통신을 위한 격리된 네트워크
 networks:
   monitoring:
@@ -99,3 +175,4 @@ volumes:
   prometheus_minimal_data:    # Prometheus 시계열 데이터
   alertmanager_minimal_data:  # Alertmanager 알림 상태 데이터
   grafana_minimal_data:       # Grafana 대시보드 및 설정 데이터
+  loki_minimal_data:          # Loki 로그 데이터

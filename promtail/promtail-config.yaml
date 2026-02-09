@@ -1,0 +1,97 @@
+# Promtail 설정 파일
+# 로그를 수집하여 Loki로 전송
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+# 현재 위치 저장 (재시작 시 이어서 수집)
+positions:
+  filename: /tmp/positions.yaml
+
+# Loki 클라이언트 설정
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+# 스크래핑 설정
+scrape_configs:
+  # Docker 컨테이너 로그 수집
+  - job_name: containers
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: containerlogs
+          __path__: /var/lib/docker/containers/*/*log
+
+    pipeline_stages:
+      # Docker JSON 로그 파싱
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            attrs: attrs
+      - json:
+          expressions:
+            tag: tag
+          source: attrs
+      - regex:
+          expression: (?P<container_name>(?:[a-zA-Z0-9][a-zA-Z0-9_.-])+)
+          source: tag
+      - labels:
+          stream:
+          container_name:
+      - output:
+          source: output
+
+  # 시스템 로그 수집 (syslog)
+  - job_name: syslog
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          __path__: /var/log/syslog
+
+    pipeline_stages:
+      - regex:
+          expression: '(?P<timestamp>\w+\s+\d+\s+\d+:\d+:\d+)\s+(?P<hostname>\S+)\s+(?P<service>\S+?)(\[(?P<pid>\d+)\])?:\s+(?P<message>.*)'
+      - labels:
+          hostname:
+          service:
+      - timestamp:
+          source: timestamp
+          format: Jan _2 15:04:05
+
+  # 애플리케이션 로그 수집 (예시)
+  - job_name: app-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: app
+          __path__: /var/log/app/*.log
+
+    pipeline_stages:
+      # JSON 형식 로그 파싱
+      - json:
+          expressions:
+            level: level
+            message: message
+            timestamp: timestamp
+            service: service
+      - labels:
+          level:
+          service:
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+  # 일반 로그 파일 수집
+  - job_name: varlog
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlog
+          __path__: /var/log/*.log
