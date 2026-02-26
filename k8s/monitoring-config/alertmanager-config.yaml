@@ -1,0 +1,50 @@
+# =============================================================================
+# AlertmanagerConfig CRD
+# monitoring_personal/alertmanager/alertmanager.yml 을 K8s CRD로 변환
+# alertmanagerConfiguration.name 으로 Alertmanager가 이 CRD를 참조
+# =============================================================================
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: monitoring-alertmanager-config
+  labels:
+    app.kubernetes.io/part-of: monitoring-personal
+spec:
+  route:
+    groupBy:
+      - alertname
+      - severity
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+    receiver: slack-alerts
+
+  receivers:
+    - name: slack-alerts
+      slackConfigs:
+        - sendResolved: true
+          apiURL:
+            name: alertmanager-slack-webhook
+            key: slack-webhook-url
+          username: Alertmanager
+          iconEmoji: '{{ if eq .CommonLabels.severity "critical" }}:rotating_light:{{ else }}:warning:{{ end }}'
+          title: '{{ if eq .CommonLabels.severity "critical" }}:fire: CRITICAL{{ else }}:bell: WARNING{{ end }}: {{ .CommonLabels.alertname }}'
+          color: '{{ if eq .Status "resolved" }}good{{ else if eq .CommonLabels.severity "critical" }}danger{{ else }}warning{{ end }}'
+          text: |-
+            {{ if eq .CommonLabels.severity "critical" }}<!channel> *긴급 알림*{{ end }}
+            *상태:* {{ .Status | toUpper }}
+            *심각도:* {{ .CommonLabels.severity }}
+            *인스턴스:* {{ .CommonLabels.instance }}
+            *설명:* {{ .CommonAnnotations.description }}
+            {{ range .Alerts }}*시작:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+            {{ end }}
+
+  inhibitRules:
+    - sourceMatch:
+        - name: severity
+          value: critical
+      targetMatch:
+        - name: severity
+          value: warning
+      equal:
+        - alertname

@@ -1,17 +1,45 @@
+# Prometheus 미니멀 설정 파일
+# 메트릭 수집 및 저장을 위한 기본 설정
+
+# 전역 설정
 global:
+  # scrape_interval: 메트릭을 수집하는 주기 (15초마다 수집)
   scrape_interval: 15s
+
+  # evaluation_interval: 규칙(알람, 레코딩)을 평가하는 주기
   evaluation_interval: 15s
+
+  # external_labels: 외부 시스템(Alertmanager, 원격 저장소)으로 전송될 때 추가되는 레이블
   external_labels:
-    monitor: 'my-monitor'
+    monitor: "minimal-monitor" # 모니터링 환경 식별자
+    environment: "local" # 환경 구분 (개발/운영 등)
+
+# Alertmanager 연동 설정
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"] # Alertmanager 주소
+
+# 알림 규칙 파일 경로
 rule_files:
-  - "alert.rules"
+  - /etc/prometheus/rules/*.yml # rules 디렉토리의 모든 yml 파일
+
+# 메트릭 수집 대상 설정
 scrape_configs:
-  - job_name: 'prometheus'
+  # Job 1: Prometheus 자체 모니터링
+  - job_name: "prometheus"
+    # static_configs: 고정된 타겟 목록
     static_configs:
-      - targets: ['localhost:9090']
-  - job_name: 'node-exporter'
+      - targets: ["localhost:9090"] # Prometheus 자체의 메트릭 수집
+        labels:
+          instance: "prometheus" # 인스턴스 레이블 추가
+          app: "monitoring" # 애플리케이션 레이블
+
+  # Job 2: Node Exporter - 시스템 메트릭 수집
+  - job_name: "node-exporter"
     static_configs:
-      - targets: ['node-exporter:9100']
-  - job_name: 'cadvisor'
-    static_configs:
-      - targets: ['cadvisor:8080']
+      # 로컬 노드 (Docker Compose 내부)
+      - targets: ["node-exporter:9100"]
+        labels:
+          instance: "local-mac"
+          app: "system-monitoring"

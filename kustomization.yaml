@@ -1,0 +1,39 @@
+# =============================================================================
+# Kustomize: CRD resources + Dashboard ConfigMap 자동 생성
+# ArgoCD가 kustomization.yaml을 감지하여 자동 빌드/배포
+# 루트에 위치해야 grafana/provisioning/dashboards/ 경로 접근 가능
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+resources:
+  - k8s/monitoring-config/prometheus-rules.yaml
+  - k8s/monitoring-config/alertmanager-config.yaml
+
+# Dashboard JSON → ConfigMap 자동 변환
+# Grafana sidecar가 label grafana_dashboard=1 을 감지하여 자동 로드
+configMapGenerator:
+  - name: grafana-dashboard-layer-system
+    files:
+      - layer-system.json=grafana/provisioning/dashboards/layer-system.json
+  - name: grafana-dashboard-layer-data
+    files:
+      - layer-data.json=grafana/provisioning/dashboards/layer-data.json
+  - name: grafana-dashboard-layer-app
+    files:
+      - layer-app.json=grafana/provisioning/dashboards/layer-app.json
+  - name: grafana-dashboard-layer-product
+    files:
+      - layer-product.json=grafana/provisioning/dashboards/layer-product.json
+  - name: grafana-dashboard-layer-business
+    files:
+      - layer-business.json=grafana/provisioning/dashboards/layer-business.json
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "5 Layer Monitoring"
