@@ -297,9 +297,9 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
             },
           },
         },
-        // Report 4: 트래픽 채널별 사용자 (sessionDefaultChannelGroup)
+        // Report 4: 트래픽 채널별 사용자 (30일 기준, 당일 데이터 없을 때 대비)
         {
-          dateRanges: [{ startDate: 'today', endDate: 'today' }],
+          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
           dimensions: [{ name: 'sessionDefaultChannelGroup' }],
           metrics: [{ name: 'activeUsers' }],
           orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
@@ -313,12 +313,12 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
     // Report 0: 기본 메트릭
     const basicRow = reports[0].rows?.[0];
     if (basicRow) {
-      const values = basicRow.metricValues;
-      businessDau.set(svc, Number(values[0].value) || 0);
-      businessNewUsers.set(svc, Number(values[1].value) || 0);
-      businessSessions.set(svc, Number(values[2].value) || 0);
-      businessSessionDuration.set(svc, Number(values[3].value) || 0);
-      businessPageViews.set(svc, Number(values[4].value) || 0);
+      const v = basicRow.metricValues;
+      businessDau.set(svc, Number(v?.[0]?.value) || 0);
+      businessNewUsers.set(svc, Number(v?.[1]?.value) || 0);
+      businessSessions.set(svc, Number(v?.[2]?.value) || 0);
+      businessSessionDuration.set(svc, Number(v?.[3]?.value) || 0);
+      businessPageViews.set(svc, Number(v?.[4]?.value) || 0);
     }
 
     // Report 1: MAU (현재 + 이전 기간) & 이탈 유저 계산
@@ -330,9 +330,9 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
     let previousMau = 0;
     let newUsers30d = 0;
     if (mauRow) {
-      currentMau = Number(mauRow.metricValues[0].value) || 0;
-      newUsers30d = Number(mauRow.metricValues[1].value) || 0;
-      previousMau = Number(mauRow.metricValues[2].value) || 0;
+      currentMau = Number(mauRow.metricValues?.[0]?.value) || 0;
+      newUsers30d = Number(mauRow.metricValues?.[1]?.value) || 0;
+      previousMau = Number(mauRow.metricValues?.[2]?.value) || 0;
       businessMau.set(svc, currentMau);
       businessPreviousMau.set(svc, previousMau);
     }

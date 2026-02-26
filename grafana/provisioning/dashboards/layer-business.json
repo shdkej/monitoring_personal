@@ -100,10 +100,10 @@
       },
       "pluginVersion": "10.0.0",
       "targets": [
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "business_dau{service=~\"$service\"}", "legendFormat": "{{service}}", "refId": "A", "format": "table", "instant": true },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "business_mau{service=~\"$service\"}", "legendFormat": "{{service}}", "refId": "B", "format": "table", "instant": true },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "business_new_users_total{service=~\"$service\"}", "legendFormat": "{{service}}", "refId": "C", "format": "table", "instant": true },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "business_churned_users_total{service=~\"$service\"}", "legendFormat": "{{service}}", "refId": "D", "format": "table", "instant": true }
+        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (service) (business_dau{service=~\"$service\"}) or (sum by (service) (business_mau{service=~\"$service\"}) * 0)", "legendFormat": "{{service}}", "refId": "A", "format": "table", "instant": true },
+        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (service) (business_mau{service=~\"$service\"})", "legendFormat": "{{service}}", "refId": "B", "format": "table", "instant": true },
+        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (service) (business_new_users_total{service=~\"$service\"}) or (sum by (service) (business_mau{service=~\"$service\"}) * 0)", "legendFormat": "{{service}}", "refId": "C", "format": "table", "instant": true },
+        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (service) (business_churned_users_total{service=~\"$service\"})", "legendFormat": "{{service}}", "refId": "D", "format": "table", "instant": true }
       ],
       "title": "서비스별 사용자 지표",
       "transformations": [
@@ -111,7 +111,7 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": { "Time": true, "__name__": true, "instance": true, "job": true },
+            "excludeByName": { "Time": true, "__name__": true, "instance": true, "job": true, "app": true },
             "indexByName": { "service": 0, "Value #A": 1, "Value #B": 2, "Value #C": 3, "Value #D": 4 },
             "renameByName": { "service": "서비스", "Value #A": "DAU", "Value #B": "MAU", "Value #C": "신규 유저", "Value #D": "이탈 유저" }
           }
@@ -208,8 +208,10 @@
           "unit": "short"
         },
         "overrides": [
-          { "matcher": { "id": "byRegexp", "options": "이탈.*" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
-          { "matcher": { "id": "byRegexp", "options": "신규.*" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }
+          { "matcher": { "id": "byName", "options": "신규 blog" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "신규 AFZMA" }, "properties": [{ "id": "color", "value": { "fixedColor": "light-green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "이탈 blog" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "이탈 AFZMA" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] }
         ]
       },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
