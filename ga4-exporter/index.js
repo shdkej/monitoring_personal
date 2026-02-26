@@ -110,10 +110,17 @@ register.registerMetric(businessNewUsers);
 
 const businessChurnedUsers = new client.Gauge({
   name: 'business_churned_users_total',
-  help: 'Churned users (estimated)',
+  help: 'Churned users estimated: previousMAU + newUsers30d - currentMAU',
   labelNames: ['service'],
 });
 register.registerMetric(businessChurnedUsers);
+
+const businessPreviousMau = new client.Gauge({
+  name: 'business_previous_mau',
+  help: 'Previous period Monthly Active Users (31-60 days ago)',
+  labelNames: ['service'],
+});
+register.registerMetric(businessPreviousMau);
 
 const businessSessions = new client.Gauge({
   name: 'business_sessions_total',
@@ -230,10 +237,16 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
             { name: 'screenPageViews' },
           ],
         },
-        // Report 1: MAU (30일)
+        // Report 1: MAU (현재 30일 + 이전 31~60일, 이탈 유저 계산용)
         {
-          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
-          metrics: [{ name: 'activeUsers' }],
+          dateRanges: [
+            { startDate: '30daysAgo', endDate: 'today' },
+            { startDate: '60daysAgo', endDate: '31daysAgo' },
+          ],
+          metrics: [
+            { name: 'activeUsers' },
+            { name: 'newUsers' },
+          ],
         },
         // Report 2: 아웃바운드 클릭 (향상된 측정의 click 이벤트)
         {
@@ -285,10 +298,20 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
       businessPageViews.set(svc, Number(values[4].value) || 0);
     }
 
-    // Report 1: MAU
+    // Report 1: MAU (현재 + 이전 기간) & 이탈 유저 계산
+    // 2개 dateRange × 2개 metric = 4개 metricValues
+    // [0] activeUsers (현재 30일), [1] newUsers (현재 30일)
+    // [2] activeUsers (이전 31~60일), [3] newUsers (이전 31~60일)
     const mauRow = reports[1].rows?.[0];
+    let currentMau = 0;
+    let previousMau = 0;
+    let newUsers30d = 0;
     if (mauRow) {
-      businessMau.set(svc, Number(mauRow.metricValues[0].value) || 0);
+      currentMau = Number(mauRow.metricValues[0].value) || 0;
+      newUsers30d = Number(mauRow.metricValues[1].value) || 0;
+      previousMau = Number(mauRow.metricValues[2].value) || 0;
+      businessMau.set(svc, currentMau);
+      businessPreviousMau.set(svc, previousMau);
     }
 
     // Report 2: CTA 클릭
@@ -327,8 +350,11 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
       });
     }
 
-    // churned_users: GA4에 없으므로 랜덤 추정치
-    businessChurnedUsers.set(svc, randomInt(0, 5));
+    // 이탈 유저 계산: 이전 기간에 있었지만 현재 기간에 없는 유저 추정
+    // churn ≈ previousMAU + newUsers30d - currentMAU
+    // 음수 방지 (유저가 급증한 경우)
+    const estimatedChurn = Math.max(0, previousMau + newUsers30d - currentMau);
+    businessChurnedUsers.set(svc, estimatedChurn);
 
     console.log(`[${new Date().toISOString()}] GA4 메트릭 수집 완료: ${name} (${propertyId})`);
   } catch (err) {
