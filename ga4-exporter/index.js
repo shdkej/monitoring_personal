@@ -164,6 +164,29 @@ const businessTrafficSource = new client.Gauge({
 });
 register.registerMetric(businessTrafficSource);
 
+// --- 캠페인별 전환 지표 (GA4 UTM campaign) ---
+
+const businessCampaignUsers = new client.Gauge({
+  name: 'business_campaign_users',
+  help: 'Active users per campaign (from GA4)',
+  labelNames: ['service', 'campaign'],
+});
+register.registerMetric(businessCampaignUsers);
+
+const businessCampaignSessions = new client.Gauge({
+  name: 'business_campaign_sessions',
+  help: 'Sessions per campaign (from GA4)',
+  labelNames: ['service', 'campaign'],
+});
+register.registerMetric(businessCampaignSessions);
+
+const businessCampaignEngaged = new client.Gauge({
+  name: 'business_campaign_engaged_sessions',
+  help: 'Engaged sessions per campaign (from GA4, proxy for conversions)',
+  labelNames: ['service', 'campaign'],
+});
+register.registerMetric(businessCampaignEngaged);
+
 // ============================================
 // 프로덕트 메트릭 업데이트 (mock 로직)
 // ============================================
@@ -359,6 +382,43 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
     console.log(`[${new Date().toISOString()}] GA4 메트릭 수집 완료: ${name} (${propertyId})`);
   } catch (err) {
     console.error(`[${new Date().toISOString()}] GA4 메트릭 수집 실패 [${name}]:`, err.message);
+  }
+
+  // 캠페인별 전환 지표 (별도 batch call, 기존 5개 리포트 제한 회피)
+  try {
+    const [campaignResponse] = await analyticsClient.batchRunReports({
+      property,
+      requests: [
+        {
+          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dimensions: [{ name: 'sessionCampaignName' }],
+          metrics: [
+            { name: 'activeUsers' },
+            { name: 'sessions' },
+            { name: 'engagedSessions' },
+          ],
+          orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+          limit: 20,
+        },
+      ],
+    });
+
+    const campaignReport = campaignResponse.reports[0];
+    if (campaignReport.rows) {
+      campaignReport.rows.forEach((row) => {
+        const campaign = row.dimensionValues[0].value;
+        // "(not set)" 은 UTM 없는 트래픽이므로 제외
+        if (campaign === '(not set)') return;
+        const labels = { ...svc, campaign };
+        businessCampaignUsers.set(labels, Number(row.metricValues[0].value) || 0);
+        businessCampaignSessions.set(labels, Number(row.metricValues[1].value) || 0);
+        businessCampaignEngaged.set(labels, Number(row.metricValues[2].value) || 0);
+      });
+    }
+
+    console.log(`[${new Date().toISOString()}] 캠페인 메트릭 수집 완료: ${name}`);
+  } catch (err) {
+    console.error(`[${new Date().toISOString()}] 캠페인 메트릭 수집 실패 [${name}]:`, err.message);
   }
 }
 
