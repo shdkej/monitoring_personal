@@ -128,7 +128,7 @@ services:
     container_name: ga4-exporter-minimal
     restart: unless-stopped
     environment:
-      - GA4_PROPERTIES=${GA4_PROPERTIES:-blog:252603434,site2:13582691061}
+      - GA4_PROPERTIES=${GA4_PROPERTIES:-blog:252603434,site2:523848883}
       - GA4_KEY_FILE=/app/credentials.json
     volumes:
       - ./ga4-exporter/credentials/credentials.json:/app/credentials.json:ro
