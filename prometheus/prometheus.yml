@@ -43,3 +43,12 @@ scrape_configs:
         labels:
           instance: "local-mac"
           app: "system-monitoring"
+
+  # Job 3: GA4 Exporter - 비즈니스/프로덕트 메트릭 수집
+  - job_name: "ga4-exporter"
+    scrape_interval: 60s # GA4 데이터는 5분마다 갱신되므로 60초면 충분
+    static_configs:
+      - targets: ["ga4-exporter:9999"]
+        labels:
+          instance: "ga4-exporter"
+          app: "business-metrics"

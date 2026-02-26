@@ -122,7 +122,7 @@ services:
     depends_on:
       - loki
 
-  # GA4 Exporter: GA4 실제 데이터 + 프로덕트 mock 메트릭 (기본 실행)
+  # GA4 Exporter: GA4 비즈니스 메트릭 + 프로덕트 mock 메트릭
   ga4-exporter:
     build: ./ga4-exporter
     container_name: ga4-exporter-minimal
@@ -137,7 +137,7 @@ services:
     networks:
       monitoring:
         aliases:
-          - mock-exporter
+          - ga4-exporter
 
 # 네트워크 정의: 서비스 간 통신을 위한 격리된 네트워크
 networks:
