@@ -60,9 +60,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["activeUsers"],
           "dimensions": [],
           "startDate": "today",
@@ -106,9 +106,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["activeUsers"],
           "dimensions": [],
           "startDate": "30daysAgo",
@@ -144,9 +144,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["newUsers"],
           "dimensions": [],
           "startDate": "30daysAgo",
@@ -182,9 +182,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["sessions"],
           "dimensions": [],
           "startDate": "30daysAgo",
@@ -244,9 +244,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["activeUsers"],
           "dimensions": ["date"],
           "startDate": "30daysAgo",
@@ -298,9 +298,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["newUsers"],
           "dimensions": ["date"],
           "startDate": "30daysAgo",
@@ -356,9 +356,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["sessions"],
           "dimensions": ["date"],
           "startDate": "30daysAgo",
@@ -402,9 +402,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["averageSessionDuration"],
           "dimensions": [],
           "startDate": "30daysAgo",
@@ -448,9 +448,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["screenPageViewsPerSession"],
           "dimensions": [],
           "startDate": "30daysAgo",
@@ -500,9 +500,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["sessions"],
           "dimensions": ["sessionDefaultChannelGrouping"],
           "startDate": "30daysAgo",
@@ -550,9 +550,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["sessions"],
           "dimensions": ["sessionDefaultChannelGrouping", "date"],
           "startDate": "30daysAgo",
@@ -604,9 +604,9 @@
       "targets": [
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
-          "accountId": "$accountId",
-          "webPropertyId": "$webPropertyId",
-          "profileId": "$webPropertyId",
+          "accountId": "110967461",
+          "webPropertyId": "252603434",
+          "profileId": "252603434",
           "metrics": ["screenPageViews", "activeUsers", "averageSessionDuration"],
           "dimensions": ["pagePath"],
           "startDate": "30daysAgo",
@@ -639,36 +639,6 @@
         "skipUrlSync": false,
         "type": "datasource"
       },
-      {
-        "current": { "selected": true, "text": "110967461 (blog)", "value": "110967461" },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Account",
-        "multi": false,
-        "name": "accountId",
-        "options": [
-          { "selected": true, "text": "110967461 (blog)", "value": "110967461" },
-          { "selected": false, "text": "383859191 (AFZMA)", "value": "383859191" }
-        ],
-        "query": "110967461 (blog),383859191 (AFZMA)",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "current": { "selected": true, "text": "252603434 (blog)", "value": "252603434" },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Property",
-        "multi": false,
-        "name": "webPropertyId",
-        "options": [
-          { "selected": true, "text": "252603434 (blog)", "value": "252603434" },
-          { "selected": false, "text": "523848883 (AFZMA)", "value": "523848883" }
-        ],
-        "query": "252603434 (blog),523848883 (AFZMA)",
-        "skipUrlSync": false,
-        "type": "custom"
-      }
     ]
   },
   "time": { "from": "now-30d", "to": "now" },
