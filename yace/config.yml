@@ -1,0 +1,42 @@
+# YACE (Yet Another CloudWatch Exporter) 설정
+# AWS CloudWatch 메트릭을 수집하여 Prometheus 형식으로 노출
+
+apiVersion: v1alpha1
+
+discovery:
+  jobs:
+    - type: AWS/Lambda
+      regions: [ap-northeast-2, eu-central-1]
+      period: 300          # CloudWatch 기본 해상도 (5분)
+      length: 300
+      metrics:
+        - name: Invocations
+          statistics: [Sum]
+        - name: Duration
+          statistics: [Average, p50, p99]
+        - name: Errors
+          statistics: [Sum]
+        - name: Throttles
+          statistics: [Sum]
+        - name: ConcurrentExecutions
+          statistics: [Maximum]
+
+    - type: AWS/DynamoDB
+      regions: [ap-northeast-2]
+      period: 300
+      length: 300
+      metrics:
+        - name: ConsumedReadCapacityUnits
+          statistics: [Sum]
+        - name: ConsumedWriteCapacityUnits
+          statistics: [Sum]
+        - name: ReadThrottleEvents
+          statistics: [Sum]
+        - name: WriteThrottleEvents
+          statistics: [Sum]
+        - name: SuccessfulRequestLatency
+          statistics: [Average, p99]
+        - name: SystemErrors
+          statistics: [Sum]
+        - name: UserErrors
+          statistics: [Sum]
