@@ -33,6 +33,9 @@ configMapGenerator:
   - name: grafana-dashboard-main
     files:
       - main.json=grafana/provisioning/dashboards/main.json
+  - name: grafana-dashboard-layer-business-ga4
+    files:
+      - layer-business-ga4.json=grafana/provisioning/dashboards/layer-business-ga4.json
 
 generatorOptions:
   disableNameSuffixHash: true
