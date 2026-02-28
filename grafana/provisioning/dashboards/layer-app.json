@@ -1132,12 +1132,437 @@
       "title": "컨테이너 메모리 사용량",
       "type": "timeseries",
       "description": "⚠️ 템플릿 패널: Kubernetes 환경에서 cAdvisor 메트릭 필요\n\n애플리케이션 컨테이너의 메모리 사용량을 Pod별로 바이트 단위로 표시합니다."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "id": 105,
+      "panels": [],
+      "title": "AWS Lambda Overview",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10000 },
+              { "color": "red", "value": 50000 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 46 },
+      "id": 14,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "sum(aws_lambda_invocations_sum)",
+          "refId": "A",
+          "legendFormat": "총 호출 수"
+        }
+      ],
+      "title": "Lambda 호출 수",
+      "type": "stat",
+      "description": "전체 Lambda 함수의 총 호출 수를 표시합니다."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1000 },
+              { "color": "red", "value": 5000 }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 46 },
+      "id": 15,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "avg(aws_lambda_duration_average)",
+          "refId": "A",
+          "legendFormat": "평균 실행시간"
+        }
+      ],
+      "title": "평균 실행시간",
+      "type": "stat",
+      "description": "전체 Lambda 함수의 평균 실행 시간을 밀리초(ms)로 표시합니다."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          },
+          "unit": "percent",
+          "max": 100,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 46 },
+      "id": 16,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "sum(aws_lambda_errors_sum) / sum(aws_lambda_invocations_sum) * 100",
+          "refId": "A",
+          "legendFormat": "에러율"
+        }
+      ],
+      "title": "Lambda 에러율",
+      "type": "gauge",
+      "description": "전체 Lambda 함수의 에러 비율을 백분율로 표시합니다."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 100 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 46 },
+      "id": 17,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "sum(aws_lambda_throttles_sum)",
+          "refId": "A",
+          "legendFormat": "스로틀 수"
+        }
+      ],
+      "title": "스로틀 수",
+      "type": "stat",
+      "description": "전체 Lambda 함수의 스로틀(제한) 수를 표시합니다."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "id": 106,
+      "panels": [],
+      "title": "AWS Lambda Details",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "tooltip": false, "viz": false, "legend": false },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 53 },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": { "mode": "multi" }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "aws_lambda_invocations_sum{dimension_FunctionName!=\"\"}",
+          "refId": "A",
+          "legendFormat": "{{dimension_FunctionName}}"
+        }
+      ],
+      "title": "함수별 호출 추이",
+      "type": "timeseries",
+      "description": "Lambda 함수별 호출 수 추이를 시계열로 표시합니다."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "tooltip": false, "viz": false, "legend": false },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 5000 }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 53 },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": { "mode": "multi" }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "aws_lambda_duration_average{dimension_FunctionName!=\"\"}",
+          "refId": "A",
+          "legendFormat": "{{dimension_FunctionName}}"
+        }
+      ],
+      "title": "함수별 실행시간",
+      "type": "timeseries",
+      "description": "Lambda 함수별 평균 실행 시간을 밀리초(ms)로 표시합니다."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "tooltip": false, "viz": false, "legend": false },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 10 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 61 },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": { "mode": "multi" }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "aws_lambda_errors_sum{dimension_FunctionName!=\"\"}",
+          "refId": "A",
+          "legendFormat": "{{dimension_FunctionName}}"
+        }
+      ],
+      "title": "함수별 에러 추이",
+      "type": "timeseries",
+      "description": "Lambda 함수별 에러 발생 추이를 표시합니다."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "tooltip": false, "viz": false, "legend": false },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 500 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 61 },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": { "mode": "multi" }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "aws_lambda_concurrent_executions_maximum{dimension_FunctionName!=\"\"}",
+          "refId": "A",
+          "legendFormat": "{{dimension_FunctionName}}"
+        }
+      ],
+      "title": "동시 실행 수",
+      "type": "timeseries",
+      "description": "Lambda 함수별 동시 실행 수(최대값)를 표시합니다."
     }
   ],
   "refresh": "10s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": ["layer", "app", "api", "logs"],
+  "tags": ["layer", "app", "api", "logs", "lambda"],
   "templating": {
     "list": []
   },
@@ -1163,5 +1588,5 @@
   "title": "Layer 4 - 애플리케이션 모니터링",
   "uid": "layer-app",
   "version": 1,
-  "description": "⚠️ 템플릿 대시보드: 애플리케이션 계측(instrumentation) 후 실제 메트릭과 로그를 연동해야 합니다.\n\n이 대시보드는 다음을 모니터링합니다:\n- API 성능 (요청 수, 응답시간, 에러율)\n- Latency 분포 및 백분위수 (p50, p95, p99)\n- HTTP 상태코드별 에러 추이\n- Loki를 통한 실시간 로그 스트림\n- 컨테이너 리소스 사용량 (CPU, Memory)"
+  "description": "⚠️ 템플릿 대시보드: 애플리케이션 계측(instrumentation) 후 실제 메트릭과 로그를 연동해야 합니다.\n\n이 대시보드는 다음을 모니터링합니다:\n- API 성능 (요청 수, 응답시간, 에러율)\n- Latency 분포 및 백분위수 (p50, p95, p99)\n- HTTP 상태코드별 에러 추이\n- Loki를 통한 실시간 로그 스트림\n- 컨테이너 리소스 사용량 (CPU, Memory)\n- AWS Lambda (호출 수, 실행시간, 에러율, 스로틀, 동시실행)"
 }

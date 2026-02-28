@@ -5,3 +5,7 @@ alertmanager/alertmanager.yml
 .env
 ga4-exporter/credentials/
 k8s/secrets/
+# AWS credentials (보안)
+yace/credentials
+yace/aws-config
+yace/.env

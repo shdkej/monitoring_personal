@@ -261,6 +261,7 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
           ],
         },
         // Report 1: MAU (현재 30일 + 이전 31~60일, 이탈 유저 계산용)
+        // sessions도 30일 기준으로 수집 (당일 데이터 없을 때 대비)
         {
           dateRanges: [
             { startDate: '30daysAgo', endDate: 'today' },
@@ -269,6 +270,7 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
           metrics: [
             { name: 'activeUsers' },
             { name: 'newUsers' },
+            { name: 'sessions' },
           ],
         },
         // Report 2: 아웃바운드 클릭 (향상된 측정의 click 이벤트)
@@ -310,21 +312,26 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
 
     const reports = response.reports;
 
-    // Report 0: 기본 메트릭
+    // Report 0: 기본 메트릭 (당일 기준 - DAU, 세션시간, 페이지뷰 등)
     const basicRow = reports[0].rows?.[0];
     if (basicRow) {
       const v = basicRow.metricValues;
       businessDau.set(svc, Number(v?.[0]?.value) || 0);
       businessNewUsers.set(svc, Number(v?.[1]?.value) || 0);
-      businessSessions.set(svc, Number(v?.[2]?.value) || 0);
       businessSessionDuration.set(svc, Number(v?.[3]?.value) || 0);
       businessPageViews.set(svc, Number(v?.[4]?.value) || 0);
+    } else {
+      // 당일 방문자 없으면 0으로 초기화
+      businessDau.set(svc, 0);
+      businessNewUsers.set(svc, 0);
+      businessSessionDuration.set(svc, 0);
+      businessPageViews.set(svc, 0);
     }
 
     // Report 1: MAU (현재 + 이전 기간) & 이탈 유저 계산
-    // 2개 dateRange × 2개 metric = 4개 metricValues
-    // [0] activeUsers (현재 30일), [1] newUsers (현재 30일)
-    // [2] activeUsers (이전 31~60일), [3] newUsers (이전 31~60일)
+    // 2개 dateRange × 3개 metric = 6개 metricValues
+    // [0] activeUsers (현재 30일), [1] newUsers (현재 30일), [2] sessions (현재 30일)
+    // [3] activeUsers (이전 31~60일), [4] newUsers (이전 31~60일), [5] sessions (이전 31~60일)
     const mauRow = reports[1].rows?.[0];
     let currentMau = 0;
     let previousMau = 0;
@@ -332,9 +339,11 @@ async function fetchGA4MetricsForProperty({ name, propertyId }) {
     if (mauRow) {
       currentMau = Number(mauRow.metricValues?.[0]?.value) || 0;
       newUsers30d = Number(mauRow.metricValues?.[1]?.value) || 0;
-      previousMau = Number(mauRow.metricValues?.[2]?.value) || 0;
+      const sessions30d = Number(mauRow.metricValues?.[2]?.value) || 0;
+      previousMau = Number(mauRow.metricValues?.[3]?.value) || 0;
       businessMau.set(svc, currentMau);
       businessPreviousMau.set(svc, previousMau);
+      businessSessions.set(svc, sessions30d);
     }
 
     // Report 2: CTA 클릭

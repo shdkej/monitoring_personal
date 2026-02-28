@@ -238,7 +238,7 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "description": "총 세션 수",
+      "description": "최근 30일 총 세션 수",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -278,7 +278,7 @@
       },
       "pluginVersion": "10.0.0",
       "targets": [
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "rate(business_sessions_total{service=~\"$service\"}[5m]) * 300", "legendFormat": "{{service}}", "refId": "A" }
+        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "business_sessions_total{service=~\"$service\"}", "legendFormat": "{{service}}", "refId": "A" }
       ],
       "title": "세션 수 추이",
       "type": "timeseries"

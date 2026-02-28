@@ -720,9 +720,9 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.75, sum(rate(web_vitals_lcp_seconds_bucket[5m])) by (le))",
+          "expr": "web_vitals_lcp_seconds",
           "refId": "A",
-          "legendFormat": "LCP p75"
+          "legendFormat": "LCP"
         }
       ],
       "title": "LCP (Largest Contentful Paint)",
@@ -783,9 +783,9 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.75, sum(rate(web_vitals_fid_seconds_bucket[5m])) by (le)) * 1000",
+          "expr": "web_vitals_fid_seconds * 1000",
           "refId": "A",
-          "legendFormat": "FID p75"
+          "legendFormat": "FID"
         }
       ],
       "title": "FID (First Input Delay)",
@@ -846,9 +846,9 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.75, sum(rate(web_vitals_cls_bucket[5m])) by (le))",
+          "expr": "web_vitals_cls",
           "refId": "A",
-          "legendFormat": "CLS p75"
+          "legendFormat": "CLS"
         }
       ],
       "title": "CLS (Cumulative Layout Shift)",

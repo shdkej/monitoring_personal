@@ -122,6 +122,20 @@ services:
     depends_on:
       - loki
 
+  # YACE: AWS CloudWatch Lambda 메트릭 수집
+  yace:
+    image: prometheuscommunity/yet-another-cloudwatch-exporter:latest
+    container_name: yace-minimal
+    restart: unless-stopped
+    volumes:
+      - ./yace/config.yml:/etc/yace/config.yml:ro
+    env_file:
+      - ./yace/.env
+    ports:
+      - "5123:5000"
+    networks:
+      - monitoring
+
   # GA4 Exporter: GA4 비즈니스 메트릭 + 프로덕트 mock 메트릭
   ga4-exporter:
     build: ./ga4-exporter
