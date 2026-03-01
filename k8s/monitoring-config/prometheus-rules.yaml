@@ -9,6 +9,7 @@ metadata:
   name: monitoring-personal-alerts
   labels:
     app.kubernetes.io/part-of: monitoring-personal
+    rule_source: monitoring-personal
 spec:
   groups:
     # 시스템 리소스 알림
