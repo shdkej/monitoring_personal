@@ -23,6 +23,7 @@ spec:
           annotations:
             summary: "높은 CPU 사용률 감지"
             description: '{{ $labels.instance }}의 CPU 사용률이 5분 이상 70%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=cpu"
 
         - alert: CriticalCpuUsage
           expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
@@ -32,6 +33,7 @@ spec:
           annotations:
             summary: "위험 수준의 CPU 사용률"
             description: '{{ $labels.instance }}의 CPU 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=cpu"
 
         - alert: HighMemoryUsage
           expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
@@ -41,6 +43,7 @@ spec:
           annotations:
             summary: "높은 메모리 사용률 감지"
             description: '{{ $labels.instance }}의 메모리 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=memory"
 
         - alert: CriticalMemoryUsage
           expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
@@ -50,6 +53,7 @@ spec:
           annotations:
             summary: "위험 수준의 메모리 사용률"
             description: '{{ $labels.instance }}의 메모리 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=memory"
 
         - alert: HighDiskUsage
           expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 80
@@ -59,6 +63,7 @@ spec:
           annotations:
             summary: "높은 디스크 사용률 감지"
             description: '{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=disk"
 
         - alert: CriticalDiskUsage
           expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 95
@@ -68,6 +73,7 @@ spec:
           annotations:
             summary: "위험 수준의 디스크 사용률"
             description: '{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크가 거의 가득 찼습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=disk"
 
     # 서비스 상태 알림
     - name: service_alerts
@@ -80,6 +86,7 @@ spec:
           annotations:
             summary: "모니터링 타겟 다운"
             description: "{{ $labels.job }}의 {{ $labels.instance }}가 1분 이상 응답하지 않습니다."
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/main-overview/main"
 
         - alert: PrometheusConfigReloadFailed
           expr: prometheus_config_last_reload_successful == 0
@@ -89,6 +96,7 @@ spec:
           annotations:
             summary: "Prometheus 설정 리로드 실패"
             description: "Prometheus 설정 파일 리로드에 실패했습니다. 설정 파일을 확인하세요."
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/main-overview/main"
 
     # 노드 생존 알림 (Blackbox TCP probe)
     - name: blackbox_alerts
@@ -101,6 +109,7 @@ spec:
           annotations:
             summary: "노드 다운 감지"
             description: "{{ $labels.instance }}가 1분 이상 TCP 연결에 응답하지 않습니다."
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3"
 
         - alert: NodeHighLatency
           expr: probe_duration_seconds{job="blackbox-tcp"} > 2
@@ -110,6 +119,7 @@ spec:
           annotations:
             summary: "노드 응답 지연"
             description: '{{ $labels.instance }}의 TCP 응답 시간이 2초를 초과했습니다. (현재: {{ $value | printf "%.2f" }}초)'
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3"
 
     # 네트워크 알림
     - name: network_alerts
@@ -122,6 +132,7 @@ spec:
           annotations:
             summary: "높은 네트워크 수신 트래픽"
             description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스에서 높은 수신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=network"
 
         - alert: HighNetworkTransmit
           expr: rate(node_network_transmit_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) > 100000000
@@ -131,3 +142,4 @@ spec:
           annotations:
             summary: "높은 네트워크 송신 트래픽"
             description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스에서 높은 송신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=network"

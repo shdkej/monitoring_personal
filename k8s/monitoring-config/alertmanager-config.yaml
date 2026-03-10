@@ -36,6 +36,7 @@ spec:
             *심각도:* {{ .CommonLabels.severity }}
             *인스턴스:* {{ .CommonLabels.instance }}
             *설명:* {{ .CommonAnnotations.description }}
+            {{ if .CommonAnnotations.dashboard_url }}*대시보드:* <{{ .CommonAnnotations.dashboard_url }}|Grafana에서 확인>{{ end }}
             {{ range .Alerts }}*시작:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
             {{ end }}
 
