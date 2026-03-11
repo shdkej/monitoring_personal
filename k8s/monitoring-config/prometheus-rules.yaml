@@ -1,7 +1,9 @@
 # =============================================================================
-# PrometheusRule CRD
-# monitoring_personal/prometheus/rules/alerts.yml 을 K8s CRD로 변환
-# Prometheus Operator가 label selector로 자동 발견
+# PrometheusRule CRD (Minimal Set)
+# Keep only 3 essential alerts:
+# 1) NodeDown
+# 2) KubePodCrashLooping
+# 3) NodeMemoryPressure
 # =============================================================================
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -12,94 +14,7 @@ metadata:
     rule_source: monitoring-personal
 spec:
   groups:
-    # 시스템 리소스 알림
-    - name: system_alerts
-      rules:
-        - alert: HighCpuUsage
-          expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 70
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: "높은 CPU 사용률 감지"
-            description: '{{ $labels.instance }}의 CPU 사용률이 5분 이상 70%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=cpu"
-
-        - alert: CriticalCpuUsage
-          expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: "위험 수준의 CPU 사용률"
-            description: '{{ $labels.instance }}의 CPU 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=cpu"
-
-        - alert: HighMemoryUsage
-          expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: "높은 메모리 사용률 감지"
-            description: '{{ $labels.instance }}의 메모리 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=memory"
-
-        - alert: CriticalMemoryUsage
-          expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: "위험 수준의 메모리 사용률"
-            description: '{{ $labels.instance }}의 메모리 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=memory"
-
-        - alert: HighDiskUsage
-          expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 80
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: "높은 디스크 사용률 감지"
-            description: '{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=disk"
-
-        - alert: CriticalDiskUsage
-          expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 95
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: "위험 수준의 디스크 사용률"
-            description: '{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크가 거의 가득 찼습니다. (현재: {{ $value | printf "%.1f" }}%)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=disk"
-
-    # 서비스 상태 알림
-    - name: service_alerts
-      rules:
-        - alert: TargetDown
-          expr: up == 0
-          for: 1m
-          labels:
-            severity: critical
-          annotations:
-            summary: "모니터링 타겟 다운"
-            description: "{{ $labels.job }}의 {{ $labels.instance }}가 1분 이상 응답하지 않습니다."
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/main-overview/main"
-
-        - alert: PrometheusConfigReloadFailed
-          expr: prometheus_config_last_reload_successful == 0
-          for: 1m
-          labels:
-            severity: warning
-          annotations:
-            summary: "Prometheus 설정 리로드 실패"
-            description: "Prometheus 설정 파일 리로드에 실패했습니다. 설정 파일을 확인하세요."
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/main-overview/main"
-
-    # 노드 생존 알림 (Blackbox TCP probe)
-    - name: blackbox_alerts
+    - name: essential_alerts
       rules:
         - alert: NodeDown
           expr: probe_success{job="blackbox-tcp"} == 0
@@ -111,35 +26,22 @@ spec:
             description: "{{ $labels.instance }}가 1분 이상 TCP 연결에 응답하지 않습니다."
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3"
 
-        - alert: NodeHighLatency
-          expr: probe_duration_seconds{job="blackbox-tcp"} > 2
-          for: 3m
-          labels:
-            severity: warning
-          annotations:
-            summary: "노드 응답 지연"
-            description: '{{ $labels.instance }}의 TCP 응답 시간이 2초를 초과했습니다. (현재: {{ $value | printf "%.2f" }}초)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3"
-
-    # 네트워크 알림
-    - name: network_alerts
-      rules:
-        - alert: HighNetworkReceive
-          expr: rate(node_network_receive_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) > 100000000
+        - alert: KubePodCrashLooping
+          expr: max_over_time(kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"}[5m]) >= 1
           for: 5m
           labels:
-            severity: warning
+            severity: critical
           annotations:
-            summary: "높은 네트워크 수신 트래픽"
-            description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스에서 높은 수신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=network"
+            summary: "Pod CrashLoopBackOff 감지"
+            description: "{{ $labels.namespace }}/{{ $labels.pod }} 컨테이너가 CrashLoopBackOff 상태를 지속하고 있습니다."
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/main-overview/main"
 
-        - alert: HighNetworkTransmit
-          expr: rate(node_network_transmit_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) > 100000000
+        - alert: NodeMemoryPressure
+          expr: kube_node_status_condition{condition="MemoryPressure", status="true"} == 1
           for: 5m
           labels:
-            severity: warning
+            severity: critical
           annotations:
-            summary: "높은 네트워크 송신 트래픽"
-            description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스에서 높은 송신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=network"
+            summary: "노드 메모리 압박 감지"
+            description: "{{ $labels.node }} 노드가 MemoryPressure 상태입니다."
+            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=memory"
