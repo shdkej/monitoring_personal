@@ -15,16 +15,27 @@ resources:
 # Dashboard JSON → ConfigMap 자동 변환
 # Grafana sidecar가 label grafana_dashboard=1 을 감지하여 자동 로드
 configMapGenerator:
-  # Minimal dashboard set (3)
-  - name: grafana-dashboard-main
-    files:
-      - main.json=grafana/provisioning/dashboards/main.json
   - name: grafana-dashboard-layer-system
     files:
       - layer-system.json=grafana/provisioning/dashboards/layer-system.json
+  - name: grafana-dashboard-layer-data
+    files:
+      - layer-data.json=grafana/provisioning/dashboards/layer-data.json
   - name: grafana-dashboard-layer-app
     files:
       - layer-app.json=grafana/provisioning/dashboards/layer-app.json
+  - name: grafana-dashboard-layer-product
+    files:
+      - layer-product.json=grafana/provisioning/dashboards/layer-product.json
+  - name: grafana-dashboard-layer-business
+    files:
+      - layer-business.json=grafana/provisioning/dashboards/layer-business.json
+  - name: grafana-dashboard-main
+    files:
+      - main.json=grafana/provisioning/dashboards/main.json
+  - name: grafana-dashboard-layer-business-ga4
+    files:
+      - layer-business-ga4.json=grafana/provisioning/dashboards/layer-business-ga4.json
 
 generatorOptions:
   disableNameSuffixHash: true
