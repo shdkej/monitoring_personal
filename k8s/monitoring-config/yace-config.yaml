@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: yace-config
+  name: yace-prometheus-yet-another-cloudwatch-exporter
   namespace: monitoring
 data:
   config.yml: |
