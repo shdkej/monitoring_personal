@@ -12,7 +12,7 @@ resources:
   - k8s/monitoring-config/prometheus-rules.yaml
   - k8s/monitoring-config/alertmanager-config.yaml
   - k8s/monitoring-config/grafana-datasource.yaml
-  - k8s/monitoring-config/yace.yaml
+  - k8s/monitoring-config/yace-config.yaml
 
 # Dashboard JSON → ConfigMap 자동 변환
 # Grafana sidecar가 label grafana_dashboard=1 을 감지하여 자동 로드
