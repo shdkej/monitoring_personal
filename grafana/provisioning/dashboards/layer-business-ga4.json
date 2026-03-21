@@ -638,7 +638,7 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
-      },
+      }
     ]
   },
   "time": { "from": "now-30d", "to": "now" },
