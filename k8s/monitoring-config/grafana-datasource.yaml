@@ -6,7 +6,7 @@ metadata:
   labels:
     grafana_datasource: "1"
 data:
-  datasource.yaml: |
+  ga4-datasource.yaml: |
     apiVersion: 1
     deleteDatasources:
       - name: GA4
