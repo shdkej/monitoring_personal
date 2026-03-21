@@ -65,7 +65,7 @@
           "profileId": "252603434",
           "metrics": ["activeUsers"],
           "dimensions": [],
-          "startDate": "today",
+          "startDate": "7daysAgo",
           "endDate": "today",
           "filtersExpression": "",
           "refId": "A"
