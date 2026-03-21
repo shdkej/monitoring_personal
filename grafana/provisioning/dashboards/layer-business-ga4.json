@@ -61,7 +61,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["activeUsers"],
           "dimensions": [],
@@ -107,7 +107,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["activeUsers"],
           "dimensions": [],
@@ -145,7 +145,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["newUsers"],
           "dimensions": [],
@@ -183,7 +183,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["sessions"],
           "dimensions": [],
@@ -245,7 +245,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["activeUsers"],
           "dimensions": ["date"],
@@ -299,7 +299,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["newUsers"],
           "dimensions": ["date"],
@@ -357,7 +357,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["sessions"],
           "dimensions": ["date"],
@@ -403,7 +403,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["averageSessionDuration"],
           "dimensions": [],
@@ -449,7 +449,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["screenPageViewsPerSession"],
           "dimensions": [],
@@ -501,7 +501,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["sessions"],
           "dimensions": ["sessionDefaultChannelGrouping"],
@@ -551,7 +551,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["sessions"],
           "dimensions": ["sessionDefaultChannelGrouping", "date"],
@@ -605,7 +605,7 @@
         {
           "datasource": { "type": "blackcowmoo-googleanalytics-datasource", "uid": "${DS_GA4}" },
           "accountId": "110967461",
-          "webPropertyId": "252603434",
+          "webPropertyId": "properties/252603434",
           "profileId": "252603434",
           "metrics": ["screenPageViews", "activeUsers", "averageSessionDuration"],
           "dimensions": ["pagePath"],
