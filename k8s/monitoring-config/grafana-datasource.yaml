@@ -17,11 +17,9 @@ data:
         access: proxy
         uid: ga4
         isDefault: false
-        editable: false
+        editable: true
         jsonData:
           authenticationType: jwt
           clientEmail: ${GA4_CLIENT_EMAIL}
           defaultProject: ${GA4_GCP_PROJECT}
           tokenUri: https://oauth2.googleapis.com/token
-        secureJsonData:
-          privateKey: ${GA4_PRIVATE_KEY}
