@@ -54,7 +54,7 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": { "calcs": ["sum"], "fields": "/activeUsers/", "values": false },
         "textMode": "auto"
       },
       "targets": [
@@ -100,7 +100,7 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": { "calcs": ["sum"], "fields": "/activeUsers/", "values": false },
         "textMode": "auto"
       },
       "targets": [
@@ -138,7 +138,7 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": { "calcs": ["sum"], "fields": "/newUsers/", "values": false },
         "textMode": "auto"
       },
       "targets": [
@@ -176,7 +176,7 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": { "calcs": ["sum"], "fields": "/sessions/", "values": false },
         "textMode": "auto"
       },
       "targets": [
