@@ -33,10 +33,8 @@
       },
       "id": 1,
       "panels": [],
-      "title": "👥 사용자 지표",
-      "type": "row",
-      "repeat": "ga4_site",
-      "repeatDirection": "h"
+      "title": "[blog] 👥 사용자 지표",
+      "type": "row"
     },
     {
       "datasource": {
@@ -98,9 +96,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "activeUsers"
           ],
@@ -176,9 +174,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "activeUsers"
           ],
@@ -238,9 +236,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "newUsers"
           ],
@@ -300,9 +298,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "sessions"
           ],
@@ -328,10 +326,8 @@
       },
       "id": 6,
       "panels": [],
-      "title": "📈 사용자 추이",
-      "type": "row",
-      "repeat": "ga4_site",
-      "repeatDirection": "h"
+      "title": "[blog] 📈 사용자 추이",
+      "type": "row"
     },
     {
       "datasource": {
@@ -407,9 +403,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "activeUsers"
           ],
@@ -498,9 +494,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "newUsers"
           ],
@@ -526,10 +522,8 @@
       },
       "id": 9,
       "panels": [],
-      "title": "💡 참여도",
-      "type": "row",
-      "repeat": "ga4_site",
-      "repeatDirection": "h"
+      "title": "[blog] 💡 참여도",
+      "type": "row"
     },
     {
       "datasource": {
@@ -600,9 +594,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "sessions"
           ],
@@ -678,9 +672,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "averageSessionDuration"
           ],
@@ -756,9 +750,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "screenPageViewsPerSession"
           ],
@@ -784,10 +778,8 @@
       },
       "id": 13,
       "panels": [],
-      "title": "📢 트래픽 소스",
-      "type": "row",
-      "repeat": "ga4_site",
-      "repeatDirection": "h"
+      "title": "[blog] 📢 트래픽 소스",
+      "type": "row"
     },
     {
       "datasource": {
@@ -927,9 +919,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "sessions"
           ],
@@ -1015,9 +1007,9 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
           "metrics": [
             "sessions"
           ],
@@ -1044,10 +1036,8 @@
       },
       "id": 16,
       "panels": [],
-      "title": "📄 인기 페이지",
-      "type": "row",
-      "repeat": "ga4_site",
-      "repeatDirection": "h"
+      "title": "[blog] 📄 인기 페이지",
+      "type": "row"
     },
     {
       "datasource": {
@@ -1113,9 +1103,1110 @@
             "type": "blackcowmoo-googleanalytics-datasource",
             "uid": "${DS_GA4}"
           },
-          "accountId": "",
-          "webPropertyId": "${ga4_site}",
-          "profileId": "",
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
+          "metrics": [
+            "screenPageViews",
+            "activeUsers",
+            "averageSessionDuration"
+          ],
+          "dimensions": [
+            "date",
+            "pagePath"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "인기 페이지 TOP",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 100,
+      "panels": [],
+      "title": "[AFZMA] 👥 사용자 지표",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "일일 활성 사용자 (DAU)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 200
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 47
+      },
+      "id": 101,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "/activeUsers/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "activeUsers"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "today",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "DAU (오늘)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "월간 활성 사용자 (MAU)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 500
+              },
+              {
+                "color": "green",
+                "value": 2000
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 47
+      },
+      "id": 102,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "/activeUsers/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "activeUsers"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "MAU (30일)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "신규 가입 사용자",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 47
+      },
+      "id": 103,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "/newUsers/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "newUsers"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "신규 유저 (30일)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "총 세션 수",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 47
+      },
+      "id": 104,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "/sessions/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "sessions"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "세션 수 (30일)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 53
+      },
+      "id": 105,
+      "panels": [],
+      "title": "[AFZMA] 📈 사용자 추이",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "일별 활성 사용자 추이",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 54
+      },
+      "id": 106,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "activeUsers"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "DAU 추이 (30일)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "일별 신규 사용자 추이",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 54
+      },
+      "id": 107,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "newUsers"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "신규 유저 추이 (30일)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 62
+      },
+      "id": 108,
+      "panels": [],
+      "title": "[AFZMA] 💡 참여도",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "일별 세션 수 추이",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 63
+      },
+      "id": 109,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "sessions"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "세션 수 추이",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "평균 세션 시간",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 120
+              },
+              {
+                "color": "green",
+                "value": 300
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 63
+      },
+      "id": 110,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "averageSessionDuration"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "평균 세션 시간",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "사용자당 평균 페이지뷰",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 63
+      },
+      "id": 111,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "screenPageViewsPerSession"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "세션당 페이지뷰",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 71
+      },
+      "id": 112,
+      "panels": [],
+      "title": "[AFZMA] 📢 트래픽 소스",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "채널별 유입 비율",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Organic.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Direct.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Referral.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Social.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Paid.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 72
+      },
+      "id": 113,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "sessions"
+          ],
+          "dimensions": [
+            "date",
+            "sessionDefaultChannelGrouping"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "채널별 유입 비율",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "채널별 유입 추이",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 72
+      },
+      "id": 114,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "sessions"
+          ],
+          "dimensions": [
+            "date",
+            "sessionDefaultChannelGrouping"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "채널별 유입 추이",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 80
+      },
+      "id": 115,
+      "panels": [],
+      "title": "[AFZMA] 📄 인기 페이지",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "페이지별 조회수 TOP 20",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 81
+      },
+      "id": 116,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "screenPageViews"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
           "metrics": [
             "screenPageViews",
             "activeUsers",
@@ -1159,37 +2250,6 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "hide": 0,
-        "includeAll": true,
-        "label": "GA4 Site",
-        "multi": true,
-        "name": "ga4_site",
-        "options": [
-          {
-            "selected": false,
-            "text": "blog",
-            "value": "properties/252603434"
-          },
-          {
-            "selected": false,
-            "text": "AFZMA",
-            "value": "properties/523848883"
-          }
-        ],
-        "query": "blog : properties/252603434, AFZMA : properties/523848883",
-        "type": "custom",
-        "skipUrlSync": false
       }
     ]
   },
@@ -1208,7 +2268,7 @@
     ]
   },
   "timezone": "Asia/Seoul",
-  "title": "Layer 1 - 비즈니스 지표 (GA4 테스트)",
+  "title": "Layer 1 - 비즈니스 지표 (GA4)",
   "uid": "layer-business-ga4",
   "version": 1,
   "weekStart": ""
