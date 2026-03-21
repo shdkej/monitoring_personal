@@ -71,7 +71,7 @@ spec:
                 name: yace-aws-credentials
           volumeMounts:
             - name: config
-              mountPath: /tmp/config.yml
+              mountPath: /etc/yace/config.yml
               subPath: config.yml
           resources:
             requests:
