@@ -63,7 +63,7 @@ spec:
     spec:
       containers:
         - name: yace
-          image: ghcr.io/nerdswords/yet-another-cloudwatch-exporter:v0.62.0
+          image: prometheuscommunity/yet-another-cloudwatch-exporter:latest
           ports:
             - containerPort: 5000
           envFrom:
