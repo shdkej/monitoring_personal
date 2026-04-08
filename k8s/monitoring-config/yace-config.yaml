@@ -42,3 +42,22 @@ data:
               statistics: [Sum]
             - name: UserErrors
               statistics: [Sum]
+        - type: AWS/RUM
+          regions: [ap-northeast-2]
+          period: 300
+          length: 300
+          metrics:
+            - name: WebVitalsLargestContentfulPaint
+              statistics: [Average, p90]
+            - name: WebVitalsFirstInputDelay
+              statistics: [Average, p90]
+            - name: WebVitalsCumulativeLayoutShift
+              statistics: [Average, p90]
+            - name: JsErrorCount
+              statistics: [Sum]
+            - name: HttpErrorCount
+              statistics: [Sum]
+            - name: SessionCount
+              statistics: [Sum]
+            - name: NavigationFrustratedTransaction
+              statistics: [Sum]

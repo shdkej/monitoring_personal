@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Layer 2 - 프로덕트 품질 모니터링 대시보드. Mock Exporter를 통해 데모 데이터를 제공하며, 실제 환경에서는 프론트엔드 에이전트(예: RUM)와 연동하여 사용합니다.",
+  "description": "Layer 2 - 프로덕트 품질 모니터링 대시보드. AWS CloudWatch RUM + YACE를 통해 실사용자 메트릭을 수집합니다. HTTP 서비스 메트릭은 애플리케이션 계측 후 활성화됩니다.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -94,7 +94,7 @@
       ],
       "title": "p95 응답시간",
       "type": "stat",
-      "description": "95번째 백분위수 응답 시간 (최근 5분)"
+      "description": "95번째 백분위수 응답 시간 (최근 5분) [애플리케이션 계측 후 활성화]"
     },
     {
       "datasource": "Prometheus",
@@ -157,7 +157,7 @@
       ],
       "title": "p99 응답시간",
       "type": "stat",
-      "description": "99번째 백분위수 응답 시간 (최근 5분)"
+      "description": "99번째 백분위수 응답 시간 (최근 5분) [애플리케이션 계측 후 활성화]"
     },
     {
       "datasource": "Prometheus",
@@ -220,7 +220,7 @@
       ],
       "title": "평균 응답시간",
       "type": "stat",
-      "description": "평균 응답 시간 (최근 5분)"
+      "description": "평균 응답 시간 (최근 5분) [애플리케이션 계측 후 활성화]"
     },
     {
       "datasource": "Prometheus",
@@ -428,7 +428,7 @@
       ],
       "title": "응답시간 추이",
       "type": "timeseries",
-      "description": "시간대별 응답시간 백분위수 추이 (p50, p95, p99)"
+      "description": "시간대별 응답시간 백분위수 추이 (p50, p95, p99) [애플리케이션 계측 후 활성화]"
     },
     {
       "datasource": "Prometheus",
@@ -599,7 +599,7 @@
       ],
       "title": "프론트엔드 오류율",
       "type": "timeseries",
-      "description": "프론트엔드 에러 타입별 발생률"
+      "description": "프론트엔드 에러 타입별 발생률 [애플리케이션 계측 후 활성화]"
     },
     {
       "datasource": "Prometheus",
@@ -650,7 +650,7 @@
       ],
       "title": "에러 타입별 분포",
       "type": "piechart",
-      "description": "최근 1시간 동안의 에러 타입별 분포"
+      "description": "최근 1시간 동안의 에러 타입별 분포 [애플리케이션 계측 후 활성화]"
     },
     {
       "collapsed": false,
@@ -720,7 +720,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "web_vitals_lcp_seconds",
+          "expr": "aws_rum_web_vitals_largest_contentful_paint_average / 1000",
           "refId": "A",
           "legendFormat": "LCP"
         }
@@ -783,7 +783,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "web_vitals_fid_seconds * 1000",
+          "expr": "aws_rum_web_vitals_first_input_delay_average",
           "refId": "A",
           "legendFormat": "FID"
         }
@@ -846,7 +846,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "web_vitals_cls",
+          "expr": "aws_rum_web_vitals_cumulative_layout_shift_average",
           "refId": "A",
           "legendFormat": "CLS"
         }
@@ -863,6 +863,528 @@
         "w": 24,
         "x": 0,
         "y": 34
+      },
+      "id": 200,
+      "panels": [],
+      "title": "CloudWatch RUM (Real User Monitoring)",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2500
+              },
+              {
+                "color": "red",
+                "value": 4000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 35
+      },
+      "id": 201,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "aws_rum_web_vitals_largest_contentful_paint_average",
+          "refId": "A",
+          "legendFormat": "LCP avg"
+        }
+      ],
+      "title": "RUM LCP (avg)",
+      "type": "stat",
+      "description": "CloudWatch RUM - Largest Contentful Paint 평균"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 300
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 4,
+        "y": 35
+      },
+      "id": 202,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "aws_rum_web_vitals_first_input_delay_average",
+          "refId": "A",
+          "legendFormat": "FID avg"
+        }
+      ],
+      "title": "RUM FID (avg)",
+      "type": "stat",
+      "description": "CloudWatch RUM - First Input Delay 평균"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.25
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 8,
+        "y": 35
+      },
+      "id": 203,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "aws_rum_web_vitals_cumulative_layout_shift_average",
+          "refId": "A",
+          "legendFormat": "CLS avg"
+        }
+      ],
+      "title": "RUM CLS (avg)",
+      "type": "stat",
+      "description": "CloudWatch RUM - Cumulative Layout Shift 평균"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 35
+      },
+      "id": 204,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "aws_rum_js_error_count_sum",
+          "refId": "A",
+          "legendFormat": "JS Errors"
+        }
+      ],
+      "title": "JS Errors",
+      "type": "stat",
+      "description": "CloudWatch RUM - JavaScript 에러 수"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 35
+      },
+      "id": 205,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "aws_rum_http_error_count_sum",
+          "refId": "A",
+          "legendFormat": "HTTP Errors"
+        }
+      ],
+      "title": "HTTP Errors",
+      "type": "stat",
+      "description": "CloudWatch RUM - HTTP 에러 수"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 35
+      },
+      "id": 206,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "aws_rum_session_count_sum",
+          "refId": "A",
+          "legendFormat": "Sessions"
+        }
+      ],
+      "title": "Sessions",
+      "type": "stat",
+      "description": "CloudWatch RUM - 세션 수"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 35
+      },
+      "id": 207,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "aws_rum_navigation_frustrated_transaction_sum",
+          "refId": "A",
+          "legendFormat": "Frustrated"
+        }
+      ],
+      "title": "Frustrated Nav",
+      "type": "stat",
+      "description": "CloudWatch RUM - 불만족 네비게이션 수"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CLS avg"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "id": 208,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "expr": "aws_rum_web_vitals_largest_contentful_paint_average",
+          "refId": "A",
+          "legendFormat": "LCP avg"
+        },
+        {
+          "expr": "aws_rum_web_vitals_first_input_delay_average",
+          "refId": "B",
+          "legendFormat": "FID avg"
+        },
+        {
+          "expr": "aws_rum_web_vitals_cumulative_layout_shift_average",
+          "refId": "C",
+          "legendFormat": "CLS avg"
+        }
+      ],
+      "title": "RUM Web Vitals 추이",
+      "type": "timeseries",
+      "description": "CloudWatch RUM - Core Web Vitals 시간대별 추이"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 49
       },
       "id": 104,
       "panels": [],
@@ -935,7 +1457,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 50
       },
       "id": 12,
       "options": {
@@ -950,7 +1472,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "avg(web_vitals_lcp_seconds * 1000) by (page)",
+          "expr": "aws_rum_web_vitals_largest_contentful_paint_average",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1006,7 +1528,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 50
       },
       "id": 13,
       "options": {
@@ -1025,7 +1547,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "avg(web_vitals_lcp_seconds * 1000) by (browser)",
+          "expr": "aws_rum_web_vitals_largest_contentful_paint_average",
           "refId": "A",
           "legendFormat": "{{browser}}"
         }
@@ -1038,7 +1560,12 @@
   "refresh": "30s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": ["layer", "product", "performance", "web-vitals"],
+  "tags": [
+    "layer",
+    "product",
+    "performance",
+    "web-vitals"
+  ],
   "templating": {
     "list": []
   },
