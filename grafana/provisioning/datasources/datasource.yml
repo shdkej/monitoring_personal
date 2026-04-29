@@ -10,6 +10,10 @@ deleteDatasources:
     orgId: 1
   - name: Loki
     orgId: 1
+  - name: GA4
+    orgId: 1
+  - name: CloudWatch
+    orgId: 1
 
 # 데이터소스 목록 (여러 개 정의 가능)
 datasources:
@@ -55,3 +59,32 @@ datasources:
     jsonData:
       # Loki 관련 설정
       maxLines: 1000
+
+  # GA4 데이터소스 (Google Analytics 4 플러그인)
+  - name: GA4
+    type: blackcowmoo-googleanalytics-datasource
+    access: proxy
+    uid: ga4
+    isDefault: false
+    editable: false
+    jsonData:
+      authenticationType: jwt
+      clientEmail: ${GA4_CLIENT_EMAIL}
+      defaultProject: ${GA4_GCP_PROJECT}
+      tokenUri: https://oauth2.googleapis.com/token
+    secureJsonData:
+      privateKey: ${GA4_PRIVATE_KEY}
+
+  # CloudWatch 데이터소스 (AWS 메트릭 직접 조회)
+  - name: CloudWatch
+    type: cloudwatch
+    access: proxy
+    uid: cloudwatch
+    isDefault: false
+    editable: false
+    jsonData:
+      authType: keys
+      defaultRegion: ap-northeast-2
+    secureJsonData:
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
