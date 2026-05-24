@@ -23,3 +23,8 @@ data:
           clientEmail: ${GA4_CLIENT_EMAIL}
           defaultProject: ${GA4_GCP_PROJECT}
           tokenUri: https://oauth2.googleapis.com/token
+        secureJsonData:
+          # 서비스계정 JSON 전체(legacy jwt blob). GA4_PRIVATE_KEY는
+          # grafana-ga4-credentials Secret → envFromSecret으로 주입됨.
+          # 이 필드가 없으면 매 파드 재시작(emptyDir)마다 인증이 휘발됨.
+          jwt: ${GA4_PRIVATE_KEY}
