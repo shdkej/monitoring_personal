@@ -2898,7 +2898,32 @@
           },
           "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "blog"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "AFZMA"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -2939,9 +2964,7 @@
           "startDate": "30daysAgo",
           "endDate": "today",
           "filtersExpression": "",
-          "refId": "A",
-          "alias": "blog",
-          "legendFormat": "blog"
+          "refId": "A"
         },
         {
           "datasource": {
@@ -2960,9 +2983,7 @@
           "startDate": "30daysAgo",
           "endDate": "today",
           "filtersExpression": "",
-          "refId": "B",
-          "alias": "AFZMA",
-          "legendFormat": "AFZMA"
+          "refId": "B"
         }
       ],
       "title": "DAU 추이 (blog+AFZMA 통합)",
