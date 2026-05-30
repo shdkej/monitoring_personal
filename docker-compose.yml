@@ -136,23 +136,6 @@ services:
     networks:
       - monitoring
 
-  # GA4 Exporter: GA4 비즈니스 메트릭 + 프로덕트 mock 메트릭
-  ga4-exporter:
-    build: ./ga4-exporter
-    container_name: ga4-exporter-minimal
-    restart: unless-stopped
-    environment:
-      - GA4_PROPERTIES=${GA4_PROPERTIES:-blog:252603434,AFZMA:523848883}
-      - GA4_KEY_FILE=/app/credentials.json
-    volumes:
-      - ./ga4-exporter/credentials/credentials.json:/app/credentials.json:ro
-    ports:
-      - "9999:9999"
-    networks:
-      monitoring:
-        aliases:
-          - ga4-exporter
-
   # PostHog Exporter: 제품 지표 (PostHog Cloud US Query API → Prometheus 브리지)
   posthog-exporter:
     build: ./posthog-exporter

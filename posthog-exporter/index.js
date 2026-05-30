@@ -53,9 +53,21 @@ const pageViews = new client.Gauge({
   help: '페이지뷰 수',
   labelNames: ['service', 'period'],
 });
+const churnedUsers = new client.Gauge({
+  name: 'product_churned_users',
+  help: '이탈 유저 (이전 7일 활성 중 최근 7일 $pageview 미발생). PostHog person 코호트 기반 (추정 아님)',
+  labelNames: ['service'],
+});
+const productClicks = new client.Gauge({
+  name: 'product_clicks',
+  help: 'autocapture 클릭 수 (CTR 분자). 명시적 CTA 아닌 전체 인터랙션 클릭',
+  labelNames: ['service', 'period'],
+});
 register.registerMetric(appConnected);
 register.registerMetric(activeUsers);
 register.registerMetric(pageViews);
+register.registerMetric(churnedUsers);
+register.registerMetric(productClicks);
 
 // TODO(트랙 A 2차): product_retention (재방문율) 추가
 
@@ -87,10 +99,18 @@ async function fetchApp(name, projectId) {
     "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day");
   const pv = await hogql(projectId,
     "SELECT count() FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day");
+  // 이탈: 이전 7일(7~14d) 활성 중 최근 7일(0~7d) 미방문 person 수
+  const churned = await hogql(projectId,
+    "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day AND timestamp <= now() - interval 7 day AND person_id NOT IN (SELECT DISTINCT person_id FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day)");
+  // CTR 분자: autocapture 클릭 수 (7일)
+  const clicks = await hogql(projectId,
+    "SELECT count() FROM events WHERE event = '$autocapture' AND timestamp > now() - interval 7 day");
 
   activeUsers.set({ ...svc, period: '1d' }, Number(dau?.[0]?.[0]) || 0);
   activeUsers.set({ ...svc, period: '7d' }, Number(wau?.[0]?.[0]) || 0);
   pageViews.set({ ...svc, period: '7d' }, Number(pv?.[0]?.[0]) || 0);
+  churnedUsers.set(svc, Number(churned?.[0]?.[0]) || 0);
+  productClicks.set({ ...svc, period: '7d' }, Number(clicks?.[0]?.[0]) || 0);
 }
 
 async function fetchAll() {

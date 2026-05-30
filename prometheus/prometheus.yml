@@ -53,16 +53,7 @@ scrape_configs:
           instance: "yace"
           app: "aws-monitoring"
 
-  # Job 4: GA4 Exporter - 비즈니스/프로덕트 메트릭 수집
-  - job_name: "ga4-exporter"
-    scrape_interval: 60s # GA4 데이터는 5분마다 갱신되므로 60초면 충분
-    static_configs:
-      - targets: ["ga4-exporter:9999"]
-        labels:
-          instance: "ga4-exporter"
-          app: "business-metrics"
-
-  # Job 5: PostHog Exporter - 제품 지표 수집 (PostHog는 5분마다 폴링)
+  # Job 4: PostHog Exporter - 제품 지표 수집 (PostHog는 5분마다 폴링)
   - job_name: "posthog-exporter"
     scrape_interval: 300s
     static_configs:

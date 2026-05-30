@@ -133,3 +133,9 @@ PostHog ──(posthog-exporter: 얇은 브리지)──> Prometheus ─┼─�
   등록 앱 virtue 1개. GA4+PostHog 한 대시보드 공존 확인.
 - 2026-05-30: virtue 이벤트 실측(§8). autocapture만 존재 → 제품 이벤트 인스트루먼테이션이
   선행 과제로 확인. 트랙 A(파이프라인 PoC)/B(이벤트 설계) 분리.
+- 2026-05-30: 트랙 A 운영 배포 완료. posthog-exporter k8s(런타임 clone) + 대시보드 PostHog 섹션.
+- 2026-05-30: **ga4-exporter 완전 폐기(설계 D2 완료)**. 이탈(product_churned_users, person
+  코호트)·클릭율(product_clicks/page_views, autocapture 근사)을 PostHog로 이전. 하이브리드
+  이탈/CTR(ga4 business_*) 패널 제거. 부작용: product mock(http_request/web_vitals/
+  frontend_error) 제거로 layer-product/app/main의 mock 패널은 No data(의도된 placeholder,
+  실제 계측 시 채울 자리). 클릭율은 명시적 CTA 아님 → 트랙 B에서 CTA 이벤트로 정밀화 예정.
