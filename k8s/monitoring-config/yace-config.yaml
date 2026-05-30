@@ -10,8 +10,8 @@ data:
       jobs:
         - type: AWS/Lambda
           regions: [ap-northeast-2]
-          period: 900
-          length: 900
+          period: 600
+          length: 600
           metrics:
             - name: Invocations
               statistics: [Sum]
@@ -25,8 +25,8 @@ data:
               statistics: [Maximum]
         - type: AWS/DynamoDB
           regions: [ap-northeast-2]
-          period: 900
-          length: 900
+          period: 600
+          length: 600
           metrics:
             - name: ConsumedReadCapacityUnits
               statistics: [Sum]
@@ -44,8 +44,8 @@ data:
               statistics: [Sum]
         - type: AWS/RUM
           regions: [ap-northeast-2]
-          period: 900
-          length: 900
+          period: 600
+          length: 600
           metrics:
             - name: WebVitalsLargestContentfulPaint
               statistics: [Average, p90]
