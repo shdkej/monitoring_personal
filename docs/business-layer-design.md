@@ -110,8 +110,26 @@ PostHog ──(posthog-exporter: 얇은 브리지)──> Prometheus ─┼─�
 - 메트릭 네이밍 컨벤션 (`product_*` 또는 `ph_*`)
 - PoC로 가장 먼저 가져올 KPI 1~2개 (예: virtue 핵심 퍼널의 전환율)
 
+## 8. virtue 현황 (2026-05-30 Query API 실측)
+
+최근 7일 virtue(project 424014) 이벤트:
+- `$autocapture` 110 / `$web_vitals` 53 / `$pageview` 50 / `$pageleave` 34 (7일 17명)
+- 페이지뷰 거의 전부 `/infinity/` 단일 페이지. infinity 시스템 웹 UI.
+- **커스텀 제품 이벤트 0** — PostHog 기본 autocapture만 켜진 상태.
+
+함의: 요청 지표 중 활성유저·retention·페이지뷰는 지금도 가능하나, **퍼널·전환·CTA·수익은
+커스텀 이벤트 인스트루먼테이션이 선행돼야 함.** 이게 제품 지표의 진짜 선행 과제.
+
+진행 트랙:
+- **A. 파이프라인 PoC** — 지금 데이터(활성유저·페이지뷰·retention)로 PostHog→Prometheus
+  브리지를 떠서 연동 구조(+blog/afzma N/A)를 먼저 증명. 지표보다 파이프라인 검증이 목적.
+- **B. 제품 이벤트 설계** — virtue 핵심 이벤트(intent 등록/실행, 핵심행동, 전환) 정의 →
+  데이터 축적 후 퍼널·전환·CTA. A와 병행.
+
 ## 변경 이력
 
 - 2026-05-30: 최초 작성. exporter 단일화(PostHog), ga4-exporter 폐기 방향 확정.
 - 2026-05-30: PostHog Cloud(US) 확정 → Query API 브리지(D4). 앱별 N/A 표시 설계(D5).
   등록 앱 virtue 1개. GA4+PostHog 한 대시보드 공존 확인.
+- 2026-05-30: virtue 이벤트 실측(§8). autocapture만 존재 → 제품 이벤트 인스트루먼테이션이
+  선행 과제로 확인. 트랙 A(파이프라인 PoC)/B(이벤트 설계) 분리.

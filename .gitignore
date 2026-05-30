@@ -1,5 +1,8 @@
 .omc/
 
+# Node
+node_modules/
+
 # 민감 정보 포함 파일
 alertmanager/alertmanager.yml
 .env

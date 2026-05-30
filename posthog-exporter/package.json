@@ -1,0 +1,14 @@
+{
+  "name": "posthog-exporter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PostHog Cloud(US) Query API → Prometheus 브리지 (제품 지표)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "prom-client": "^15.1.3"
+  }
+}
