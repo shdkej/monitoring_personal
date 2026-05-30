@@ -2843,6 +2843,130 @@
       ],
       "title": "비율 (재방문율·전환율)",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 143
+      },
+      "id": 400,
+      "panels": [],
+      "title": "📊 GA4 유입 통합 테스트 (blog+AFZMA 한 그래프)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "GA4 DAU를 blog+AFZMA 두 타깃 한 패널에. legend로 앱 구분되는지 테스트",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 144
+      },
+      "id": 401,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
+          "metrics": [
+            "activeUsers"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A",
+          "alias": "blog",
+          "legendFormat": "blog"
+        },
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": [
+            "activeUsers"
+          ],
+          "dimensions": [
+            "date"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "B",
+          "alias": "AFZMA",
+          "legendFormat": "AFZMA"
+        }
+      ],
+      "title": "DAU 추이 (blog+AFZMA 통합)",
+      "type": "timeseries"
     }
   ],
   "refresh": "",
