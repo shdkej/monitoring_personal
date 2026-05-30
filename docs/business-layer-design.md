@@ -143,3 +143,9 @@ PostHog ──(posthog-exporter: 얇은 브리지)──> Prometheus ─┼─�
   product_retained_users. 이탈·재방문을 동일 코호트(이전 7일 활성 분모)에서 일관 산출
   (이탈 = 이전활성 − 재방문, 재방문율 = 재방문/이전활성). 대시보드 각 앱 6 stat
   (WAU/DAU/페이지뷰 · 이탈/재방문율/클릭율).
+- 2026-05-30: 트랙 B. virtue 앱은 이미 12개 커스텀 이벤트 인스트루먼트됨(deed_saved 등
+  전환 퍼널 완비) → 앱 코드 수정 불필요. exporter에 전환 KPI 추가: product_conversions
+  (전환 유저)·product_conversion_rate(전환율 %). 앱별 funnel은 env POSTHOG_FUNNELS로
+  (app:start:convert). autocapture 클릭율 제거 → 진짜 전환율로 대시보드 교체.
+  virtue funnel = deed_judge_attempted→deed_saved (add_flow_started는 배포본 미발생).
+  데이터 매우 작음(전환 1명) — 측정 인프라 선구축, virtue 활성화는 별개 과제.

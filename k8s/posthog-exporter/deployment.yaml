@@ -29,6 +29,8 @@ spec:
               value: "virtue:424014"
             - name: PRODUCT_APPS
               value: "virtue,blog,afzma"
+            - name: POSTHOG_FUNNELS
+              value: "virtue:deed_judge_attempted:deed_saved"
             # Personal API Key는 민감정보 → Secret 참조 (repo가 public이므로 평문 금지)
             # 생성: kubectl -n monitoring create secret generic posthog-credentials \
             #         --from-literal=access-token='phx_...'

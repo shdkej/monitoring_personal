@@ -27,6 +27,19 @@ const projects = parseProjects();
 const allApps = (process.env.PRODUCT_APPS || 'virtue,blog,afzma')
   .split(',').map((s) => s.trim()).filter(Boolean);
 
+// 앱별 전환 퍼널: "app:startEvent:convertEvent" (쉼표 구분). 전환율 = convert유저/start유저
+// funnel 정의가 없는 앱은 전환 메트릭 미노출 → 대시보드 N/A
+// virtue: 판정 시도(deed_judge_attempted) → 저장(deed_saved). add_flow_started는 배포본 미발생이라 제외.
+function parseFunnels() {
+  const map = {};
+  (process.env.POSTHOG_FUNNELS || 'virtue:deed_judge_attempted:deed_saved').split(',').forEach((entry) => {
+    const [app, start, convert] = entry.trim().split(':');
+    if (app && start && convert) map[app] = { start, convert };
+  });
+  return map;
+}
+const funnels = parseFunnels();
+
 if (!TOKEN) {
   console.error('POSTHOG_ACCESS_TOKEN 환경변수가 필요합니다');
   process.exit(1);
@@ -58,10 +71,15 @@ const churnedUsers = new client.Gauge({
   help: '이탈 유저 (이전 7일 활성 중 최근 7일 $pageview 미발생). PostHog person 코호트 기반 (추정 아님)',
   labelNames: ['service'],
 });
-const productClicks = new client.Gauge({
-  name: 'product_clicks',
-  help: 'autocapture 클릭 수 (CTR 분자). 명시적 CTA 아닌 전체 인터랙션 클릭',
-  labelNames: ['service', 'period'],
+const conversions = new client.Gauge({
+  name: 'product_conversions',
+  help: '핵심 전환 유저 수 (앱별 funnel의 convert 이벤트, 30일 distinct person)',
+  labelNames: ['service'],
+});
+const conversionRate = new client.Gauge({
+  name: 'product_conversion_rate',
+  help: '전환율 % (convert 유저 / funnel start 유저 × 100, 30일)',
+  labelNames: ['service'],
 });
 const retainedUsers = new client.Gauge({
   name: 'product_retained_users',
@@ -77,7 +95,8 @@ register.registerMetric(appConnected);
 register.registerMetric(activeUsers);
 register.registerMetric(pageViews);
 register.registerMetric(churnedUsers);
-register.registerMetric(productClicks);
+register.registerMetric(conversions);
+register.registerMetric(conversionRate);
 register.registerMetric(retainedUsers);
 register.registerMetric(retentionRate);
 
@@ -114,21 +133,29 @@ async function fetchApp(name, projectId) {
     "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day AND timestamp <= now() - interval 7 day");
   const retained = await hogql(projectId,
     "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day AND timestamp <= now() - interval 7 day AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day)");
-  // CTR 분자: autocapture 클릭 수 (7일)
-  const clicks = await hogql(projectId,
-    "SELECT count() FROM events WHERE event = '$autocapture' AND timestamp > now() - interval 7 day");
-
   const prev = Number(prevActive?.[0]?.[0]) || 0;
   const ret = Number(retained?.[0]?.[0]) || 0;
 
   activeUsers.set({ ...svc, period: '1d' }, Number(dau?.[0]?.[0]) || 0);
   activeUsers.set({ ...svc, period: '7d' }, Number(wau?.[0]?.[0]) || 0);
   pageViews.set({ ...svc, period: '7d' }, Number(pv?.[0]?.[0]) || 0);
-  productClicks.set({ ...svc, period: '7d' }, Number(clicks?.[0]?.[0]) || 0);
   // 이탈·재방문은 같은 코호트에서 일관 산출 (이탈 = 이전활성 − 재방문)
   retainedUsers.set(svc, ret);
   churnedUsers.set(svc, Math.max(0, prev - ret));
   retentionRate.set(svc, prev > 0 ? (ret / prev) * 100 : 0);
+
+  // 전환 퍼널 (앱별 정의가 있을 때만). 30일 distinct person 기준
+  const f = funnels[name];
+  if (f) {
+    const starts = await hogql(projectId,
+      `SELECT count(DISTINCT person_id) FROM events WHERE event = '${f.start}' AND timestamp > now() - interval 30 day`);
+    const convs = await hogql(projectId,
+      `SELECT count(DISTINCT person_id) FROM events WHERE event = '${f.convert}' AND timestamp > now() - interval 30 day`);
+    const s = Number(starts?.[0]?.[0]) || 0;
+    const c = Number(convs?.[0]?.[0]) || 0;
+    conversions.set(svc, c);
+    conversionRate.set(svc, s > 0 ? (c / s) * 100 : 0);
+  }
 }
 
 async function fetchAll() {

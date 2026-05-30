@@ -146,6 +146,7 @@ services:
       - POSTHOG_HOST=${POSTHOG_HOST:-https://us.posthog.com}
       - POSTHOG_PROJECTS=${POSTHOG_PROJECTS:-virtue:424014}
       - PRODUCT_APPS=${PRODUCT_APPS:-virtue,blog,afzma}
+      - POSTHOG_FUNNELS=${POSTHOG_FUNNELS:-virtue:deed_judge_attempted:deed_saved}
     ports:
       - "9101:9101"
     networks:

@@ -2573,7 +2573,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "주간 활성 유저 (PostHog $pageview 7일 distinct)",
+      "description": "주간 활성 유저",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2817,7 +2817,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값. PostHog person 코호트",
+      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2878,7 +2878,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=다중클릭). CTA CTR은 트랙 B 후",
+      "description": "핵심 전환율 = 전환유저 ÷ 시작유저. virtue: 판정시도(deed_judge_attempted)→저장(deed_saved)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2927,11 +2927,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_clicks{service=\"virtue\",period=\"7d\"} / product_page_views{service=\"virtue\",period=\"7d\"} * 100",
+          "expr": "product_conversion_rate{service=\"virtue\"}",
           "refId": "A"
         }
       ],
-      "title": "클릭율 (인터랙션)",
+      "title": "전환율 (30일)",
       "type": "stat"
     },
     {
@@ -2952,7 +2952,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "주간 활성 유저 (PostHog $pageview 7일 distinct)",
+      "description": "주간 활성 유저",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3196,7 +3196,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값. PostHog person 코호트",
+      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3257,7 +3257,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=다중클릭). CTA CTR은 트랙 B 후",
+      "description": "핵심 전환율 = 전환유저 ÷ 시작유저. virtue: 판정시도(deed_judge_attempted)→저장(deed_saved)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3306,11 +3306,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_clicks{service=\"blog\",period=\"7d\"} / product_page_views{service=\"blog\",period=\"7d\"} * 100",
+          "expr": "product_conversion_rate{service=\"blog\"}",
           "refId": "A"
         }
       ],
-      "title": "클릭율 (인터랙션)",
+      "title": "전환율 (30일)",
       "type": "stat"
     },
     {
@@ -3331,7 +3331,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "주간 활성 유저 (PostHog $pageview 7일 distinct)",
+      "description": "주간 활성 유저",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3575,7 +3575,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값. PostHog person 코호트",
+      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3636,7 +3636,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=다중클릭). CTA CTR은 트랙 B 후",
+      "description": "핵심 전환율 = 전환유저 ÷ 시작유저. virtue: 판정시도(deed_judge_attempted)→저장(deed_saved)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3685,11 +3685,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_clicks{service=\"afzma\",period=\"7d\"} / product_page_views{service=\"afzma\",period=\"7d\"} * 100",
+          "expr": "product_conversion_rate{service=\"afzma\"}",
           "refId": "A"
         }
       ],
-      "title": "클릭율 (인터랙션)",
+      "title": "전환율 (30일)",
       "type": "stat"
     }
   ],
