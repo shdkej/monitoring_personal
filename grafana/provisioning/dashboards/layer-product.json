@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Layer 2 - 프로덕트 품질 모니터링 대시보드. AWS CloudWatch RUM + YACE를 통해 실사용자 메트릭을 수집합니다. HTTP 서비스 메트릭은 애플리케이션 계측 후 활성화됩니다.",
+  "description": "L2 프로덕트 헬스: PostHog(web vitals·오류·세션·북극성) + CloudWatch RUM(p95/p99·JsError, 연동 시)",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -21,862 +21,32 @@
   "panels": [
     {
       "collapsed": false,
-      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 100,
-      "panels": [],
-      "title": "Performance Overview",
-      "type": "row"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 200
-              },
-              {
-                "color": "red",
-                "value": 500
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 0,
-        "y": 1
-      },
       "id": 1,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "refId": "A",
-          "legendFormat": "p95 Response Time"
-        }
-      ],
-      "title": "p95 응답시간",
-      "type": "stat",
-      "description": "95번째 백분위수 응답 시간 (최근 5분) [애플리케이션 계측 후 활성화]"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 500
-              },
-              {
-                "color": "red",
-                "value": 1000
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 6,
-        "y": 1
-      },
-      "id": 2,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "refId": "A",
-          "legendFormat": "p99 Response Time"
-        }
-      ],
-      "title": "p99 응답시간",
-      "type": "stat",
-      "description": "99번째 백분위수 응답 시간 (최근 5분) [애플리케이션 계측 후 활성화]"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 100
-              },
-              {
-                "color": "red",
-                "value": 300
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 12,
-        "y": 1
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m])) * 1000",
-          "refId": "A",
-          "legendFormat": "Avg Response Time"
-        }
-      ],
-      "title": "평균 응답시간",
-      "type": "stat",
-      "description": "평균 응답 시간 (최근 5분) [애플리케이션 계측 후 활성화]"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 100
-              },
-              {
-                "color": "red",
-                "value": 500
-              }
-            ]
-          },
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 18,
-        "y": 1
-      },
-      "id": 4,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "sum(rate(http_requests_total[5m]))",
-          "refId": "A",
-          "legendFormat": "Request Throughput"
-        }
-      ],
-      "title": "요청 처리량",
-      "type": "stat",
-      "description": "초당 처리된 HTTP 요청 수 (최근 5분)"
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 7
-      },
-      "id": 101,
       "panels": [],
-      "title": "Performance Trend",
+      "title": "🩺 프로덕트 헬스 [virtue] (PostHog)",
       "type": "row"
     },
     {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "p50"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "p95"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "p99"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 5,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "lastNotNull",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "refId": "A",
-          "legendFormat": "p50"
-        },
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "refId": "B",
-          "legendFormat": "p95"
-        },
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "refId": "C",
-          "legendFormat": "p99"
-        }
-      ],
-      "title": "응답시간 추이",
-      "type": "timeseries",
-      "description": "시간대별 응답시간 백분위수 추이 (p50, p95, p99) [애플리케이션 계측 후 활성화]"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
-      "id": 6,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "lastNotNull",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "sum(rate(http_requests_total[5m])) by (status)",
-          "refId": "A",
-          "legendFormat": "{{status}}"
-        }
-      ],
-      "title": "처리량 추이",
-      "type": "timeseries",
-      "description": "HTTP 상태 코드별 초당 요청 처리량"
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 16
-      },
-      "id": 102,
-      "panels": [],
-      "title": "Error Monitoring",
-      "type": "row"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.01
-              },
-              {
-                "color": "red",
-                "value": 0.05
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 17
-      },
-      "id": 7,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "sum(rate(frontend_error_total[5m])) by (error_type)",
-          "refId": "A",
-          "legendFormat": "{{error_type}}"
-        }
-      ],
-      "title": "프론트엔드 오류율",
-      "type": "timeseries",
-      "description": "프론트엔드 에러 타입별 발생률 [애플리케이션 계측 후 활성화]"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 17
-      },
-      "id": 8,
-      "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "values": [
-            "value",
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "sum(increase(frontend_error_total[1h])) by (error_type)",
-          "refId": "A",
-          "legendFormat": "{{error_type}}"
-        }
-      ],
-      "title": "에러 타입별 분포",
-      "type": "piechart",
-      "description": "최근 1시간 동안의 에러 타입별 분포 [애플리케이션 계측 후 활성화]"
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 25
-      },
-      "id": 103,
-      "panels": [],
-      "title": "Core Web Vitals",
-      "type": "row"
-    },
-    {
-      "datasource": "Prometheus",
+      "description": "최대 콘텐츠 렌더 (Google: <2.5s 양호)",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "mappings": [],
-          "max": 4,
+          "noValue": "N/A",
           "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 2.5
-              },
-              {
-                "color": "red",
-                "value": 4
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 26
-      },
-      "id": 9,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "aws_rum_web_vitals_largest_contentful_paint_average / 1000",
-          "refId": "A",
-          "legendFormat": "LCP"
-        }
-      ],
-      "title": "LCP (Largest Contentful Paint)",
-      "type": "gauge",
-      "description": "최대 콘텐츠풀 페인트 시간. 목표: <2.5s (Good), 2.5-4s (Needs Improvement), >4s (Poor)"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "max": 300,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 100
-              },
-              {
-                "color": "red",
-                "value": 300
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 26
-      },
-      "id": 10,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "aws_rum_web_vitals_first_input_delay_average",
-          "refId": "A",
-          "legendFormat": "FID"
-        }
-      ],
-      "title": "FID (First Input Delay)",
-      "type": "gauge",
-      "description": "최초 입력 지연 시간. 목표: <100ms (Good), 100-300ms (Needs Improvement), >300ms (Poor)"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "max": 0.25,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.1
-              },
-              {
-                "color": "red",
-                "value": 0.25
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 26
-      },
-      "id": 11,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "aws_rum_web_vitals_cumulative_layout_shift_average",
-          "refId": "A",
-          "legendFormat": "CLS"
-        }
-      ],
-      "title": "CLS (Cumulative Layout Shift)",
-      "type": "gauge",
-      "description": "누적 레이아웃 이동 점수. 목표: <0.1 (Good), 0.1-0.25 (Needs Improvement), >0.25 (Poor)"
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 34
-      },
-      "id": 200,
-      "panels": [],
-      "title": "CloudWatch RUM (Real User Monitoring)",
-      "type": "row"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
+          "max": 5000,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -900,15 +70,14 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
+        "w": 5,
         "x": 0,
-        "y": 35
+        "y": 1
       },
-      "id": 201,
+      "id": 2,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -917,27 +86,38 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
       "targets": [
         {
-          "expr": "aws_rum_web_vitals_largest_contentful_paint_average",
-          "refId": "A",
-          "legendFormat": "LCP avg"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_web_vitals_lcp_ms{service=\"virtue\"}",
+          "refId": "A"
         }
       ],
-      "title": "RUM LCP (avg)",
-      "type": "stat",
-      "description": "CloudWatch RUM - Largest Contentful Paint 평균"
+      "title": "LCP (p75)",
+      "type": "gauge"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "상호작용 반응 (FID 후속, <200ms 양호)",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "N/A",
+          "min": 0,
+          "max": 1000,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -947,11 +127,11 @@
               },
               {
                 "color": "yellow",
-                "value": 100
+                "value": 200
               },
               {
                 "color": "red",
-                "value": 300
+                "value": 500
               }
             ]
           },
@@ -961,15 +141,14 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
-        "x": 4,
-        "y": 35
+        "w": 5,
+        "x": 5,
+        "y": 1
       },
-      "id": 202,
+      "id": 3,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -978,210 +157,37 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
       "targets": [
         {
-          "expr": "aws_rum_web_vitals_first_input_delay_average",
-          "refId": "A",
-          "legendFormat": "FID avg"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_web_vitals_inp_ms{service=\"virtue\"}",
+          "refId": "A"
         }
       ],
-      "title": "RUM FID (avg)",
-      "type": "stat",
-      "description": "CloudWatch RUM - First Input Delay 평균"
+      "title": "INP (p75)",
+      "type": "gauge"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "세션 수 — 서비스 정상 여부",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed",
+            "fixedColor": "blue"
           },
           "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.1
-              },
-              {
-                "color": "red",
-                "value": 0.25
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 8,
-        "y": 35
-      },
-      "id": 203,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "aws_rum_web_vitals_cumulative_layout_shift_average",
-          "refId": "A",
-          "legendFormat": "CLS avg"
-        }
-      ],
-      "title": "RUM CLS (avg)",
-      "type": "stat",
-      "description": "CloudWatch RUM - Cumulative Layout Shift 평균"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 5
-              },
-              {
-                "color": "red",
-                "value": 20
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 12,
-        "y": 35
-      },
-      "id": 204,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "aws_rum_js_error_count_sum",
-          "refId": "A",
-          "legendFormat": "JS Errors"
-        }
-      ],
-      "title": "JS Errors",
-      "type": "stat",
-      "description": "CloudWatch RUM - JavaScript 에러 수"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 5
-              },
-              {
-                "color": "red",
-                "value": 20
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 15,
-        "y": 35
-      },
-      "id": 205,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "aws_rum_http_error_count_sum",
-          "refId": "A",
-          "legendFormat": "HTTP Errors"
-        }
-      ],
-      "title": "HTTP Errors",
-      "type": "stat",
-      "description": "CloudWatch RUM - HTTP 에러 수"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
+          "noValue": "N/A",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1197,11 +203,11 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 3,
-        "x": 18,
-        "y": 35
+        "w": 5,
+        "x": 10,
+        "y": 1
       },
-      "id": 206,
+      "id": 4,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -1218,33 +224,37 @@
       },
       "targets": [
         {
-          "expr": "aws_rum_session_count_sum",
-          "refId": "A",
-          "legendFormat": "Sessions"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_sessions{service=\"virtue\"}",
+          "refId": "A"
         }
       ],
-      "title": "Sessions",
-      "type": "stat",
-      "description": "CloudWatch RUM - 세션 수"
+      "title": "세션 (7일)",
+      "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "핵심 가치 행동 (virtue: deed_saved)",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed",
+            "fixedColor": "green"
           },
           "mappings": [],
+          "noValue": "N/A",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 5
               }
             ]
           },
@@ -1254,11 +264,11 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 3,
-        "x": 21,
-        "y": 35
+        "w": 5,
+        "x": 15,
+        "y": 1
       },
-      "id": 207,
+      "id": 5,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -1275,134 +285,106 @@
       },
       "targets": [
         {
-          "expr": "aws_rum_navigation_frustrated_transaction_sum",
-          "refId": "A",
-          "legendFormat": "Frustrated"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_conversions{service=\"virtue\"}",
+          "refId": "A"
         }
       ],
-      "title": "Frustrated Nav",
-      "type": "stat",
-      "description": "CloudWatch RUM - 불만족 네비게이션 수"
+      "title": "북극성 (전환)",
+      "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "$exception 수",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "never",
-            "spanNulls": true
+            "mode": "fixed",
+            "fixedColor": "orange"
           },
           "mappings": [],
+          "noValue": "N/A",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "orange",
                 "value": null
               }
             ]
           },
-          "unit": "ms"
+          "unit": "short"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "CLS avg"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "none"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 41
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 1
       },
-      "id": 208,
+      "id": 7,
       "options": {
-        "legend": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
           "calcs": [
-            "mean",
-            "lastNotNull",
-            "max"
+            "lastNotNull"
           ],
-          "displayMode": "table",
-          "placement": "bottom"
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "multi"
-        }
+        "textMode": "auto"
       },
       "targets": [
         {
-          "expr": "aws_rum_web_vitals_largest_contentful_paint_average",
-          "refId": "A",
-          "legendFormat": "LCP avg"
-        },
-        {
-          "expr": "aws_rum_web_vitals_first_input_delay_average",
-          "refId": "B",
-          "legendFormat": "FID avg"
-        },
-        {
-          "expr": "aws_rum_web_vitals_cumulative_layout_shift_average",
-          "refId": "C",
-          "legendFormat": "CLS avg"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_errors{service=\"virtue\"}",
+          "refId": "A"
         }
       ],
-      "title": "RUM Web Vitals 추이",
-      "type": "timeseries",
-      "description": "CloudWatch RUM - Core Web Vitals 시간대별 추이"
+      "title": "프론트 에러 (7일)",
+      "type": "stat"
     },
     {
       "collapsed": false,
-      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 7
       },
-      "id": 104,
+      "id": 10,
       "panels": [],
-      "title": "User Experience",
+      "title": "⚡ 백엔드/프론트 성능 (CloudWatch RUM — 연동 시 표시)",
       "type": "row"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "RUM PerformanceNavigationDuration p95. RUM CloudWatch metrics 활성 필요",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "custom": {
-            "align": "auto",
-            "displayMode": "auto"
-          },
           "mappings": [],
+          "noValue": "RUM 연동 대기",
+          "min": 0,
+          "max": 6000,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1412,103 +394,286 @@
               },
               {
                 "color": "yellow",
-                "value": 1000
+                "value": 2000
               },
               {
                 "color": "red",
-                "value": 3000
+                "value": 4000
               }
             ]
           },
           "unit": "ms"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "page"
-            },
-            "properties": [
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 8
+      },
+      "id": 11,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "aws_rum_performance_navigation_duration_p95",
+          "refId": "A"
+        }
+      ],
+      "title": "페이지로드 p95",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "RUM p99",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "RUM 연동 대기",
+          "min": 0,
+          "max": 8000,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "id": "custom.width",
-                "value": 200
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 3000
+              },
+              {
+                "color": "red",
+                "value": 6000
               }
             ]
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Avg Load Time (ms)"
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background"
-              }
-            ]
-          }
-        ]
+          "unit": "ms"
+        },
+        "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 50
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 8
       },
       "id": 12,
       "options": {
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Avg Load Time (ms)"
-          }
-        ]
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
-      "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "aws_rum_web_vitals_largest_contentful_paint_average",
-          "refId": "A",
-          "format": "table",
-          "instant": true
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "aws_rum_performance_navigation_duration_p99",
+          "refId": "A"
         }
       ],
-      "title": "페이지별 로드시간",
-      "type": "table",
-      "description": "페이지별 평균 LCP 로드시간"
+      "title": "페이지로드 p99",
+      "type": "gauge"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "RUM JsErrorCount",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "mappings": [],
+          "noValue": "RUM 연동 대기",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 8
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "aws_rum_js_error_count_sum",
+          "refId": "A"
+        }
+      ],
+      "title": "JS 에러 (RUM)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "RUM SessionCount",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "mappings": [],
+          "noValue": "RUM 연동 대기",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 8
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "aws_rum_session_count_sum",
+          "refId": "A"
+        }
+      ],
+      "title": "세션 (RUM)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 20,
+      "panels": [],
+      "title": "📈 추이",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "web vitals p75 추이",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
+            "axisColorMode": "text",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
             },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -1527,34 +692,132 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 50
+        "x": 0,
+        "y": 15
       },
-      "id": 13,
+      "id": 21,
       "options": {
         "legend": {
           "calcs": [
-            "mean",
-            "max"
+            "lastNotNull"
           ],
           "displayMode": "table",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "aws_rum_web_vitals_largest_contentful_paint_average",
-          "refId": "A",
-          "legendFormat": "{{browser}}"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_web_vitals_lcp_ms{service=\"virtue\"}",
+          "legendFormat": "LCP",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_web_vitals_inp_ms{service=\"virtue\"}",
+          "legendFormat": "INP",
+          "refId": "B"
         }
       ],
-      "title": "브라우저별 성능",
-      "type": "timeseries",
-      "description": "브라우저별 평균 LCP 성능 비교"
+      "title": "Web Vitals 추이 (LCP/INP)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "세션·에러 추이",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisColorMode": "text",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_sessions{service=\"virtue\"}",
+          "legendFormat": "세션",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_errors{service=\"virtue\"}",
+          "legendFormat": "에러",
+          "refId": "B"
+        }
+      ],
+      "title": "세션·에러 추이",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
