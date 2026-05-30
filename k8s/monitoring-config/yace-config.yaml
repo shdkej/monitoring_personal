@@ -61,3 +61,5 @@ data:
               statistics: [Sum]
             - name: NavigationFrustratedTransaction
               statistics: [Sum]
+            - name: PerformanceNavigationDuration
+              statistics: [Average, p95, p99]
