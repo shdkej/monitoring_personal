@@ -149,3 +149,9 @@ PostHog ──(posthog-exporter: 얇은 브리지)──> Prometheus ─┼─�
   (app:start:convert). autocapture 클릭율 제거 → 진짜 전환율로 대시보드 교체.
   virtue funnel = deed_judge_attempted→deed_saved (add_flow_started는 배포본 미발생).
   데이터 매우 작음(전환 1명) — 측정 인프라 선구축, virtue 활성화는 별개 과제.
+- 2026-05-30: 개요 대시보드(main.json) 5-레이어 헬스보드 재구성(Grafana13 gauge). 깨진
+  business_dau/web_vitals를 product_*로 교체.
+- 2026-05-30: layer-business PostHog 섹션을 $service 변수 + row repeat로 통합(정적 복제
+  virtue/blog/afzma 18패널 → 7패널 1세트). 앱 추가 시 변수 값만 추가하면 됨. GA4 유입
+  섹션은 앱별 accountId/property가 본질적으로 달라(레이블 치환 아님) repeat 제외.
+  방식은 Grafana13 Scenes 기반 dynamic dashboards가 아니라 검증된 template variable+repeat.
