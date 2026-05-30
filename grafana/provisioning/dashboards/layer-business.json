@@ -2561,62 +2561,118 @@
         "h": 1,
         "w": 24,
         "x": 0,
+        "y": 126
+      },
+      "id": 299,
+      "panels": [],
+      "title": "🟣 제품 지표 (PostHog)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "앱별 PostHog 제품 지표 비교. service 기준 join. 데이터 있는 앱만 값, 미연동은 –",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "noValue": "–",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "재방문율"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "전환율"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "연동"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "✅",
+                        "index": 0
+                      },
+                      "0": {
+                        "text": "❌",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
         "y": 127
       },
       "id": 300,
-      "panels": [],
-      "title": "🟣 [$service] 제품 지표 (PostHog)",
-      "type": "row",
-      "repeat": "service",
-      "repeatDirection": "v"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "주간 활성 유저",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "blue"
-          },
-          "mappings": [],
-          "noValue": "N/A",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 128
-      },
-      "id": 301,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
         },
-        "textMode": "auto"
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "연동",
+            "desc": true
+          }
+        ]
       },
       "targets": [
         {
@@ -2624,317 +2680,118 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_active_users{service=\"$service\",period=\"7d\"}",
+          "expr": "max by(service)(product_app_connected)",
+          "format": "table",
+          "instant": true,
           "refId": "A"
-        }
-      ],
-      "title": "WAU (7일)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "일간 활성 유저",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "green"
-          },
-          "mappings": [],
-          "noValue": "N/A",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 128
-      },
-      "id": 302,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_active_users{service=\"$service\",period=\"1d\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "DAU (오늘)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "페이지뷰 7일",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "purple"
-          },
-          "mappings": [],
-          "noValue": "N/A",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "purple",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
+          "expr": "max by(service)(product_active_users{period=\"7d\"})",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 128
-      },
-      "id": 303,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_page_views{service=\"$service\",period=\"7d\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "페이지뷰 (7일)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "이전 7일 활성 중 최근 7일 미방문",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "orange"
-          },
-          "mappings": [],
-          "noValue": "N/A",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "orange",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
+          "expr": "max by(service)(product_active_users{period=\"1d\"})",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 134
-      },
-      "id": 304,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_churned_users{service=\"$service\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "이탈 유저 (7일)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "retained ÷ 이전 7일 활성. 이탈율=100−이값",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "green"
-          },
-          "mappings": [],
-          "noValue": "N/A",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "percent"
+          "expr": "max by(service)(product_page_views{period=\"7d\"})",
+          "format": "table",
+          "instant": true,
+          "refId": "D"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 134
-      },
-      "id": 305,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_retention_rate{service=\"$service\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "재방문율 (7일)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "전환유저÷시작유저. virtue: 판정시도→저장",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
-          },
-          "mappings": [],
-          "noValue": "N/A",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              }
-            ]
-          },
-          "unit": "percent"
+          "expr": "max by(service)(product_churned_users)",
+          "format": "table",
+          "instant": true,
+          "refId": "E"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 134
-      },
-      "id": 306,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_conversion_rate{service=\"$service\"}",
-          "refId": "A"
+          "expr": "max by(service)(product_retention_rate)",
+          "format": "table",
+          "instant": true,
+          "refId": "F"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by(service)(product_conversion_rate)",
+          "format": "table",
+          "instant": true,
+          "refId": "G"
         }
       ],
-      "title": "전환율 (30일)",
-      "type": "stat"
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "service",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time": true
+            },
+            "renameByName": {
+              "service": "앱",
+              "Value #A": "연동",
+              "Value #B": "WAU(7d)",
+              "Value #C": "DAU",
+              "Value #D": "페이지뷰(7d)",
+              "Value #E": "이탈(7d)",
+              "Value #F": "재방문율",
+              "Value #G": "전환율"
+            },
+            "indexByName": {
+              "service": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4,
+              "Value #E": 5,
+              "Value #F": 6,
+              "Value #G": 7
+            }
+          }
+        }
+      ],
+      "title": "🟣 앱별 제품 지표 비교 (PostHog)",
+      "type": "table"
     }
   ],
   "refresh": "",
@@ -2948,49 +2805,6 @@
   ],
   "templating": {
     "list": [
-      {
-        "name": "service",
-        "type": "custom",
-        "label": "앱 (PostHog)",
-        "description": "PostHog 제품 지표 앱 선택",
-        "query": "virtue,blog,afzma",
-        "multi": true,
-        "includeAll": true,
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "selected": false,
-            "text": "virtue",
-            "value": "virtue"
-          },
-          {
-            "selected": false,
-            "text": "blog",
-            "value": "blog"
-          },
-          {
-            "selected": false,
-            "text": "afzma",
-            "value": "afzma"
-          }
-        ],
-        "hide": 0,
-        "skipUrlSync": false
-      },
       {
         "current": {},
         "hide": 0,
