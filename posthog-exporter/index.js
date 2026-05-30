@@ -91,6 +91,27 @@ const retentionRate = new client.Gauge({
   help: '주간 재방문율 % (retained / 이전 7일 활성 × 100). 이탈율 = 100 − 이 값',
   labelNames: ['service'],
 });
+// --- 프로덕트 헬스 (L2) ---
+const webVitalsLcp = new client.Gauge({
+  name: 'product_web_vitals_lcp_ms',
+  help: 'LCP p75 (ms, PostHog $web_vitals 30일). Google 기준: <2500 양호, >4000 불량',
+  labelNames: ['service'],
+});
+const webVitalsInp = new client.Gauge({
+  name: 'product_web_vitals_inp_ms',
+  help: 'INP p75 (ms, FID 후속 지표). Google 기준: <200 양호, >500 불량',
+  labelNames: ['service'],
+});
+const productErrors = new client.Gauge({
+  name: 'product_errors',
+  help: '프론트 에러 수 ($exception 7일)',
+  labelNames: ['service'],
+});
+const productSessions = new client.Gauge({
+  name: 'product_sessions',
+  help: '세션 수 (7일 uniq $session_id). 서비스 정상 여부 지표',
+  labelNames: ['service'],
+});
 register.registerMetric(appConnected);
 register.registerMetric(activeUsers);
 register.registerMetric(pageViews);
@@ -99,6 +120,10 @@ register.registerMetric(conversions);
 register.registerMetric(conversionRate);
 register.registerMetric(retainedUsers);
 register.registerMetric(retentionRate);
+register.registerMetric(webVitalsLcp);
+register.registerMetric(webVitalsInp);
+register.registerMetric(productErrors);
+register.registerMetric(productSessions);
 
 // ============================================
 // PostHog Query API (HogQL)
@@ -143,6 +168,20 @@ async function fetchApp(name, projectId) {
   retainedUsers.set(svc, ret);
   churnedUsers.set(svc, Math.max(0, prev - ret));
   retentionRate.set(svc, prev > 0 ? (ret / prev) * 100 : 0);
+
+  // 프로덕트 헬스: web vitals(p75, 30일) · 프론트 에러 · 세션
+  const lcp = await hogql(projectId,
+    "SELECT round(quantile(0.75)(toFloat(properties['$web_vitals_LCP_value'])), 0) FROM events WHERE event = '$web_vitals' AND timestamp > now() - interval 30 day");
+  const inp = await hogql(projectId,
+    "SELECT round(quantile(0.75)(toFloat(properties['$web_vitals_INP_value'])), 0) FROM events WHERE event = '$web_vitals' AND timestamp > now() - interval 30 day");
+  const errs = await hogql(projectId,
+    "SELECT count() FROM events WHERE event = '$exception' AND timestamp > now() - interval 7 day");
+  const sess = await hogql(projectId,
+    "SELECT uniq(properties['$session_id']) FROM events WHERE timestamp > now() - interval 7 day");
+  webVitalsLcp.set(svc, Number(lcp?.[0]?.[0]) || 0);
+  webVitalsInp.set(svc, Number(inp?.[0]?.[0]) || 0);
+  productErrors.set(svc, Number(errs?.[0]?.[0]) || 0);
+  productSessions.set(svc, Number(sess?.[0]?.[0]) || 0);
 
   // 전환 퍼널 (앱별 정의가 있을 때만). 30일 distinct person 기준
   const f = funnels[name];
