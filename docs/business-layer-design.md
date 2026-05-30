@@ -139,3 +139,7 @@ PostHog ──(posthog-exporter: 얇은 브리지)──> Prometheus ─┼─�
   이탈/CTR(ga4 business_*) 패널 제거. 부작용: product mock(http_request/web_vitals/
   frontend_error) 제거로 layer-product/app/main의 mock 패널은 No data(의도된 placeholder,
   실제 계측 시 채울 자리). 클릭율은 명시적 CTA 아님 → 트랙 B에서 CTA 이벤트로 정밀화 예정.
+- 2026-05-30: retention 메트릭 추가(트랙 A 2차). product_retention_rate(재방문율 %)·
+  product_retained_users. 이탈·재방문을 동일 코호트(이전 7일 활성 분모)에서 일관 산출
+  (이탈 = 이전활성 − 재방문, 재방문율 = 재방문/이전활성). 대시보드 각 앱 6 stat
+  (WAU/DAU/페이지뷰 · 이탈/재방문율/클릭율).

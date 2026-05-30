@@ -2756,7 +2756,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "이전 7일 활성 중 최근 7일 미방문. PostHog person 코호트 기반(추정 아님)",
+      "description": "이전 7일 활성 중 최근 7일 미방문 (코호트 기반)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2780,7 +2780,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 134
       },
@@ -2817,7 +2817,68 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=페이지뷰당 다중 클릭). 진짜 CTA CTR은 트랙 B(CTA 이벤트) 후",
+      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값. PostHog person 코호트",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "mappings": [],
+          "noValue": "N/A",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 134
+      },
+      "id": 305,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_retention_rate{service=\"virtue\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "재방문율 (7일)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=다중클릭). CTA CTR은 트랙 B 후",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2841,11 +2902,11 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 134
       },
-      "id": 305,
+      "id": 306,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -3074,7 +3135,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "이전 7일 활성 중 최근 7일 미방문. PostHog person 코호트 기반(추정 아님)",
+      "description": "이전 7일 활성 중 최근 7일 미방문 (코호트 기반)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3098,7 +3159,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 147
       },
@@ -3135,7 +3196,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=페이지뷰당 다중 클릭). 진짜 CTA CTR은 트랙 B(CTA 이벤트) 후",
+      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값. PostHog person 코호트",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3159,11 +3220,72 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 8,
         "y": 147
       },
       "id": 315,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_retention_rate{service=\"blog\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "재방문율 (7일)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=다중클릭). CTA CTR은 트랙 B 후",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [],
+          "noValue": "N/A",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 147
+      },
+      "id": 316,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -3392,7 +3514,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "이전 7일 활성 중 최근 7일 미방문. PostHog person 코호트 기반(추정 아님)",
+      "description": "이전 7일 활성 중 최근 7일 미방문 (코호트 기반)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3416,7 +3538,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 160
       },
@@ -3453,7 +3575,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=페이지뷰당 다중 클릭). 진짜 CTA CTR은 트랙 B(CTA 이벤트) 후",
+      "description": "retained ÷ 이전 7일 활성 × 100. 이탈율 = 100 − 이 값. PostHog person 코호트",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3477,11 +3599,72 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 8,
         "y": 160
       },
       "id": 325,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "product_retention_rate{service=\"afzma\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "재방문율 (7일)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "autocapture 전체 클릭 ÷ 페이지뷰. 명시적 CTA 아님(>100%=다중클릭). CTA CTR은 트랙 B 후",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [],
+          "noValue": "N/A",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 160
+      },
+      "id": 326,
       "options": {
         "colorMode": "value",
         "graphMode": "none",

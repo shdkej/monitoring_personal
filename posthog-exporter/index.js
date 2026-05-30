@@ -63,13 +63,23 @@ const productClicks = new client.Gauge({
   help: 'autocapture 클릭 수 (CTR 분자). 명시적 CTA 아닌 전체 인터랙션 클릭',
   labelNames: ['service', 'period'],
 });
+const retainedUsers = new client.Gauge({
+  name: 'product_retained_users',
+  help: '재방문 유저 (이전 7일 활성 중 최근 7일도 $pageview 발생)',
+  labelNames: ['service'],
+});
+const retentionRate = new client.Gauge({
+  name: 'product_retention_rate',
+  help: '주간 재방문율 % (retained / 이전 7일 활성 × 100). 이탈율 = 100 − 이 값',
+  labelNames: ['service'],
+});
 register.registerMetric(appConnected);
 register.registerMetric(activeUsers);
 register.registerMetric(pageViews);
 register.registerMetric(churnedUsers);
 register.registerMetric(productClicks);
-
-// TODO(트랙 A 2차): product_retention (재방문율) 추가
+register.registerMetric(retainedUsers);
+register.registerMetric(retentionRate);
 
 // ============================================
 // PostHog Query API (HogQL)
@@ -99,18 +109,26 @@ async function fetchApp(name, projectId) {
     "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day");
   const pv = await hogql(projectId,
     "SELECT count() FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day");
-  // 이탈: 이전 7일(7~14d) 활성 중 최근 7일(0~7d) 미방문 person 수
-  const churned = await hogql(projectId,
-    "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day AND timestamp <= now() - interval 7 day AND person_id NOT IN (SELECT DISTINCT person_id FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day)");
+  // 리텐션 코호트: 이전 7일(7~14d) 활성 = 분모, 그중 최근 7일(0~7d)도 활성 = retained
+  const prevActive = await hogql(projectId,
+    "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day AND timestamp <= now() - interval 7 day");
+  const retained = await hogql(projectId,
+    "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day AND timestamp <= now() - interval 7 day AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day)");
   // CTR 분자: autocapture 클릭 수 (7일)
   const clicks = await hogql(projectId,
     "SELECT count() FROM events WHERE event = '$autocapture' AND timestamp > now() - interval 7 day");
 
+  const prev = Number(prevActive?.[0]?.[0]) || 0;
+  const ret = Number(retained?.[0]?.[0]) || 0;
+
   activeUsers.set({ ...svc, period: '1d' }, Number(dau?.[0]?.[0]) || 0);
   activeUsers.set({ ...svc, period: '7d' }, Number(wau?.[0]?.[0]) || 0);
   pageViews.set({ ...svc, period: '7d' }, Number(pv?.[0]?.[0]) || 0);
-  churnedUsers.set(svc, Number(churned?.[0]?.[0]) || 0);
   productClicks.set({ ...svc, period: '7d' }, Number(clicks?.[0]?.[0]) || 0);
+  // 이탈·재방문은 같은 코호트에서 일관 산출 (이탈 = 이전활성 − 재방문)
+  retainedUsers.set(svc, ret);
+  churnedUsers.set(svc, Math.max(0, prev - ret));
+  retentionRate.set(svc, prev > 0 ? (ret / prev) * 100 : 0);
 }
 
 async function fetchAll() {
