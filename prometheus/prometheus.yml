@@ -61,3 +61,12 @@ scrape_configs:
         labels:
           instance: "ga4-exporter"
           app: "business-metrics"
+
+  # Job 5: PostHog Exporter - 제품 지표 수집 (PostHog는 5분마다 폴링)
+  - job_name: "posthog-exporter"
+    scrape_interval: 300s
+    static_configs:
+      - targets: ["posthog-exporter:9101"]
+        labels:
+          instance: "posthog-exporter"
+          app: "product-metrics"

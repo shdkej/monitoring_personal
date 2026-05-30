@@ -1,0 +1,75 @@
+# posthog-exporter Deployment
+# 커스텀 이미지 없이 node:20-alpine에서 런타임에 monitoring_personal을 clone → 실행
+# (virtue-rebirth와 동일 패턴 — 이미지 레지스트리 불필요)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posthog-exporter
+  labels:
+    app: posthog-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: posthog-exporter
+  template:
+    metadata:
+      labels:
+        app: posthog-exporter
+    spec:
+      containers:
+        - name: exporter
+          image: node:20-alpine
+          imagePullPolicy: IfNotPresent
+          workingDir: /tmp
+          env:
+            - name: POSTHOG_HOST
+              value: https://us.posthog.com
+            - name: POSTHOG_PROJECTS
+              value: "virtue:424014"
+            - name: PRODUCT_APPS
+              value: "virtue,blog,afzma"
+            # Personal API Key는 민감정보 → Secret 참조 (repo가 public이므로 평문 금지)
+            # 생성: kubectl -n monitoring create secret generic posthog-credentials \
+            #         --from-literal=access-token='phx_...'
+            - name: POSTHOG_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: posthog-credentials
+                  key: access-token
+          ports:
+            - containerPort: 9101
+              name: metrics
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              apk add --no-cache git
+              rm -rf /app
+              git clone --depth=1 --branch master https://github.com/shdkej/monitoring_personal.git /app
+              cd /app/posthog-exporter
+              npm install --omit=dev
+              node index.js
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 18
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 4
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

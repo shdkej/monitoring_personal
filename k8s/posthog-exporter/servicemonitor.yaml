@@ -1,0 +1,16 @@
+# Prometheus Operator가 자동 감지하도록 release 라벨을 kube-prometheus-stack으로
+# (YACE와 동일 — Prometheus serviceMonitorSelector가 이 라벨을 매칭)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: posthog-exporter
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: posthog-exporter
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 5m

@@ -153,6 +153,23 @@ services:
         aliases:
           - ga4-exporter
 
+  # PostHog Exporter: 제품 지표 (PostHog Cloud US Query API → Prometheus 브리지)
+  posthog-exporter:
+    build: ./posthog-exporter
+    container_name: posthog-exporter
+    restart: unless-stopped
+    environment:
+      - POSTHOG_ACCESS_TOKEN=${POSTHOG_ACCESS_TOKEN}
+      - POSTHOG_HOST=${POSTHOG_HOST:-https://us.posthog.com}
+      - POSTHOG_PROJECTS=${POSTHOG_PROJECTS:-virtue:424014}
+      - PRODUCT_APPS=${PRODUCT_APPS:-virtue,blog,afzma}
+    ports:
+      - "9101:9101"
+    networks:
+      monitoring:
+        aliases:
+          - posthog-exporter
+
 # 네트워크 정의: 서비스 간 통신을 위한 격리된 네트워크
 networks:
   monitoring:

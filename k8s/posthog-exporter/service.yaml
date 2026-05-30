@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: posthog-exporter
+  labels:
+    app: posthog-exporter
+spec:
+  selector:
+    app: posthog-exporter
+  ports:
+    - name: metrics
+      port: 9101
+      targetPort: metrics
