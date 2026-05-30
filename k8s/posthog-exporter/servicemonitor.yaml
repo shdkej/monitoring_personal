@@ -14,3 +14,6 @@ spec:
     - port: metrics
       path: /metrics
       interval: 5m
+      # exporter가 노출한 service=virtue/blog/afzma 레이블을 target 레이블(service=posthog-exporter)이
+      # 덮어쓰지 않도록 메트릭 레이블 우선. (없으면 대시보드 service="virtue" 쿼리가 No data)
+      honorLabels: true
