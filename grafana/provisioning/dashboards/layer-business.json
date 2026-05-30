@@ -2224,6 +2224,428 @@
       ],
       "title": "인기 페이지 TOP",
       "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 91 },
+      "id": 200,
+      "panels": [],
+      "title": "[blog] 🎯 퍼널 & 캠페인",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "이벤트별 발생 수 (page_view → scroll → click 순으로 참여 퍼널 drop-off 확인). 30일",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "continuous-GrYlRd" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 92 },
+      "id": 201,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
+          "metrics": ["eventCount"],
+          "dimensions": ["eventName"],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "참여 퍼널 (이벤트별)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "UTM 캠페인별 사용자·세션·참여세션(전환 프록시). 30일",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "text", "value": null }]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 92 },
+      "id": 202,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "sessions" }]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "110967461",
+          "webPropertyId": "properties/252603434",
+          "profileId": "252603434",
+          "metrics": ["activeUsers", "sessions", "engagedSessions"],
+          "dimensions": ["sessionCampaignName"],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "캠페인별 전환 (UTM)",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 100 },
+      "id": 203,
+      "panels": [],
+      "title": "[blog] 💰 이탈 · CTR (계산지표 · exporter)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "이탈 유저(추정). 추정식 = 이전MAU + 30일 신규 − 현재MAU. 코호트 차이 기반이라 정확값이 아닌 추정치",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 200 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 101 },
+      "id": 204,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "business_churned_users_total{service=\"blog\"}",
+          "legendFormat": "이탈(추정)",
+          "refId": "A"
+        }
+      ],
+      "title": "이탈 유저 (30일 추정)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "CTA 클릭율 = CTA 클릭수 ÷ 페이지뷰 × 100 (당일 기준)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "green", "value": 3 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 101 },
+      "id": 205,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "business_cta_clicks_total{service=\"blog\"} / business_page_views_total{service=\"blog\"} * 100",
+          "legendFormat": "CTR",
+          "refId": "A"
+        }
+      ],
+      "title": "CTR (CTA 클릭율)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 109 },
+      "id": 210,
+      "panels": [],
+      "title": "[AFZMA] 🎯 퍼널 & 캠페인",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "이벤트별 발생 수 (page_view → scroll → click 순으로 참여 퍼널 drop-off 확인). 30일",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "continuous-GrYlRd" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 110 },
+      "id": 211,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": ["eventCount"],
+          "dimensions": ["eventName"],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "참여 퍼널 (이벤트별)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "blackcowmoo-googleanalytics-datasource",
+        "uid": "${DS_GA4}"
+      },
+      "description": "UTM 캠페인별 사용자·세션·참여세션(전환 프록시). 30일",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "text", "value": null }]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 110 },
+      "id": 212,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "sessions" }]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "${DS_GA4}"
+          },
+          "accountId": "383859191",
+          "webPropertyId": "properties/523848883",
+          "profileId": "523848883",
+          "metrics": ["activeUsers", "sessions", "engagedSessions"],
+          "dimensions": ["sessionCampaignName"],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "A"
+        }
+      ],
+      "title": "캠페인별 전환 (UTM)",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 118 },
+      "id": 213,
+      "panels": [],
+      "title": "[AFZMA] 💰 이탈 · CTR (계산지표 · exporter)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "이탈 유저(추정). 추정식 = 이전MAU + 30일 신규 − 현재MAU. 코호트 차이 기반이라 정확값이 아닌 추정치",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 200 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 119 },
+      "id": 214,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "business_churned_users_total{service=\"AFZMA\"}",
+          "legendFormat": "이탈(추정)",
+          "refId": "A"
+        }
+      ],
+      "title": "이탈 유저 (30일 추정)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "CTA 클릭율 = CTA 클릭수 ÷ 페이지뷰 × 100 (당일 기준)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "green", "value": 3 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 119 },
+      "id": 215,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "business_cta_clicks_total{service=\"AFZMA\"} / business_page_views_total{service=\"AFZMA\"} * 100",
+          "legendFormat": "CTR",
+          "refId": "A"
+        }
+      ],
+      "title": "CTR (CTA 클릭율)",
+      "type": "stat"
     }
   ],
   "refresh": "",
