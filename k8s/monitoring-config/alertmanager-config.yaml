@@ -34,7 +34,7 @@ spec:
             {{ if eq .CommonLabels.severity "critical" }}<!channel> *긴급 알림*{{ end }}
             *상태:* {{ .Status | toUpper }}
             *심각도:* {{ .CommonLabels.severity }}
-            *인스턴스:* {{ .CommonLabels.instance }}
+            *호스트:* {{ if .CommonLabels.nodename }}{{ .CommonLabels.nodename }}{{ else }}{{ .CommonLabels.instance }}{{ end }}
             *설명:* {{ .CommonAnnotations.description }}
             {{ if .CommonAnnotations.dashboard_url }}*대시보드:* <{{ .CommonAnnotations.dashboard_url }}|Grafana에서 확인>{{ end }}
             {{ range .Alerts }}*시작:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
