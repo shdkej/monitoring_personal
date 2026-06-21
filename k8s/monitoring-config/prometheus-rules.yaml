@@ -56,26 +56,6 @@ spec:
             description: '{{ $labels.nodename }}의 메모리 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=memory"
 
-        - alert: HighDiskUsage
-          expr: ((1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100) * on(instance) group_left(nodename) node_uname_info > 80
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: "높은 디스크 사용률 감지"
-            description: '{{ $labels.nodename }}의 {{ $labels.mountpoint }} 디스크 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=disk"
-
-        - alert: CriticalDiskUsage
-          expr: ((1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100) * on(instance) group_left(nodename) node_uname_info > 95
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: "위험 수준의 디스크 사용률"
-            description: '{{ $labels.nodename }}의 {{ $labels.mountpoint }} 디스크가 거의 가득 찼습니다. (현재: {{ $value | printf "%.1f" }}%)'
-            dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=disk"
-
     # 서비스 상태 알림
     - name: service_alerts
       rules:
