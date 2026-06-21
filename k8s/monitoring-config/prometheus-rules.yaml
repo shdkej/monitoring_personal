@@ -9,6 +9,7 @@ metadata:
   name: monitoring-personal-alerts
   labels:
     app.kubernetes.io/part-of: monitoring-personal
+    release: kube-prometheus-stack
     rule_source: monitoring-personal
 spec:
   groups:
