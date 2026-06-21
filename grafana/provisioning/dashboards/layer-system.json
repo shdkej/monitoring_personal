@@ -97,8 +97,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "100 - (avg by (instance)(irate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$instance\"}[5m])) * 100)",
-          "legendFormat": "{{instance}}",
+          "expr": "(100 - (avg by (instance)(irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}}",
           "range": true,
           "refId": "A"
         }
@@ -168,8 +168,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"})) * 100",
-          "legendFormat": "{{instance}}",
+          "expr": "((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}}",
           "range": true,
           "refId": "A"
         }
@@ -239,8 +239,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\", instance=~\"$instance\"} / node_filesystem_size_bytes{instance=~\"$instance\"})) * 100",
-          "legendFormat": "{{instance}} {{mountpoint}}",
+          "expr": "((1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"})) * 100) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{mountpoint}}",
           "range": true,
           "refId": "A"
         }
@@ -302,8 +302,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "time() - node_boot_time_seconds{instance=~\"$instance\"}",
-          "legendFormat": "{{instance}}",
+          "expr": "(time() - node_boot_time_seconds) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}}",
           "range": true,
           "refId": "A"
         }
@@ -420,8 +420,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "100 - (avg by (instance)(irate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$instance\"}[5m])) * 100)",
-          "legendFormat": "{{instance}}",
+          "expr": "(100 - (avg by (instance)(irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}}",
           "range": true,
           "refId": "A"
         }
@@ -515,8 +515,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "node_load1{instance=~\"$instance\"}",
-          "legendFormat": "{{instance}} Load 1m",
+          "expr": "(node_load1) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} Load 1m",
           "range": true,
           "refId": "A"
         },
@@ -526,8 +526,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "node_load5{instance=~\"$instance\"}",
-          "legendFormat": "{{instance}} Load 5m",
+          "expr": "(node_load5) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} Load 5m",
           "range": true,
           "refId": "B"
         },
@@ -537,8 +537,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "node_load15{instance=~\"$instance\"}",
-          "legendFormat": "{{instance}} Load 15m",
+          "expr": "(node_load15) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} Load 15m",
           "range": true,
           "refId": "C"
         }
@@ -645,8 +645,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "node_memory_MemTotal_bytes{instance=~\"$instance\"} - node_memory_MemFree_bytes{instance=~\"$instance\"} - node_memory_Buffers_bytes{instance=~\"$instance\"} - node_memory_Cached_bytes{instance=~\"$instance\"}",
-          "legendFormat": "{{instance}} Used",
+          "expr": "(node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} Used",
           "range": true,
           "refId": "A"
         },
@@ -656,8 +656,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "node_memory_Buffers_bytes{instance=~\"$instance\"}",
-          "legendFormat": "{{instance}} Buffers",
+          "expr": "(node_memory_Buffers_bytes) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} Buffers",
           "range": true,
           "refId": "B"
         },
@@ -667,8 +667,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "node_memory_Cached_bytes{instance=~\"$instance\"}",
-          "legendFormat": "{{instance}} Cached",
+          "expr": "(node_memory_Cached_bytes) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} Cached",
           "range": true,
           "refId": "C"
         },
@@ -678,8 +678,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "node_memory_MemFree_bytes{instance=~\"$instance\"}",
-          "legendFormat": "{{instance}} Free",
+          "expr": "(node_memory_MemFree_bytes) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} Free",
           "range": true,
           "refId": "D"
         }
@@ -783,8 +783,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "((node_memory_SwapTotal_bytes{instance=~\"$instance\"} - node_memory_SwapFree_bytes{instance=~\"$instance\"}) / node_memory_SwapTotal_bytes{instance=~\"$instance\"}) * 100",
-          "legendFormat": "{{instance}} Swap",
+          "expr": "(((node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes) / node_memory_SwapTotal_bytes) * 100) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} Swap",
           "range": true,
           "refId": "A"
         }
@@ -904,8 +904,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_network_receive_bytes_total{device!~\"lo|docker.*|br.*\", instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}} 수신",
+          "expr": "(irate(node_network_receive_bytes_total{device!~\"lo|docker.*|br.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}} 수신",
           "range": true,
           "refId": "A"
         },
@@ -915,8 +915,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_network_transmit_bytes_total{device!~\"lo|docker.*|br.*\", instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}} 송신",
+          "expr": "(irate(node_network_transmit_bytes_total{device!~\"lo|docker.*|br.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}} 송신",
           "range": true,
           "refId": "B"
         }
@@ -1010,8 +1010,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_network_receive_errs_total{device!~\"lo|docker.*|br.*\", instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}} RX 에러",
+          "expr": "(irate(node_network_receive_errs_total{device!~\"lo|docker.*|br.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}} RX 에러",
           "range": true,
           "refId": "A"
         },
@@ -1021,8 +1021,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_network_transmit_errs_total{device!~\"lo|docker.*|br.*\", instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}} TX 에러",
+          "expr": "(irate(node_network_transmit_errs_total{device!~\"lo|docker.*|br.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}} TX 에러",
           "range": true,
           "refId": "B"
         },
@@ -1032,8 +1032,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_network_receive_drop_total{device!~\"lo|docker.*|br.*\", instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}} RX 드롭",
+          "expr": "(irate(node_network_receive_drop_total{device!~\"lo|docker.*|br.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}} RX 드롭",
           "range": true,
           "refId": "C"
         },
@@ -1043,8 +1043,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_network_transmit_drop_total{device!~\"lo|docker.*|br.*\", instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}} TX 드롭",
+          "expr": "(irate(node_network_transmit_drop_total{device!~\"lo|docker.*|br.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}} TX 드롭",
           "range": true,
           "refId": "D"
         }
@@ -1129,8 +1129,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\", instance=~\"$instance\"} / node_filesystem_size_bytes{instance=~\"$instance\"})) * 100",
-          "legendFormat": "{{instance}} {{mountpoint}}",
+          "expr": "((1 - (node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"})) * 100) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{mountpoint}}",
           "range": true,
           "refId": "A"
         }
@@ -1237,8 +1237,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_disk_read_bytes_total{instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}} 읽기",
+          "expr": "(irate(node_disk_read_bytes_total[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}} 읽기",
           "range": true,
           "refId": "A"
         },
@@ -1248,8 +1248,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_disk_written_bytes_total{instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}} 쓰기",
+          "expr": "(irate(node_disk_written_bytes_total[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}} 쓰기",
           "range": true,
           "refId": "B"
         }
@@ -1343,8 +1343,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "irate(node_disk_reads_completed_total{instance=~\"$instance\"}[5m]) + irate(node_disk_writes_completed_total{instance=~\"$instance\"}[5m])",
-          "legendFormat": "{{instance}} {{device}}",
+          "expr": "(irate(node_disk_reads_completed_total[5m]) + irate(node_disk_writes_completed_total[5m])) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}} {{device}}",
           "range": true,
           "refId": "A"
         }
@@ -1362,7 +1362,7 @@
       },
       "id": 19,
       "panels": [],
-      "title": "인스턴스 헬스",
+      "title": "노드 헬스",
       "type": "row"
     },
     {
@@ -1370,7 +1370,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Node Exporter 인스턴스 상태 (1=정상, 0=다운)",
+      "description": "Node Exporter 노드 상태 (1=정상, 0=다운)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1438,13 +1438,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "up{job=\"node-exporter\", instance=~\"$instance\"}",
-          "legendFormat": "{{instance}}",
+          "expr": "(up{job=\"node-exporter\"}) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+          "legendFormat": "{{nodename}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "인스턴스 헬스체크",
+      "title": "노드 헬스체크",
       "type": "stat"
     },
     {
@@ -1452,7 +1452,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "모니터링 중인 Node Exporter 인스턴스 목록",
+      "description": "모니터링 중인 Node Exporter 노드 목록",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1540,7 +1540,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "up{job=\"node-exporter\", instance=~\"$instance\"}",
+          "expr": "(up{job=\"node-exporter\"}) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1548,7 +1548,7 @@
           "refId": "A"
         }
       ],
-      "title": "인스턴스 목록",
+      "title": "노드 목록",
       "transformations": [
         {
           "id": "organize",
@@ -1556,18 +1556,20 @@
             "excludeByName": {
               "Time": true,
               "__name__": true,
-              "job": true
+              "job": true,
+              "instance": true
             },
             "indexByName": {
               "Time": 0,
               "__name__": 1,
-              "instance": 2,
-              "job": 3,
-              "Value": 4
+              "nodename": 2,
+              "instance": 3,
+              "job": 4,
+              "Value": 5
             },
             "renameByName": {
               "Value": "상태",
-              "instance": "인스턴스"
+              "nodename": "노드"
             }
           }
         }
@@ -1588,22 +1590,26 @@
       {
         "current": {
           "selected": true,
-          "text": ["All"],
-          "value": ["$__all"]
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(up{job=\"node-exporter\"}, instance)",
+        "definition": "label_values(node_uname_info, nodename)",
         "hide": 0,
         "includeAll": true,
-        "label": "인스턴스",
+        "label": "노드",
         "multi": true,
-        "name": "instance",
+        "name": "node",
         "options": [],
         "query": {
-          "query": "label_values(up{job=\"node-exporter\"}, instance)",
+          "query": "label_values(node_uname_info, nodename)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

@@ -16,63 +16,63 @@ spec:
     - name: system_alerts
       rules:
         - alert: HighCpuUsage
-          expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 70
+          expr: (100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) * on(instance) group_left(nodename) node_uname_info > 70
           for: 5m
           labels:
             severity: warning
           annotations:
             summary: "높은 CPU 사용률 감지"
-            description: '{{ $labels.instance }}의 CPU 사용률이 5분 이상 70%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            description: '{{ $labels.nodename }}의 CPU 사용률이 5분 이상 70%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=cpu"
 
         - alert: CriticalCpuUsage
-          expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+          expr: (100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) * on(instance) group_left(nodename) node_uname_info > 95
           for: 2m
           labels:
             severity: critical
           annotations:
             summary: "위험 수준의 CPU 사용률"
-            description: '{{ $labels.instance }}의 CPU 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            description: '{{ $labels.nodename }}의 CPU 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=cpu"
 
         - alert: HighMemoryUsage
-          expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+          expr: ((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100) * on(instance) group_left(nodename) node_uname_info > 80
           for: 5m
           labels:
             severity: warning
           annotations:
             summary: "높은 메모리 사용률 감지"
-            description: '{{ $labels.instance }}의 메모리 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            description: '{{ $labels.nodename }}의 메모리 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=memory"
 
         - alert: CriticalMemoryUsage
-          expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+          expr: ((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100) * on(instance) group_left(nodename) node_uname_info > 95
           for: 2m
           labels:
             severity: critical
           annotations:
             summary: "위험 수준의 메모리 사용률"
-            description: '{{ $labels.instance }}의 메모리 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            description: '{{ $labels.nodename }}의 메모리 사용률이 95%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=memory"
 
         - alert: HighDiskUsage
-          expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 80
+          expr: ((1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100) * on(instance) group_left(nodename) node_uname_info > 80
           for: 5m
           labels:
             severity: warning
           annotations:
             summary: "높은 디스크 사용률 감지"
-            description: '{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            description: '{{ $labels.nodename }}의 {{ $labels.mountpoint }} 디스크 사용률이 80%를 초과했습니다. (현재: {{ $value | printf "%.1f" }}%)'
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=disk"
 
         - alert: CriticalDiskUsage
-          expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 95
+          expr: ((1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100) * on(instance) group_left(nodename) node_uname_info > 95
           for: 2m
           labels:
             severity: critical
           annotations:
             summary: "위험 수준의 디스크 사용률"
-            description: '{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크가 거의 가득 찼습니다. (현재: {{ $value | printf "%.1f" }}%)'
+            description: '{{ $labels.nodename }}의 {{ $labels.mountpoint }} 디스크가 거의 가득 찼습니다. (현재: {{ $value | printf "%.1f" }}%)'
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=disk"
 
     # 서비스 상태 알림
@@ -125,21 +125,21 @@ spec:
     - name: network_alerts
       rules:
         - alert: HighNetworkReceive
-          expr: rate(node_network_receive_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) > 100000000
+          expr: rate(node_network_receive_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) * on(instance) group_left(nodename) node_uname_info > 100000000
           for: 5m
           labels:
             severity: warning
           annotations:
             summary: "높은 네트워크 수신 트래픽"
-            description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스에서 높은 수신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
+            description: "{{ $labels.nodename }}의 {{ $labels.device }} 인터페이스에서 높은 수신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=network"
 
         - alert: HighNetworkTransmit
-          expr: rate(node_network_transmit_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) > 100000000
+          expr: rate(node_network_transmit_bytes_total{device!~"lo|veth.*|docker.*|br-.*"}[5m]) * on(instance) group_left(nodename) node_uname_info > 100000000
           for: 5m
           labels:
             severity: warning
           annotations:
             summary: "높은 네트워크 송신 트래픽"
-            description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스에서 높은 송신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
+            description: "{{ $labels.nodename }}의 {{ $labels.device }} 인터페이스에서 높은 송신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=network"
