@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: infinity-dispatcher-exporter
+  labels:
+    app: infinity-dispatcher-exporter
+spec:
+  selector:
+    app: infinity-dispatcher-exporter
+  ports:
+    - name: metrics
+      port: 9102
+      targetPort: metrics

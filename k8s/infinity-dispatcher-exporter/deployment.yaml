@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: infinity-dispatcher-exporter
+  labels:
+    app: infinity-dispatcher-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: infinity-dispatcher-exporter
+  template:
+    metadata:
+      labels:
+        app: infinity-dispatcher-exporter
+    spec:
+      containers:
+        - name: exporter
+          image: python:3.12-alpine
+          imagePullPolicy: IfNotPresent
+          workingDir: /tmp
+          ports:
+            - containerPort: 9102
+              name: metrics
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              apk add --no-cache git
+              git clone --depth=1 --branch master https://github.com/shdkej/monitoring_personal.git /app
+              exec python /app/dispatcher-exporter/exporter.py
+          env:
+            - name: DISPATCHER_SNAPSHOT_FILE
+              value: /data/snapshot/snapshot.json
+          volumeMounts:
+            - name: dispatcher-snapshot
+              mountPath: /data/snapshot
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 45
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: dispatcher-snapshot
+          configMap:
+            name: infinity-dispatcher-snapshot
+            optional: true
