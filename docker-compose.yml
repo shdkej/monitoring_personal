@@ -154,6 +154,22 @@ services:
         aliases:
           - posthog-exporter
 
+  dispatcher-exporter:
+    build: ./dispatcher-exporter
+    container_name: infinity-dispatcher-exporter
+    restart: unless-stopped
+    environment:
+      - DISPATCHER_RUNS_DIR=/data/runs
+    volumes:
+      - /home/ubuntu/.openclaw/state/infinity-dispatcher-runs:/data/runs:ro
+      - ../knowledge-lab/infinity:/data/infinity:ro
+    ports:
+      - "9102:9102"
+    networks:
+      monitoring:
+        aliases:
+          - dispatcher-exporter
+
 # 네트워크 정의: 서비스 간 통신을 위한 격리된 네트워크
 networks:
   monitoring:

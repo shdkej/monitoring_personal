@@ -61,3 +61,11 @@ scrape_configs:
         labels:
           instance: "posthog-exporter"
           app: "product-metrics"
+
+  # Job 5: Infinity dispatcher read-only observability
+  - job_name: "infinity-dispatcher-exporter"
+    static_configs:
+      - targets: ["dispatcher-exporter:9102"]
+        labels:
+          instance: "infinity-dispatcher-exporter"
+          app: "workflow-observability"
