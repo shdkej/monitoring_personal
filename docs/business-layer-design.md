@@ -10,7 +10,7 @@ CTA 클릭율/CTR, 퍼널 drop-off, 캠페인별 전환, 수익, CS 건수.
 기존 상태는 두 경로가 어정쩡하게 공존했다.
 - 비즈니스 대시보드(`layer-business.json`)는 GA4 플러그인을 직접 쿼리한다.
 - `ga4-exporter`(자작 Node.js 앱)는 GA4 API에서 `business_*` 메트릭을 계산해 Prometheus로
-  내보내지만, 로컬 docker-compose에만 있고 운영 k8s에는 배포되지 않았다. 대시보드도 이 메트릭을
+  내보내지만, 이전 로컬 구성에만 있었고 운영 k8s에는 배포되지 않았다. 대시보드도 이 메트릭을
   쓰지 않는다.
 
 여기에 PostHog를 도입한다.
@@ -94,7 +94,7 @@ PostHog ──(posthog-exporter: 얇은 브리지)──> Prometheus ─┼─�
 2. `posthog-exporter` PoC: PostHog Query API에서 KPI 1~2개를 메트릭으로 노출
 3. Grafana 비즈니스 레이어를 GA4(유입) + PostHog(제품) 두 출처로 재구성
 4. `posthog-exporter`를 운영 k8s(space 레포)에 배포, prometheus scrape 추가
-5. `ga4-exporter` 폐기 (디렉토리/compose/scrape 제거)
+5. `ga4-exporter` 폐기 (디렉토리/legacy 구성/scrape 제거)
 
 ## 7. 확정 사항 / 미결
 
