@@ -1585,7 +1585,7 @@
     ]
   },
   "timezone": "Asia/Seoul",
-  "title": "Layer 4 - 애플리케이션 모니터링",
+  "title": "운영 상세 — API·Lambda",
   "uid": "layer-app",
   "version": 1,
   "description": "⚠️ 템플릿 대시보드: 애플리케이션 계측(instrumentation) 후 실제 메트릭과 로그를 연동해야 합니다.\n\n이 대시보드는 다음을 모니터링합니다:\n- API 성능 (요청 수, 응답시간, 에러율)\n- Latency 분포 및 백분위수 (p50, p95, p99)\n- HTTP 상태코드별 에러 추이\n- Loki를 통한 실시간 로그 스트림\n- 컨테이너 리소스 사용량 (CPU, Memory)\n- AWS Lambda (호출 수, 실행시간, 에러율, 스로틀, 동시실행)"

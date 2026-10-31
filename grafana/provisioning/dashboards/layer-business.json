@@ -15,8 +15,8 @@
       }
     ]
   },
-  "description": "비즈니스 지표 모니터링 - GA4 플러그인 직접 연동 (테스트)",
-  "editable": true,
+  "description": "앱별 사업 성과. 매출/결제/광고비 원천과 앱별 북극성 정의가 연결되기 전까지는 N/A입니다.",
+  "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
@@ -24,2034 +24,606 @@
   "liveNow": false,
   "panels": [
     {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
       "id": 1,
-      "panels": [],
-      "title": "📊 GA4 유입 (blog+AFZMA 통합)",
-      "type": "row"
-    },
-    {
+      "type": "stat",
+      "title": "북극성 지표",
+      "description": "앱별 핵심 가치 이벤트와 단위 정의 필요",
       "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
+        "type": "prometheus",
+        "uid": "prometheus"
       },
-      "description": "앱별 활성 유저 (GA4, 30일)",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "business_north_star_value{service=\"$service\"}",
+          "range": true
+        }
+      ],
       "fieldConfig": {
         "defaults": {
+          "unit": "short",
+          "noValue": "N/A",
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {
-            "axisColorMode": "text",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
+              },
               {
-                "id": "displayName",
-                "value": "blog"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
+                "color": "yellow",
+                "value": 75
+              },
               {
-                "id": "displayName",
-                "value": "AFZMA"
+                "color": "red",
+                "value": 90
               }
             ]
           }
-        ]
+        },
+        "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 1
-      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "showPercentChange": false
+      }
+    },
+    {
       "id": 2,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+      "type": "stat",
+      "title": "순매출",
+      "description": "환불·할인 제외. 결제/회계 원천과 통화 정의 필요",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 5
       },
       "targets": [
         {
+          "refId": "A",
           "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "activeUsers"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "activeUsers"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "B"
+          "editorMode": "code",
+          "expr": "business_net_revenue{service=\"$service\"}",
+          "range": true
         }
       ],
-      "title": "활성 유저 추이",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "앱별 신규 유저",
       "fieldConfig": {
         "defaults": {
+          "unit": "short",
+          "noValue": "N/A",
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {
-            "axisColorMode": "text",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
+              },
               {
-                "id": "displayName",
-                "value": "blog"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
+                "color": "yellow",
+                "value": 75
+              },
               {
-                "id": "displayName",
-                "value": "AFZMA"
+                "color": "red",
+                "value": 90
               }
             ]
           }
-        ]
+        },
+        "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
-      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "showPercentChange": false
+      }
+    },
+    {
       "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+      "type": "stat",
+      "title": "매출 성장률",
+      "description": "기간 비교. 매출 시계열 필요",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 5
       },
       "targets": [
         {
+          "refId": "A",
           "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "newUsers"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "newUsers"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "B"
+          "editorMode": "code",
+          "expr": "business_revenue_growth_percent{service=\"$service\"}",
+          "range": true
         }
       ],
-      "title": "신규 유저 추이",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "앱별 세션",
       "fieldConfig": {
         "defaults": {
+          "unit": "percent",
+          "noValue": "N/A",
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {
-            "axisColorMode": "text",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
+              },
               {
-                "id": "displayName",
-                "value": "blog"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
+                "color": "yellow",
+                "value": 75
+              },
               {
-                "id": "displayName",
-                "value": "AFZMA"
+                "color": "red",
+                "value": 90
               }
             ]
           }
-        ]
+        },
+        "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 9
-      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "showPercentChange": false
+      }
+    },
+    {
       "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "sessions"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "sessions"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "B"
-        }
-      ],
-      "title": "세션 추이",
-      "type": "timeseries"
-    },
-    {
+      "type": "stat",
+      "title": "유료 고객 수",
+      "description": "기간 내 결제 완료한 고유 고객",
       "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "앱별 평균 세션 시간",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisColorMode": "text",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "blog"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "AFZMA"
-              }
-            ]
-          }
-        ]
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
-        "y": 9
-      },
-      "id": 5,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "averageSessionDuration"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "averageSessionDuration"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "B"
-        }
-      ],
-      "title": "평균 세션 시간",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "앱별 세션당 페이지뷰",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisColorMode": "text",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "blog"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "AFZMA"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
         "x": 18,
-        "y": 9
+        "y": 0,
+        "w": 6,
+        "h": 5
       },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "business_paying_customers{service=\"$service\"}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "N/A",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "showPercentChange": false
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "유료 전환율",
+      "description": "유료 고객 ÷ 적격 사용자. 결제 이벤트 필요",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 6,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "business_paid_conversion_rate{service=\"$service\"}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "noValue": "N/A",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "showPercentChange": false
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "고객당 매출 (ARPPU)",
+      "description": "순매출 ÷ 유료 고객",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 6,
+        "w": 6,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "business_arppu{service=\"$service\"}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "N/A",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "showPercentChange": false
+      }
+    },
+    {
       "id": 7,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "screenPageViewsPerSession"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "screenPageViewsPerSession"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "B"
-        }
-      ],
-      "title": "세션당 페이지뷰",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 17
-      },
-      "id": 13,
-      "panels": [],
-      "title": "[blog] 📢 트래픽 소스",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "채널별 유입 비율",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": [],
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Organic.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Direct.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "orange",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Referral.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Social.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "purple",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Paid.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 18
-      },
-      "id": 14,
-      "options": {
-        "displayLabels": [
-          "name",
-          "percent"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true,
-          "values": [
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "sessions"
-          ],
-          "dimensions": [
-            "date",
-            "sessionDefaultChannelGrouping"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "채널별 유입 비율",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "채널별 유입 추이",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "drawStyle": "line",
-            "fillOpacity": 30,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 18
-      },
-      "id": 15,
-      "options": {
-        "legend": {
-          "calcs": [
-            "sum"
-          ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "sessions"
-          ],
-          "dimensions": [
-            "date",
-            "sessionDefaultChannelGrouping"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "채널별 유입 추이",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 26
-      },
-      "id": 16,
-      "panels": [],
-      "title": "[blog] 📄 인기 페이지",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "페이지별 조회수 TOP 20",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 27
-      },
-      "id": 17,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": true
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "screenPageViews"
-          }
-        ]
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "screenPageViews",
-            "activeUsers",
-            "averageSessionDuration"
-          ],
-          "dimensions": [
-            "date",
-            "pagePath"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "인기 페이지 TOP",
-      "type": "table"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 37
-      },
-      "id": 112,
-      "panels": [],
-      "title": "[AFZMA] 📢 트래픽 소스",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "채널별 유입 비율",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": [],
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Organic.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Direct.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "orange",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Referral.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Social.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "purple",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Paid.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 38
-      },
-      "id": 113,
-      "options": {
-        "displayLabels": [
-          "name",
-          "percent"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true,
-          "values": [
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "sessions"
-          ],
-          "dimensions": [
-            "date",
-            "sessionDefaultChannelGrouping"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "채널별 유입 비율",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "채널별 유입 추이",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "drawStyle": "line",
-            "fillOpacity": 30,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 38
-      },
-      "id": 114,
-      "options": {
-        "legend": {
-          "calcs": [
-            "sum"
-          ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "sessions"
-          ],
-          "dimensions": [
-            "date",
-            "sessionDefaultChannelGrouping"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "채널별 유입 추이",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 46
-      },
-      "id": 115,
-      "panels": [],
-      "title": "[AFZMA] 📄 인기 페이지",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "페이지별 조회수 TOP 20",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 47
-      },
-      "id": 116,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": true
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "screenPageViews"
-          }
-        ]
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "screenPageViews",
-            "activeUsers",
-            "averageSessionDuration"
-          ],
-          "dimensions": [
-            "date",
-            "pagePath"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "인기 페이지 TOP",
-      "type": "table"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 57
-      },
-      "id": 200,
-      "panels": [],
-      "title": "[blog] 🎯 퍼널 & 캠페인",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "이벤트별 발생 수 (page_view → scroll → click 순으로 참여 퍼널 drop-off 확인). 30일",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 58
-      },
-      "id": 201,
-      "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "eventCount"
-          ],
-          "dimensions": [
-            "eventName"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "참여 퍼널 (이벤트별)",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "UTM 캠페인별 사용자·세션·참여세션(전환 프록시). 30일",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 58
-      },
-      "id": 202,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": true
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "sessions"
-          }
-        ]
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "activeUsers",
-            "sessions",
-            "engagedSessions"
-          ],
-          "dimensions": [
-            "sessionCampaignName"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "캠페인별 전환 (UTM)",
-      "type": "table"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 66
-      },
-      "id": 210,
-      "panels": [],
-      "title": "[AFZMA] 🎯 퍼널 & 캠페인",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "이벤트별 발생 수 (page_view → scroll → click 순으로 참여 퍼널 drop-off 확인). 30일",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 67
-      },
-      "id": 211,
-      "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "eventCount"
-          ],
-          "dimensions": [
-            "eventName"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "참여 퍼널 (이벤트별)",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "${DS_GA4}"
-      },
-      "description": "UTM 캠페인별 사용자·세션·참여세션(전환 프록시). 30일",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 67
-      },
-      "id": 212,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": true
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "sessions"
-          }
-        ]
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "blackcowmoo-googleanalytics-datasource",
-            "uid": "${DS_GA4}"
-          },
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "activeUsers",
-            "sessions",
-            "engagedSessions"
-          ],
-          "dimensions": [
-            "sessionCampaignName"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": "",
-          "refId": "A"
-        }
-      ],
-      "title": "캠페인별 전환 (UTM)",
-      "type": "table"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 75
-      },
-      "id": 299,
-      "panels": [],
-      "title": "🟣 제품 지표 (PostHog · 앱별 추이)",
-      "type": "row"
-    },
-    {
+      "type": "stat",
+      "title": "환불률",
+      "description": "환불 ÷ 결제. 결제·환불 이벤트 필요",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "앱별 활성 유저 추이 (PostHog)",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisColorMode": "text",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 76
-      },
-      "id": 300,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "product_active_users{period=\"7d\"}",
-          "legendFormat": "{{service}} · WAU",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "product_active_users{period=\"1d\"}",
-          "legendFormat": "{{service}} · DAU",
-          "refId": "B"
-        }
-      ],
-      "title": "활성 유저 (WAU/DAU)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "앱별 페이지뷰·이탈 추이",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisColorMode": "text",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 12,
-        "y": 76
-      },
-      "id": 301,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "y": 6,
+        "w": 6,
+        "h": 5
       },
       "targets": [
         {
+          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_page_views{period=\"7d\"}",
-          "legendFormat": "{{service}} · 페이지뷰",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "product_churned_users",
-          "legendFormat": "{{service}} · 이탈",
-          "refId": "B"
+          "editorMode": "code",
+          "expr": "business_refund_rate{service=\"$service\"}",
+          "range": true
         }
       ],
-      "title": "참여 (페이지뷰·이탈)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "앱별 재방문율·전환율 추이",
       "fieldConfig": {
         "defaults": {
+          "unit": "percent",
+          "noValue": "N/A",
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisColorMode": "text",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
               }
             ]
-          },
-          "unit": "percent"
+          }
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 84
-      },
-      "id": 302,
       "options": {
-        "legend": {
+        "reduceOptions": {
+          "values": false,
           "calcs": [
             "lastNotNull"
           ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
+          "fields": ""
         },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "showPercentChange": false
+      }
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "고객 획득 비용 (CAC)",
+      "description": "광고비 ÷ 신규 유료 고객. 캠페인 비용 연결 필요",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 6,
+        "w": 6,
+        "h": 5
       },
       "targets": [
         {
+          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "product_retention_rate",
-          "legendFormat": "{{service}} · 재방문율",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "product_conversion_rate",
-          "legendFormat": "{{service}} · 전환율",
-          "refId": "B"
+          "editorMode": "code",
+          "expr": "business_cac{service=\"$service\"}",
+          "range": true
         }
       ],
-      "title": "비율 (재방문율·전환율)",
-      "type": "timeseries"
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "N/A",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "showPercentChange": false
+      }
     }
   ],
-  "refresh": "",
+  "refresh": "5m",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
-    "layer",
-    "business",
-    "ga4",
-    "test"
+    "monitoring",
+    "4-layer"
   ],
   "templating": {
     "list": [
       {
-        "current": {},
+        "name": "service",
+        "label": "앱",
+        "type": "custom",
+        "query": "virtue,blog,afzma",
+        "current": {
+          "selected": true,
+          "text": "virtue",
+          "value": "virtue"
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": "virtue",
+            "value": "virtue"
+          },
+          {
+            "selected": false,
+            "text": "blog",
+            "value": "blog"
+          },
+          {
+            "selected": false,
+            "text": "afzma",
+            "value": "afzma"
+          }
+        ],
         "hide": 0,
         "includeAll": false,
-        "label": "GA4 DataSource",
         "multi": false,
-        "name": "DS_GA4",
-        "options": [],
-        "query": "blackcowmoo-googleanalytics-datasource",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "datasource"
+        "skipUrlSync": false
       }
     ]
   },
@@ -2070,7 +642,7 @@
     ]
   },
   "timezone": "Asia/Seoul",
-  "title": "Layer 1 - 비즈니스 지표",
+  "title": "Layer 1 — 비즈니스",
   "uid": "layer-business",
   "version": 1,
   "weekStart": ""

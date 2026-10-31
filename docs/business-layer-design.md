@@ -1,157 +1,88 @@
-# 비즈니스 레이어 모니터링 설계
+# Monitoring Metrics Catalog — 4 Layers × 8
 
-> 상태: 설계 (구현 전) · 최종 수정 2026-05-30
+## 목적과 측정 원칙
 
-## 1. 배경
+Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살핀다. 각 레이어는 대표 지표 8개로 고정하되, 실제 원천이 연결되지 않은 값은 0으로 꾸미지 않고 `N/A`로 표시한다. 현재 저장소에 쿼리가 있다는 사실과 데이터가 실제로 유입된다는 사실은 구분한다.
 
-비즈니스/제품 지표를 모니터링에 통합하려 한다. 요청 지표는 신규 유저, 이탈 유저,
-CTA 클릭율/CTR, 퍼널 drop-off, 캠페인별 전환, 수익, CS 건수.
+- **GA4**: 유입·사용자 획득(현재 Grafana 데이터소스에 `blog`, `afzma` 속성 설정)
+- **PostHog**: 제품 내 행동·퍼널·재방문·Web Vitals(현재 exporter에 `virtue` 연결, 다른 앱은 N/A)
+- **CloudWatch / Prometheus**: 실제 인프라, Lambda·DynamoDB, RUM
+- **이메일/CS**: 지정된 지원 메일함·라벨과 집계 범위를 확인한 뒤 연결. 일반 메일은 읽거나 집계하지 않는다.
 
-기존 상태는 두 경로가 어정쩡하게 공존했다.
-- 비즈니스 대시보드(`layer-business.json`)는 GA4 플러그인을 직접 쿼리한다.
-- `ga4-exporter`(자작 Node.js 앱)는 GA4 API에서 `business_*` 메트릭을 계산해 Prometheus로
-  내보내지만, 이전 로컬 구성에만 있었고 운영 k8s에는 배포되지 않았다. 대시보드도 이 메트릭을
-  쓰지 않는다.
+## 레이어별 지표
 
-여기에 PostHog를 도입한다.
+상태: **연결됨**은 현재 원천 쿼리가 있음, **조건부**는 계측·정의·실데이터 확인이 더 필요함, **입력 필요**는 현재 쓸 수 있는 원천이 없음.
 
-## 2. 도구별 담당 (관점 분리)
+### 1. 비즈니스 — 앱별 사업 성과
 
-| 도구 | 담당 | 다루는 질문 |
-|------|------|-------------|
-| **GA4** | 유입 | 누가, 어디서, 어떤 채널/캠페인으로 들어왔나 |
-| **PostHog** | 제품 내 사용 과정 | 들어와서 무엇을 했나 — 퍼널, 이탈(retention), CTA, 전환, 수익 |
-| Prometheus/Loki/CloudWatch | 인프라/시스템 | 가용성, 성능, 비용 |
+| # | 지표 | 산출 기준 | 현재 상태 / 필요한 입력 |
+|---|---|---|---|
+| 1 | 북극성 지표 | 고객이 핵심 가치를 얻은 빈도 또는 규모 | 입력 필요: 앱별 핵심 가치·이벤트 정의 |
+| 2 | 순매출 | 환불·할인 제외 매출 | 입력 필요: 결제/회계 원천과 통화·기간 |
+| 3 | 매출 성장률 | 기간별 순매출 증감률 | 입력 필요: 같은 매출 원천의 기간 데이터 |
+| 4 | 유료 고객 수 | 기간 내 결제 완료한 고유 고객 | 입력 필요: 결제 성공 이벤트/API |
+| 5 | 유료 전환율 | 유료 고객 ÷ 적격 사용자 | 입력 필요: 분모·결제완료 정의 |
+| 6 | 고객당 매출(ARPPU) | 순매출 ÷ 유료 고객 수 | 입력 필요: 매출과 유료 고객 데이터 |
+| 7 | 환불률 | 환불액 또는 환불 건수 ÷ 결제액/건수 | 입력 필요: 결제·환불 원천 |
+| 8 | 고객 획득 비용(CAC) | 캠페인 비용 ÷ 신규 유료 고객 | 입력 필요: 광고비와 채널별 유료 전환 연결 |
 
-GA4와 PostHog는 측정 대상이 다르므로 경쟁이 아니라 분업이다. GA4는 가볍게 유지한다.
+구독형 앱은 매출 성장률의 보조 지표로 MRR/구독 유지율을 추가할 수 있다. 모델을 확인하기 전에는 모든 앱에 MRR을 강제하지 않는다.
 
-## 3. 핵심 결정
+### 2. 고객·마케팅 — 획득부터 재방문까지
 
-### D1. 시각화는 Grafana 단일 통합
-모든 레이어를 Grafana 한 화면에서 본다. 비즈니스도 예외 없음.
+| # | 지표 | 산출 기준 | 현재 상태 / 필요한 입력 |
+|---|---|---|---|
+| 1 | 신규 사용자 수 | GA4 신규 사용자, 앱·기간별 | 부분 연결: blog·afzma 속성 쿼리는 구성됐으나 이번 점검에서 라이브 반환은 확인하지 못함 |
+| 2 | 세션 수 | GA4 세션 수, 앱·기간별 | 부분 연결: GA4 쿼리는 구성됐으나 라이브 반환 확인 필요 |
+| 3 | 채널별 유입 | 기본 채널별 세션 수 | 부분 연결: GA4 쿼리는 구성됐으나 라이브 반환 확인 필요 |
+| 4 | 캠페인 전환율 | 캠페인 유입 중 지정 전환을 만든 비율 | 조건부: 전환 이벤트 이름과 GA4 key event 필요 |
+| 5 | 핵심 퍼널 이탈률 | 퍼널 시작자 중 완료 이벤트 미발생 비율 | 부분 연결: virtue 2단계 퍼널 있음, 시작자 0이면 N/A |
+| 6 | 7일 재방문율 | 직전 7일 활성자 중 최근 7일 재방문자 비율 | 연결됨: PostHog 코호트 쿼리, virtue만 |
+| 7 | CTA 클릭률(CTR) | CTA 클릭 ÷ CTA 노출 | 입력 필요: CTA 노출·클릭 이벤트. 일반 autocapture 클릭은 대체값으로 쓰지 않음 |
+| 8 | 고객 문의 수 | 지정된 지원 메일 스레드 또는 문의 건수 | 입력 필요: Gmail 연결 및 주소/라벨·건수 기준 |
 
-### D2. exporter는 하나 — PostHog exporter. ga4-exporter 폐기
-- GA4 유입 지표는 **GA4 플러그인 직접 연동**으로 이미 Grafana에서 본다 → GA4용 exporter 불필요.
-- PostHog 제품 지표만 Grafana로 올리려면 **PostHog → Prometheus 브리지**가 필요하다.
-- 따라서 단일 exporter는 PostHog exporter이며, `ga4-exporter`는 GA4 플러그인과 역할이 겹쳐
-  폐기한다.
-- 트레이드오프: GA4 지표에 Prometheus 기반 알림을 걸 수단이 사라진다. GA4는 "가볍게"가
-  원칙이고 유입 알림 수요가 낮아 수용한다. 필요해지면 그때 최소 범위로 되살린다.
+이탈 인원 수는 재방문율과 함께 참고값으로 두며, 이탈률과 재방문율을 서로 다른 독립 KPI처럼 중복 카운트하지 않는다.
 
-### D3. PostHog 브리지는 "얇게" 유지
-계산(퍼널·retention·전환·수익)은 PostHog 안에서 정의(인사이트/HogQL)하고, exporter는 그
-**결과 KPI 숫자만 폴링해 Prometheus 메트릭으로 노출**한다. exporter 코드 안에서 churn 추정식
-같은 자체 계산을 다시 만들지 않는다. (ga4-exporter가 했던 실수를 반복하지 않는다.)
+### 3. 제품 — 사용자가 겪는 품질
 
-### D4. PostHog는 Cloud(US) — Query API 폴링
-ClickHouse 직접 접근이 불가하므로 브리지는 PostHog **Query API(HogQL)** 를 Personal API Key로
-폴링한다.
-- 엔드포인트: `POST https://us.posthog.com/api/projects/{project_id}/query/`
-- PostHog는 프로젝트 단위. 앱 → 프로젝트ID 매핑을 설정으로 받는다.
-  현재 `virtue` 프로젝트만 존재하고 blog/afzma는 미생성.
+| # | 지표 | 산출 기준 | 현재 상태 / 필요한 입력 |
+|---|---|---|---|
+| 1 | 화면 전환 지연 p95 | CloudWatch RUM 탐색 시간 p95 | 입력 필요: Prometheus에 RUM 시계열이 아직 없음 |
+| 2 | 화면 전환 지연 p99 | CloudWatch RUM 탐색 시간 p99 | 입력 필요: Prometheus에 RUM 시계열이 아직 없음 |
+| 3 | 프론트엔드 예외 | PostHog `$exception` 건수 | 연결됨: virtue exporter, blog·afzma N/A |
+| 4 | Core Web Vitals | LCP·INP의 지정 백분위 | 부분 연결: PostHog LCP/INP는 virtue 값 있음. CloudWatch RUM CLS 시계열은 아직 없음 |
+| 5 | 로그인 성공률 | 성공 로그인 ÷ 로그인 시도 | 입력 필요: 로그인 시도·성공 이벤트 |
+| 6 | 결제 성공률 | 성공 결제 ÷ 결제 시도 | 입력 필요: 결제 시도·성공·실패 이벤트 |
+| 7 | 제품 세션 수 | 앱 내 고유 세션 수 | 연결됨: PostHog, virtue만 |
+| 8 | 핵심 작업 완료율 | 앱별 핵심 시작 이벤트 중 완료 이벤트 비율 | 부분 연결: virtue의 판정 시도→저장 퍼널만 구성됨. 앱별 North Star/완료 이벤트 확인 필요 |
 
-### D5. 앱별 표시 + 미연동 앱은 N/A
-대시보드는 앱별 섹션(virtue/blog/afzma)을 동일 구조로 깔고, PostHog 미연동 앱도 빈칸이 아니라
-**N/A로 명시**한다.
-- exporter: 연동된 앱(virtue)만 실제 값을 노출. 미연동 앱은 메트릭이 비거나, 명시적
-  `product_app_connected{service="blog"} 0` 표식을 함께 노출.
-- Grafana: stat 패널의 **No value 옵션을 "N/A"** 로 설정 → 데이터 없는 앱은 "No data" 대신 N/A.
-  (추이/timeseries는 N/A 표현이 어색하므로 미연동 앱은 stat 위주로 둔다.)
-- 앱을 PostHog에 새로 등록하면 exporter 설정에 프로젝트ID만 추가하면 값이 채워진다.
+CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 서버/API p95·p99가 필요하면 앱별 서버 계측이나 CloudWatch 서비스 지표를 별도 연결한다. FID는 현재 Core Web Vitals의 상호작용 반응성 지표가 아니므로 새 대시보드에는 INP를 사용한다.
 
-## 4. 목표 아키텍처
+### 4. 시스템·인프라 — 용량과 장애 징후
 
-```
-GA4 ──────(GA4 플러그인 직접)──────────────────────┐
-                                                    │
-PostHog ──(posthog-exporter: 얇은 브리지)──> Prometheus ─┼──> Grafana (단일 뷰)
-                                                    │
-인프라 ── Prometheus · Loki · CloudWatch ───────────┘
-```
+| # | 지표 | 산출 기준 | 현재 상태 / 필요한 입력 |
+|---|---|---|---|
+| 1 | CPU 사용률 | 노드별 사용률 | 연결됨: node-exporter |
+| 2 | 메모리 사용률 | 노드별 사용률·가용 용량 | 연결됨: node-exporter |
+| 3 | 디스크 사용률 | 마운트별 사용률·잔여 공간 | 연결됨: node-exporter |
+| 4 | 네트워크 트래픽 | 노드별 송수신량 | 연결됨: node-exporter |
+| 5 | 네트워크 지연 | 서비스/노드 왕복 지연 | 입력 필요: black-box probe 또는 적절한 CloudWatch 지표 |
+| 6 | 인스턴스·노드 상태 | node-exporter/대상 scrape 상태 | 연결됨: Prometheus `up` |
+| 7 | 자동 확장 여유 | 현재/최대 replica와 확장 실패 | 입력 필요: 현재 Prometheus에서 HPA series 없음. 대상 HPA/ASG와 최대 용량 계약 확인 |
+| 8 | 의존 서비스 포화·오류 | Lambda 오류·스로틀, DynamoDB 제한·지연 | 연결됨: CloudWatch exporter 설정, 자원별 확인 필요 |
 
-- exporter 1개 = `posthog-exporter`
-- `ga4-exporter` 디렉토리/배포/scrape job 제거
+## 앱·데이터 원천 현황
 
-## 5. 지표 배치
+- PostHog exporter의 앱 목록은 `virtue`, `blog`, `afzma`; 프로젝트 연결은 `virtue`만이다. 연결되지 않은 앱을 0으로 해석하지 않고 N/A로 표시한다.
+- GA4 datasource 설정은 있으며 business 대시보드에 `blog`, `afzma` 속성 ID가 정의돼 있다. 이번 점검에서는 GA4 API 실시간 반환을 확인하지 못했으므로 쿼리 연결과 데이터 유입은 별도로 검증한다.
+- CloudWatch Lambda·DynamoDB 시계열은 Prometheus에 있다. CloudWatch RUM은 YACE 설정에는 있으나 현재 RUM metric series가 없고, 앱별 계측·데이터 유입 확인이 필요하다.
+- 노드 CPU·메모리·디스크·네트워크·헬스 시계열은 Prometheus에 있다. HPA와 black-box latency probe 시계열은 없다.
+- Gmail connector는 현재 설치·연결되지 않았다. 메일을 조회하기 전에 사용자가 지원 주소 또는 Gmail 라벨과 집계 단위(스레드/메시지)를 지정해야 한다.
+- 매출·결제·광고비 원천은 저장소와 배포 설정에서 확인되지 않았다. 값이나 North Star를 추정하지 않는다.
 
-| 지표 | 출처 | 비고 |
-|------|------|------|
-| 신규 유저 / DAU / MAU / 세션 | GA4 플러그인 | 유입 (기존 패널 유지) |
-| 채널·캠페인 **유입** | GA4 플러그인 | 유입 관점 |
-| 퍼널 drop-off | PostHog | 제품 사용 과정 |
-| 이탈 (retention) | PostHog | 코호트 기반, 추정식 아님 |
-| CTA 클릭율 / CTR | PostHog | autocapture 이벤트 |
-| 캠페인별 **전환** | PostHog | 들어와서 전환했나 |
-| 수익 | PostHog (revenue) | 소스 확정 필요 → 미결 |
-| CS 건수 | (외부) | 이번 범위 제외 |
+## 메트릭 구현 계약
 
-## 6. 마이그레이션
-
-1. 방금 추가한 하이브리드 패널 정리
-   - 퍼널·캠페인(GA4 플러그인): 유입 관점으로 유지하거나 PostHog 전환 시 재배치
-   - 이탈·CTR(ga4-exporter 의존): PostHog 브리지로 대체. ga4-exporter 폐기 시 이 패널은
-     PostHog 출처로 교체해야 함 (그 전까지는 로컬에서만 의미)
-2. `posthog-exporter` PoC: PostHog Query API에서 KPI 1~2개를 메트릭으로 노출
-3. Grafana 비즈니스 레이어를 GA4(유입) + PostHog(제품) 두 출처로 재구성
-4. `posthog-exporter`를 운영 k8s(space 레포)에 배포, prometheus scrape 추가
-5. `ga4-exporter` 폐기 (디렉토리/legacy 구성/scrape 제거)
-
-## 7. 확정 사항 / 미결
-
-확정:
-- PostHog = Cloud, US 리전 → Query API(HogQL) 폴링 (D4)
-- 등록된 앱 = `virtue` 하나. blog/afzma는 미연동 → N/A 표시 (D5)
-- GA4 + PostHog는 한 대시보드에서 패널별 데이터소스로 공존 (이미 검증된 방식)
-
-미결 (다음 결정):
-- **virtue에 이벤트 수집이 실제로 시작됐나** — pageview·CTA click 등 어떤 이벤트가 들어오는지
-  (브리지가 가져올 KPI를 정하려면 필요)
-- 수익 데이터 소스 (PostHog revenue 이벤트 vs 결제사 API/DB)
-- 메트릭 네이밍 컨벤션 (`product_*` 또는 `ph_*`)
-- PoC로 가장 먼저 가져올 KPI 1~2개 (예: virtue 핵심 퍼널의 전환율)
-
-## 8. virtue 현황 (2026-05-30 Query API 실측)
-
-최근 7일 virtue(project 424014) 이벤트:
-- `$autocapture` 110 / `$web_vitals` 53 / `$pageview` 50 / `$pageleave` 34 (7일 17명)
-- 페이지뷰 거의 전부 `/infinity/` 단일 페이지. infinity 시스템 웹 UI.
-- **커스텀 제품 이벤트 0** — PostHog 기본 autocapture만 켜진 상태.
-
-함의: 요청 지표 중 활성유저·retention·페이지뷰는 지금도 가능하나, **퍼널·전환·CTA·수익은
-커스텀 이벤트 인스트루먼테이션이 선행돼야 함.** 이게 제품 지표의 진짜 선행 과제.
-
-진행 트랙:
-- **A. 파이프라인 PoC** — 지금 데이터(활성유저·페이지뷰·retention)로 PostHog→Prometheus
-  브리지를 떠서 연동 구조(+blog/afzma N/A)를 먼저 증명. 지표보다 파이프라인 검증이 목적.
-- **B. 제품 이벤트 설계** — virtue 핵심 이벤트(intent 등록/실행, 핵심행동, 전환) 정의 →
-  데이터 축적 후 퍼널·전환·CTA. A와 병행.
-
-## 변경 이력
-
-- 2026-05-30: 최초 작성. exporter 단일화(PostHog), ga4-exporter 폐기 방향 확정.
-- 2026-05-30: PostHog Cloud(US) 확정 → Query API 브리지(D4). 앱별 N/A 표시 설계(D5).
-  등록 앱 virtue 1개. GA4+PostHog 한 대시보드 공존 확인.
-- 2026-05-30: virtue 이벤트 실측(§8). autocapture만 존재 → 제품 이벤트 인스트루먼테이션이
-  선행 과제로 확인. 트랙 A(파이프라인 PoC)/B(이벤트 설계) 분리.
-- 2026-05-30: 트랙 A 운영 배포 완료. posthog-exporter k8s(런타임 clone) + 대시보드 PostHog 섹션.
-- 2026-05-30: **ga4-exporter 완전 폐기(설계 D2 완료)**. 이탈(product_churned_users, person
-  코호트)·클릭율(product_clicks/page_views, autocapture 근사)을 PostHog로 이전. 하이브리드
-  이탈/CTR(ga4 business_*) 패널 제거. 부작용: product mock(http_request/web_vitals/
-  frontend_error) 제거로 layer-product/app/main의 mock 패널은 No data(의도된 placeholder,
-  실제 계측 시 채울 자리). 클릭율은 명시적 CTA 아님 → 트랙 B에서 CTA 이벤트로 정밀화 예정.
-- 2026-05-30: retention 메트릭 추가(트랙 A 2차). product_retention_rate(재방문율 %)·
-  product_retained_users. 이탈·재방문을 동일 코호트(이전 7일 활성 분모)에서 일관 산출
-  (이탈 = 이전활성 − 재방문, 재방문율 = 재방문/이전활성). 대시보드 각 앱 6 stat
-  (WAU/DAU/페이지뷰 · 이탈/재방문율/클릭율).
-- 2026-05-30: 트랙 B. virtue 앱은 이미 12개 커스텀 이벤트 인스트루먼트됨(deed_saved 등
-  전환 퍼널 완비) → 앱 코드 수정 불필요. exporter에 전환 KPI 추가: product_conversions
-  (전환 유저)·product_conversion_rate(전환율 %). 앱별 funnel은 env POSTHOG_FUNNELS로
-  (app:start:convert). autocapture 클릭율 제거 → 진짜 전환율로 대시보드 교체.
-  virtue funnel = deed_judge_attempted→deed_saved (add_flow_started는 배포본 미발생).
-  데이터 매우 작음(전환 1명) — 측정 인프라 선구축, virtue 활성화는 별개 과제.
-- 2026-05-30: 개요 대시보드(main.json) 5-레이어 헬스보드 재구성(Grafana13 gauge). 깨진
-  business_dau/web_vitals를 product_*로 교체.
-- 2026-05-30: layer-business PostHog 섹션을 $service 변수 + row repeat로 통합(정적 복제
-  virtue/blog/afzma 18패널 → 7패널 1세트). 앱 추가 시 변수 값만 추가하면 됨. GA4 유입
-  섹션은 앱별 accountId/property가 본질적으로 달라(레이블 치환 아님) repeat 제외.
-  방식은 Grafana13 Scenes 기반 dynamic dashboards가 아니라 검증된 template variable+repeat.
+- 앱별·기간별로 분리하고 집계 기간과 분모를 패널 설명에 표시한다.
+- `0`은 실제로 관측한 0건, `N/A`는 미연결·미정의·분모 없음으로 구분한다.
+- 새 지표를 추가할 때 exporter/Prometheus 쿼리와 Grafana 패널, 이 카탈로그의 상태를 같은 변경에서 갱신한다.
+- PostHog exporter는 원천 쿼리만 맡고 추정식으로 수익·고객·지원 문의를 만들어 내지 않는다.

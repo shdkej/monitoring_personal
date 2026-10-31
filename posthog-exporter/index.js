@@ -76,9 +76,19 @@ const conversions = new client.Gauge({
   help: '핵심 전환 유저 수 (앱별 funnel의 convert 이벤트, 30일 distinct person)',
   labelNames: ['service'],
 });
+const funnelStartedUsers = new client.Gauge({
+  name: 'product_funnel_started_users',
+  help: '핵심 퍼널 시작 유저 수 (30일 distinct person)',
+  labelNames: ['service'],
+});
 const conversionRate = new client.Gauge({
   name: 'product_conversion_rate',
   help: '전환율 % (convert 유저 / funnel start 유저 × 100, 30일)',
+  labelNames: ['service'],
+});
+const funnelDropoffRate = new client.Gauge({
+  name: 'product_funnel_dropoff_rate',
+  help: '핵심 퍼널 이탈률 % (1 - convert 유저 / start 유저, 30일). 시작 유저가 없으면 계열을 내보내지 않음',
   labelNames: ['service'],
 });
 const retainedUsers = new client.Gauge({
@@ -117,7 +127,9 @@ register.registerMetric(activeUsers);
 register.registerMetric(pageViews);
 register.registerMetric(churnedUsers);
 register.registerMetric(conversions);
+register.registerMetric(funnelStartedUsers);
 register.registerMetric(conversionRate);
+register.registerMetric(funnelDropoffRate);
 register.registerMetric(retainedUsers);
 register.registerMetric(retentionRate);
 register.registerMetric(webVitalsLcp);
@@ -192,8 +204,18 @@ async function fetchApp(name, projectId) {
       `SELECT count(DISTINCT person_id) FROM events WHERE event = '${f.convert}' AND timestamp > now() - interval 30 day`);
     const s = Number(starts?.[0]?.[0]) || 0;
     const c = Number(convs?.[0]?.[0]) || 0;
-    conversions.set(svc, c);
-    conversionRate.set(svc, s > 0 ? (c / s) * 100 : 0);
+    if (s > 0) {
+      funnelStartedUsers.set(svc, s);
+      conversions.set(svc, c);
+      conversionRate.set(svc, (c / s) * 100);
+      funnelDropoffRate.set(svc, ((s - c) / s) * 100);
+    } else {
+      // 퍼널 진입자가 없으면 이탈률은 0%가 아니라 측정 불가다.
+      funnelStartedUsers.remove(svc);
+      conversions.remove(svc);
+      conversionRate.remove(svc);
+      funnelDropoffRate.remove(svc);
+    }
   }
 }
 

@@ -39,6 +39,9 @@ configMapGenerator:
   - name: grafana-dashboard-layer-business
     files:
       - layer-business.json=grafana/provisioning/dashboards/layer-business.json
+  - name: grafana-dashboard-layer-customer
+    files:
+      - layer-customer.json=grafana/provisioning/dashboards/layer-customer.json
   - name: grafana-dashboard-main
     files:
       - main.json=grafana/provisioning/dashboards/main.json
@@ -51,4 +54,4 @@ generatorOptions:
   labels:
     grafana_dashboard: "1"
   annotations:
-    grafana_folder: "5 Layer Monitoring"
+    grafana_folder: "4 Layer Monitoring"

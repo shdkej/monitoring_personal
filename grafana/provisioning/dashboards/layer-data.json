@@ -1464,7 +1464,7 @@
     ]
   },
   "timezone": "Asia/Seoul",
-  "title": "Layer 5 - 데이터 레이어 모니터링",
+  "title": "운영 상세 — 데이터 저장소",
   "uid": "layer-data",
   "version": 1,
   "description": "데이터 레이어의 데이터베이스, 캐시, 큐 상태를 모니터링합니다. PostgreSQL Exporter 및 관련 Exporter 설정 후 데이터가 표시됩니다."
