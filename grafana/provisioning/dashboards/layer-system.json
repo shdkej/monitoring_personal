@@ -73,7 +73,13 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        }
       }
     },
     {
@@ -127,7 +133,13 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        }
       }
     },
     {
@@ -181,7 +193,13 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        }
       }
     },
     {
@@ -246,7 +264,13 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        }
       }
     },
     {
@@ -481,7 +505,13 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        }
       }
     }
   ],
