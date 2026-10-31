@@ -205,7 +205,8 @@
           },
           "editorMode": "code",
           "expr": "product_web_vitals_lcp_ms{service=\"$service\"}",
-          "range": true
+          "range": true,
+          "legendFormat": "LCP p75"
         },
         {
           "refId": "B",
@@ -215,7 +216,8 @@
           },
           "editorMode": "code",
           "expr": "product_web_vitals_inp_ms{service=\"$service\"}",
-          "range": true
+          "range": true,
+          "legendFormat": "INP p75"
         }
       ],
       "fieldConfig": {

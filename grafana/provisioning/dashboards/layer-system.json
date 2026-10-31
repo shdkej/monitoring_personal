@@ -46,7 +46,8 @@
           },
           "editorMode": "code",
           "expr": "(100 - avg by (instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
-          "range": true
+          "range": true,
+          "legendFormat": "{{instance}}"
         }
       ],
       "fieldConfig": {
@@ -99,7 +100,8 @@
           },
           "editorMode": "code",
           "expr": "(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100",
-          "range": true
+          "range": true,
+          "legendFormat": "{{instance}}"
         }
       ],
       "fieldConfig": {
@@ -152,7 +154,8 @@
           },
           "editorMode": "code",
           "expr": "(1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"}) * 100",
-          "range": true
+          "range": true,
+          "legendFormat": "{{instance}} {{mountpoint}}"
         }
       ],
       "fieldConfig": {
@@ -205,7 +208,8 @@
           },
           "editorMode": "code",
           "expr": "sum by (instance)(rate(node_network_receive_bytes_total{device!~\"lo|docker.*|br.*\"}[5m]))",
-          "range": true
+          "range": true,
+          "legendFormat": "{{instance}}"
         },
         {
           "refId": "B",
@@ -215,7 +219,8 @@
           },
           "editorMode": "code",
           "expr": "sum by (instance)(rate(node_network_transmit_bytes_total{device!~\"lo|docker.*|br.*\"}[5m]))",
-          "range": true
+          "range": true,
+          "legendFormat": "{{instance}}"
         }
       ],
       "fieldConfig": {
