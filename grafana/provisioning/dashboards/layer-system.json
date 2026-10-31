@@ -146,7 +146,7 @@
       "id": 3,
       "type": "timeseries",
       "title": "디스크 사용률",
-      "description": "node-exporter · tmpfs/overlay 제외",
+      "description": "node-exporter · 노드별 root mount 사용률",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -165,9 +165,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"}) * 100",
+          "expr": "(1 - node_filesystem_avail_bytes{mountpoint=\"/\",fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{mountpoint=\"/\",fstype!~\"tmpfs|overlay\"}) * 100",
           "range": true,
-          "legendFormat": "{{instance}} {{mountpoint}}"
+          "legendFormat": "{{instance}}"
         }
       ],
       "fieldConfig": {
@@ -206,7 +206,7 @@
       "id": 4,
       "type": "timeseries",
       "title": "네트워크 트래픽",
-      "description": "node-exporter · 수신/송신 bytes/sec",
+      "description": "node-exporter · 전체 노드 송수신 합계 (bytes/sec)",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -225,9 +225,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (instance)(rate(node_network_receive_bytes_total{device!~\"lo|docker.*|br.*\"}[5m]))",
+          "expr": "sum(rate(node_network_receive_bytes_total{device!~\"lo|docker.*|br.*\"}[5m]))",
           "range": true,
-          "legendFormat": "{{instance}}"
+          "legendFormat": "RX"
         },
         {
           "refId": "B",
@@ -236,9 +236,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (instance)(rate(node_network_transmit_bytes_total{device!~\"lo|docker.*|br.*\"}[5m]))",
+          "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"lo|docker.*|br.*\"}[5m]))",
           "range": true,
-          "legendFormat": "{{instance}}"
+          "legendFormat": "TX"
         }
       ],
       "fieldConfig": {
