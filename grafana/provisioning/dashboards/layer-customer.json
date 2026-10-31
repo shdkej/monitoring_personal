@@ -74,23 +74,6 @@
           "noValue": "N/A",
           "color": {
             "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
           }
         },
         "overrides": [
@@ -189,23 +172,6 @@
           "noValue": "N/A",
           "color": {
             "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
           }
         },
         "overrides": [
@@ -283,24 +249,8 @@
           "unit": "short",
           "noValue": "N/A",
           "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
+            "mode": "fixed",
+            "fixedColor": "#9CA3AF"
           }
         },
         "overrides": []
@@ -353,24 +303,8 @@
           "unit": "percent",
           "noValue": "N/A",
           "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
+            "mode": "fixed",
+            "fixedColor": "#9CA3AF"
           }
         },
         "overrides": []
@@ -423,24 +357,8 @@
           "unit": "percent",
           "noValue": "N/A",
           "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
+            "mode": "fixed",
+            "fixedColor": "#9CA3AF"
           }
         },
         "overrides": []
@@ -493,24 +411,8 @@
           "unit": "percent",
           "noValue": "N/A",
           "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
+            "mode": "fixed",
+            "fixedColor": "#9CA3AF"
           }
         },
         "overrides": []
@@ -563,24 +465,8 @@
           "unit": "percent",
           "noValue": "N/A",
           "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
+            "mode": "fixed",
+            "fixedColor": "#9CA3AF"
           }
         },
         "overrides": []
@@ -633,24 +519,8 @@
           "unit": "short",
           "noValue": "N/A",
           "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
+            "mode": "fixed",
+            "fixedColor": "#9CA3AF"
           }
         },
         "overrides": []
