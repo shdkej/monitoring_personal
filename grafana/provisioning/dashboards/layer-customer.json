@@ -160,6 +160,7 @@
             "sessions"
           ],
           "dimensions": [
+            "date",
             "sessionDefaultChannelGrouping"
           ],
           "startDate": "30daysAgo",
@@ -174,6 +175,7 @@
             "sessions"
           ],
           "dimensions": [
+            "date",
             "sessionDefaultChannelGrouping"
           ],
           "startDate": "30daysAgo",
