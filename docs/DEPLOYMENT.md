@@ -38,5 +38,8 @@
   Gmail은 지원 메일 주소/라벨과 집계 단위가 정해지고 connector가 연결된 뒤에만 사용합니다.
 - 새 PostHog 퍼널 지표는 `start > 0`일 때만 전환·이탈률 series를 발행합니다. 시작자가 없을 때
   이탈률을 0%로 오인하지 않도록 해당 series는 내보내지 않습니다.
+- PostHog exporter는 컨테이너 시작 시 저장소를 clone하므로 `posthog-exporter/index.js` 변경에는
+  같은 변경에서 `k8s/posthog-exporter/deployment.yaml`의 `SOURCE_REVISION`을 갱신해 Pod rollout을
+  유도합니다.
 - 변경 완료 보고에는 수정한 문서, source commit, Argo CD revision, Prometheus/Grafana 검증
   결과와 남은 화면 검증 경계를 함께 적습니다.

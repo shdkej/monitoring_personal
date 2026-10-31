@@ -22,7 +22,10 @@ spec:
           image: node:20-alpine
           imagePullPolicy: IfNotPresent
           workingDir: /tmp
+          # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
+            - name: SOURCE_REVISION
+              value: "funnel-dropoff-v1-2026-10-31"
             - name: POSTHOG_HOST
               value: https://us.posthog.com
             - name: POSTHOG_PROJECTS
