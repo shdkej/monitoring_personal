@@ -23,7 +23,7 @@
       "id": 1,
       "type": "stat",
       "title": "화면 로딩 p95",
-      "description": "CloudWatch RUM · PerformanceNavigationDuration p95",
+      "description": "CloudWatch RUM · PerformanceNavigationDuration p95 CloudWatch RUM series 미수집 시 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -77,7 +77,7 @@
       "id": 2,
       "type": "stat",
       "title": "화면 로딩 p99",
-      "description": "CloudWatch RUM · PerformanceNavigationDuration p99",
+      "description": "CloudWatch RUM · PerformanceNavigationDuration p99 CloudWatch RUM series 미수집 시 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -248,7 +248,7 @@
       "id": 5,
       "type": "stat",
       "title": "로그인 성공률",
-      "description": "로그인 시도·성공 이벤트 정의와 계측 필요",
+      "description": "로그인 시도·성공 이벤트 정의와 계측 필요 아직 exporter가 없는 placeholder metric이며, 해당 이벤트를 계측하기 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -302,7 +302,7 @@
       "id": 6,
       "type": "stat",
       "title": "결제 성공률",
-      "description": "결제 시도·성공·실패 이벤트/결제 원천 필요",
+      "description": "결제 시도·성공·실패 이벤트/결제 원천 필요 아직 exporter가 없는 placeholder metric이며, 해당 이벤트를 계측하기 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"

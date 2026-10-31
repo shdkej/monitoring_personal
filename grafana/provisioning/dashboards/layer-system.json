@@ -248,7 +248,7 @@
       "id": 5,
       "type": "stat",
       "title": "네트워크 지연",
-      "description": "black-box probe / 지연 계측 미설정. N/A",
+      "description": "black-box probe / 지연 계측 미설정. N/A 현재 probe exporter 미설정이라 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -356,7 +356,7 @@
       "id": 7,
       "type": "stat",
       "title": "자동 확장 여유",
-      "description": "HPA 현재/최대 replica 비율. HPA 대상 설정 필요",
+      "description": "HPA 현재/최대 replica 비율. HPA 대상 설정 필요 현재 Prometheus에 HPA series가 없어 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"

@@ -27,7 +27,7 @@
       "id": 1,
       "type": "stat",
       "title": "북극성 지표",
-      "description": "앱별 핵심 가치 이벤트와 단위 정의 필요",
+      "description": "앱별 핵심 가치 이벤트와 단위 정의 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -81,7 +81,7 @@
       "id": 2,
       "type": "stat",
       "title": "순매출",
-      "description": "환불·할인 제외. 결제/회계 원천과 통화 정의 필요",
+      "description": "환불·할인 제외. 결제/회계 원천과 통화 정의 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -135,7 +135,7 @@
       "id": 3,
       "type": "stat",
       "title": "매출 성장률",
-      "description": "기간 비교. 매출 시계열 필요",
+      "description": "기간 비교. 매출 시계열 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -189,7 +189,7 @@
       "id": 4,
       "type": "stat",
       "title": "유료 고객 수",
-      "description": "기간 내 결제 완료한 고유 고객",
+      "description": "기간 내 결제 완료한 고유 고객 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -243,7 +243,7 @@
       "id": 5,
       "type": "stat",
       "title": "유료 전환율",
-      "description": "유료 고객 ÷ 적격 사용자. 결제 이벤트 필요",
+      "description": "유료 고객 ÷ 적격 사용자. 결제 이벤트 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -297,7 +297,7 @@
       "id": 6,
       "type": "stat",
       "title": "고객당 매출 (ARPPU)",
-      "description": "순매출 ÷ 유료 고객",
+      "description": "순매출 ÷ 유료 고객 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -351,7 +351,7 @@
       "id": 7,
       "type": "stat",
       "title": "환불률",
-      "description": "환불 ÷ 결제. 결제·환불 이벤트 필요",
+      "description": "환불 ÷ 결제. 결제·환불 이벤트 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -405,7 +405,7 @@
       "id": 8,
       "type": "stat",
       "title": "고객 획득 비용 (CAC)",
-      "description": "광고비 ÷ 신규 유료 고객. 캠페인 비용 연결 필요",
+      "description": "광고비 ÷ 신규 유료 고객. 캠페인 비용 연결 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"

@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "획득·전환·재방문·문의. GA4, PostHog, 지원 메일함을 분리된 원천으로 봅니다.",
+  "description": "고객 획득·전환·재방문·문의. GA4는 blog·afzma 속성, PostHog는 현재 연결된 virtue 서비스 기준입니다.",
   "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -123,7 +123,7 @@
       "id": 2,
       "type": "timeseries",
       "title": "유입 채널별 세션",
-      "description": "GA4 · 최근 30일. 두 속성은 각 series로 표시",
+      "description": "GA4 · 최근 30일. blog와 afzma 속성의 유입 채널별 세션 (범례는 채널명)",
       "datasource": {
         "type": "blackcowmoo-googleanalytics-datasource",
         "uid": "ga4"
@@ -174,32 +174,7 @@
             "mode": "palette-classic"
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "blog"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "afzma"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -221,7 +196,7 @@
       "id": 3,
       "type": "stat",
       "title": "이탈 사용자 수",
-      "description": "PostHog · 이전 활성 코호트 중 최근 7일 미방문. virtue만",
+      "description": "PostHog · 이전 활성 코호트 중 최근 7일 미방문. 현재 연결된 virtue 기준",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -240,7 +215,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_churned_users{service=\"$service\"}",
+          "expr": "product_churned_users{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -275,7 +250,7 @@
       "id": 4,
       "type": "stat",
       "title": "7일 재방문율",
-      "description": "PostHog · 동일한 이전 7일 활성 코호트 기준. virtue만",
+      "description": "PostHog · 동일한 이전 7일 활성 코호트 기준. 현재 연결된 virtue 기준",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -294,7 +269,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_retention_rate{service=\"$service\"}",
+          "expr": "product_retention_rate{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -348,7 +323,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_funnel_dropoff_rate{service=\"$service\"}",
+          "expr": "product_funnel_dropoff_rate{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -383,7 +358,7 @@
       "id": 6,
       "type": "stat",
       "title": "캠페인 전환율",
-      "description": "전환 이벤트 미정의. GA4 key event 연결 전에는 N/A",
+      "description": "전환 이벤트 미정의. GA4 key event 연결 전에는 N/A 아직 exporter가 없는 placeholder metric이며, 원천/이벤트를 연결하기 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -402,7 +377,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "customer_campaign_conversion_rate{service=\"$service\"}",
+          "expr": "customer_campaign_conversion_rate{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -437,7 +412,7 @@
       "id": 7,
       "type": "stat",
       "title": "CTA 클릭률 (CTR)",
-      "description": "CTA 노출·클릭 이벤트 미계측. 정의 후 PostHog에 연결",
+      "description": "CTA 노출·클릭 이벤트 미계측. 정의 후 PostHog에 연결 아직 exporter가 없는 placeholder metric이며, 원천/이벤트를 연결하기 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -456,7 +431,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "customer_cta_ctr{service=\"$service\"}",
+          "expr": "customer_cta_ctr{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -491,7 +466,7 @@
       "id": 8,
       "type": "stat",
       "title": "고객 문의 수",
-      "description": "지원 메일 범위와 스레드/메시지 기준 확인 및 Gmail 연결 필요",
+      "description": "지원 메일 범위와 스레드/메시지 기준 확인 및 Gmail 연결 필요 아직 exporter가 없는 placeholder metric이며, 원천/이벤트를 연결하기 전까지 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -510,7 +485,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "customer_support_threads{service=\"$service\"}",
+          "expr": "customer_support_threads{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -550,40 +525,7 @@
     "4-layer"
   ],
   "templating": {
-    "list": [
-      {
-        "name": "service",
-        "label": "앱",
-        "type": "custom",
-        "query": "virtue,blog,afzma",
-        "current": {
-          "selected": true,
-          "text": "virtue",
-          "value": "virtue"
-        },
-        "options": [
-          {
-            "selected": true,
-            "text": "virtue",
-            "value": "virtue"
-          },
-          {
-            "selected": false,
-            "text": "blog",
-            "value": "blog"
-          },
-          {
-            "selected": false,
-            "text": "afzma",
-            "value": "afzma"
-          }
-        ],
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "skipUrlSync": false
-      }
-    ]
+    "list": []
   },
   "time": {
     "from": "now-30d",
