@@ -439,7 +439,7 @@
       "id": 8,
       "type": "timeseries",
       "title": "AWS 처리량·오류",
-      "description": "CloudWatch · Lambda 호출/오류, DynamoDB throttles",
+      "description": "CloudWatch/YACE · exporter scrape는 up. Lambda 호출·오류 샘플이 NaN이고 DynamoDB throttling series가 없어 현재 N/A. 대상 리소스와 유효한 CloudWatch 데이터 확인 필요.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"

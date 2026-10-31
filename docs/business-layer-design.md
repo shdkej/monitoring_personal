@@ -6,7 +6,7 @@ Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살
 
 - **GA4**: 유입·사용자 획득(현재 Grafana 데이터소스에 `blog`, `afzma` 속성 설정)
 - **PostHog**: 제품 내 행동·퍼널·재방문·Web Vitals(현재 exporter에 `virtue` 연결, 다른 앱은 N/A)
-- **CloudWatch / Prometheus**: 실제 인프라, Lambda·DynamoDB, RUM
+- **CloudWatch / Prometheus**: 노드 계측은 연결됨. YACE exporter는 scrape되나 Lambda 유효 샘플·DynamoDB throttling·RUM 데이터는 확인되지 않음
 - **이메일/CS**: 지정된 지원 메일함·라벨과 집계 범위를 확인한 뒤 연결. 일반 메일은 읽거나 집계하지 않는다.
 
 ## 레이어별 지표
@@ -69,13 +69,13 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 | 5 | 네트워크 지연 | 서비스/노드 왕복 지연 | 입력 필요: black-box probe 또는 적절한 CloudWatch 지표 |
 | 6 | 인스턴스·노드 상태 | node-exporter/대상 scrape 상태 | 연결됨: Prometheus `up` |
 | 7 | 자동 확장 여유 | 현재/최대 replica와 확장 실패 | 입력 필요: 현재 Prometheus에서 HPA series 없음. 대상 HPA/ASG와 최대 용량 계약 확인 |
-| 8 | 의존 서비스 포화·오류 | Lambda 오류·스로틀, DynamoDB 제한·지연 | 연결됨: CloudWatch exporter 설정, 자원별 확인 필요 |
+| 8 | 의존 서비스 포화·오류 | Lambda 오류·스로틀, DynamoDB 제한·지연 | 부분 연결: YACE scrape는 up. 현재 Lambda 호출·오류 샘플은 NaN, DynamoDB throttling series는 없음. 기대 리소스·CloudWatch 데이터 확인 필요 |
 
 ## 앱·데이터 원천 현황
 
 - PostHog exporter의 앱 목록은 `virtue`, `blog`, `afzma`; 프로젝트 연결은 `virtue`만이다. 연결되지 않은 앱을 0으로 해석하지 않고 N/A로 표시한다.
 - GA4 datasource의 blog·afzma 속성 쿼리는 Grafana에서 응답(HTTP 200)했다. 최근 30일 신규 사용자 그래프에는 blog series가 보였고 afzma series는 보이지 않았다. 데이터가 실제 0인지 속성/태깅 문제인지는 이 증거만으로 판별하지 않는다. 고객 대시보드는 GA4 두 속성을 함께 보여주고, PostHog 카드만 현재 연동된 virtue에 고정한다.
-- CloudWatch Lambda·DynamoDB 시계열은 Prometheus에 있다. CloudWatch RUM은 YACE 설정에는 있으나 현재 RUM metric series가 없고, 앱별 계측·데이터 유입 확인이 필요하다.
+- YACE exporter와 ServiceMonitor scrape target은 정상(up)이다. YACE `/metrics`에는 Lambda invocation/error 및 DynamoDB capacity metric names가 있지만, 확인 시 Lambda samples는 NaN, DynamoDB consumed capacity는 0, throttling series는 없었다. CloudWatch RUM 로그에는 `No metrics data found`가 반복되고 RUM Prometheus series도 없다. 값이 0인지 데이터/리소스 범위가 잘못됐는지 임의 추정하지 않는다.
 - 노드 CPU·메모리·디스크·네트워크·헬스 시계열은 Prometheus에 있다. HPA와 black-box latency probe 시계열은 없다.
 - Gmail connector는 현재 설치·연결되지 않았다. 메일을 조회하기 전에 사용자가 지원 주소 또는 Gmail 라벨과 집계 단위(스레드/메시지)를 지정해야 한다.
 - 매출·결제·광고비 원천은 저장소와 배포 설정에서 확인되지 않았다. 관련 Grafana 패널은 계획된 `business_*` placeholder query로 N/A 상태이며 실제 exporter 지표가 아니다. 값이나 North Star를 추정하지 않는다.
