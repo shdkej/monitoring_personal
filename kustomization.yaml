@@ -45,9 +45,6 @@ configMapGenerator:
   - name: grafana-dashboard-main
     files:
       - main.json=grafana/provisioning/dashboards/main.json
-  - name: grafana-dashboard-infinity-dispatcher
-    files:
-      - dispatcher-status.json=grafana/provisioning/dashboards/dispatcher-status.json
 
 generatorOptions:
   disableNameSuffixHash: true

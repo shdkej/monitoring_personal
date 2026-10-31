@@ -27,7 +27,7 @@
       "includeVars": false,
       "keepTime": true,
       "tags": [
-        "layer"
+        "4-layer"
       ],
       "targetBlank": false,
       "title": "레이어 대시보드",
@@ -67,6 +67,15 @@
         "defaults": {
           "unit": "short",
           "noValue": "N/A",
+          "links": [
+            {
+              "title": "비즈니스 레이어 자세히 보기",
+              "url": "/d/layer-business",
+              "targetBlank": false,
+              "keepTime": true,
+              "includeVars": false
+            }
+          ],
           "color": {
             "mode": "palette-classic"
           },
@@ -155,6 +164,15 @@
         "defaults": {
           "unit": "short",
           "noValue": "N/A",
+          "links": [
+            {
+              "title": "고객 레이어 자세히 보기",
+              "url": "/d/layer-customer",
+              "targetBlank": false,
+              "keepTime": true,
+              "includeVars": false
+            }
+          ],
           "color": {
             "mode": "palette-classic"
           },
@@ -225,6 +243,15 @@
         "defaults": {
           "unit": "percent",
           "noValue": "N/A",
+          "links": [
+            {
+              "title": "제품 레이어 자세히 보기",
+              "url": "/d/layer-product",
+              "targetBlank": false,
+              "keepTime": true,
+              "includeVars": false
+            }
+          ],
           "color": {
             "mode": "palette-classic"
           },
@@ -295,6 +322,15 @@
         "defaults": {
           "unit": "percent",
           "noValue": "N/A",
+          "links": [
+            {
+              "title": "시스템 레이어 자세히 보기",
+              "url": "/d/layer-system",
+              "targetBlank": false,
+              "keepTime": true,
+              "includeVars": false
+            }
+          ],
           "color": {
             "mode": "palette-classic"
           },

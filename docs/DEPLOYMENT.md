@@ -25,6 +25,15 @@
 5. dashboard 변경은 Grafana sidecar reload 로그를 확인하고, 인증된 Grafana 화면이 가능하면
    실제 패널 렌더까지 확인합니다. 화면 검증이 불가능하면 그 경계를 완료 보고에 남깁니다.
 
+## 대시보드 탐색과 제거
+
+- `main-overview`는 비즈니스·고객·제품·시스템 4개 요약 카드를 제공하며, 각 카드에서 대응하는
+  `layer-business`, `layer-customer`, `layer-product`, `layer-system` 상세 대시보드로 이동합니다.
+- 대시보드는 Kustomize가 생성한 ConfigMap을 Grafana sidecar가 읽습니다. 소스 JSON과
+  `configMapGenerator` 항목을 함께 제거하면 Argo CD prune 후 sidecar가 대시보드 파일을 제거하며,
+  현재 실제 provider는 `disableDeletion: false`입니다. Dispatcher 상세 대시보드는 제거하지만
+  별도 exporter와 메트릭 수집은 이 변경의 범위가 아닙니다.
+
 ## Dashboard 계약
 
 - 패널은 exporter가 실제로 발행하는 지표만 조회합니다. exporter 지표를 바꾸면 dashboard
