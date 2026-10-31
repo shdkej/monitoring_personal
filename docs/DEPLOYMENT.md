@@ -27,8 +27,8 @@
 
 ## 대시보드 탐색과 제거
 
-- `main-overview`는 비즈니스·고객·제품·시스템 4개 요약 카드를 제공하며, 각 카드에서 대응하는
-  `layer-business`, `layer-customer`, `layer-product`, `layer-system` 상세 대시보드로 이동합니다.
+- `main-overview`의 상단에는 비즈니스·고객·제품·시스템 상세 대시보드로 가는 네 링크가 보입니다.
+  데이터가 표시되는 요약 카드 값에도 각 대응 링크가 있고, `N/A` 상태에서도 상단 링크로 이동할 수 있습니다.
 - 대시보드는 Kustomize가 생성한 ConfigMap을 Grafana sidecar가 읽습니다. 소스 JSON과
   `configMapGenerator` 항목을 함께 제거하면 Argo CD prune 후 sidecar가 대시보드 파일을 제거하며,
   현재 실제 provider는 `disableDeletion: false`입니다. Dispatcher 상세 대시보드는 제거하지만
