@@ -9,3 +9,7 @@ alertmanager/alertmanager.yml
 ga4-exporter/credentials/
 k8s/secrets/
 # AWS credentials (보안)
+
+# Python bytecode caches
+**/__pycache__/
+*.py[cod]
