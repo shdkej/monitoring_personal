@@ -1,5 +1,6 @@
 const express = require('express');
 const client = require('prom-client');
+const {collectSnapshot, createSnapshotCache} = require('./calendar');
 
 // ============================================
 // 설정
@@ -144,6 +145,7 @@ register.registerMetric(productSessions);
 async function hogql(projectId, query) {
   const res = await fetch(`${POSTHOG_HOST}/api/projects/${projectId}/query/`, {
     method: 'POST',
+    signal: AbortSignal.timeout(60000),
     headers: {
       Authorization: `Bearer ${TOKEN}`,
       'Content-Type': 'application/json',
@@ -151,7 +153,7 @@ async function hogql(projectId, query) {
     body: JSON.stringify({ query: { kind: 'HogQLQuery', query } }),
   });
   if (!res.ok) {
-    throw new Error(`PostHog ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    throw new Error(`PostHog HTTP ${res.status}`);
   }
   const data = await res.json();
   return data.results; // [[value], ...]
@@ -236,6 +238,44 @@ async function fetchAll() {
   }
 }
 
+const calendar = createSnapshotCache(() => collectSnapshot(hogql));
+new client.Gauge({
+  name: 'posthog_app_calendar_count',
+  help: 'Received events, pageviews, identified sessions and events with a session ID per app and completed period',
+  labelNames: ['scope', 'period', 'period_start', 'period_end', 'metric'],
+  registers: [register],
+  collect() {
+    this.reset();
+    for (const row of calendar.current?.rows || []) {
+      for (const [period, samples] of Object.entries({...row.periods, rolling7d: [row]})) {
+        for (const sample of samples) {
+          const labels = {scope: row.scope, period, period_start: sample.periodStart, period_end: sample.periodEnd};
+          for (const [metric, count] of Object.entries({...sample.values, eventsWithSessionId: sample.eventsWithSessionId})) {
+            this.set({...labels, metric}, count);
+          }
+        }
+      }
+    }
+  },
+});
+new client.Gauge({
+  name: 'posthog_app_calendar_observed_timestamp_seconds',
+  help: 'Source observation time of the last complete PostHog app calendar snapshot',
+  registers: [register],
+  collect() {
+    this.set(calendar.current ? Date.parse(calendar.current.observedAt) / 1000 : 0);
+  },
+});
+
+async function refreshCalendar() {
+  if (calendar.current && Date.now() - Date.parse(calendar.current.observedAt) < 15 * 60 * 1000) return;
+  try {
+    await calendar.refresh();
+  } catch (err) {
+    console.error('PostHog 앱별 달력 집계 실패:', err.message);
+  }
+}
+
 // ============================================
 // HTTP 서버
 // ============================================
@@ -244,6 +284,11 @@ const app = express();
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
+});
+app.get('/analytics-posthog.json', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  if (!calendar.current) return res.status(503).json({error: 'Awaiting PostHog aggregates'});
+  res.json(calendar.current);
 });
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', host: POSTHOG_HOST, projects, allApps });
@@ -257,6 +302,8 @@ async function start() {
     console.error('초기 수집 실패:', err.message);
   }
   setInterval(fetchAll, FETCH_INTERVAL);
+  void refreshCalendar();
+  setInterval(refreshCalendar, Math.min(FETCH_INTERVAL, 5 * 60 * 1000));
   app.listen(PORT, () => {
     console.log(`posthog-exporter on port ${PORT}`);
     console.log(`연동 앱: ${Object.entries(projects).map(([k, v]) => `${k}:${v}`).join(', ') || '(없음)'}`);

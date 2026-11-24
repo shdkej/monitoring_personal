@@ -47,6 +47,17 @@
   Gmail은 지원 메일 주소/라벨과 집계 단위가 정해지고 connector가 연결된 뒤에만 사용합니다.
 - 새 PostHog 퍼널 지표는 `start > 0`일 때만 전환·이탈률 series를 발행합니다. 시작자가 없을 때
   이탈률을 0%로 오인하지 않도록 해당 series는 내보내지 않습니다.
+- PostHog exporter는 공유 프로젝트 424014를 15분마다 네 번 조회해 앱별 완료 구간을 갱신합니다.
+  `posthog_app_calendar_count`의 `scope`는 승인된 앱 ID를 우선하고, ID가 없으면 등록된 호스트로 분류합니다.
+  남은 무기명 소스는 ‘앱 미지정’입니다. 등록되지 않은 명시적 ID와 합성 이벤트는 집계에서 제외합니다.
+  `period`는 한국 시간 일간 7개·주간 4개·월간 2개와 UTC 최근 완료 7일(`rolling7d`)이며
+  `period_start`와 `period_end`는 양 끝 날짜를 포함합니다. `metric`은 `events`, `pageviews`,
+  `sessions`, `eventsWithSessionId`입니다. 세션 수는 각 구간에서 비어 있지 않은 고유 세션 ID 수입니다.
+  기존 `product_sessions{service="virtue"}`는 공유 프로젝트 전체의 직전 7일 값을 유지합니다.
+- 클러스터 내부 `posthog-exporter:9101/analytics-posthog.json`은 동일한 성공 스냅샷을 반환합니다.
+  초기 수집 전에는 HTTP 503, 재조회 실패 뒤에는 마지막 성공 값과 원래 관측 시각을 반환합니다.
+  `posthog_app_calendar_observed_timestamp_seconds`로 경과 시간을 확인할 수 있습니다.
+  달력 경계·원천 장애 회귀 검사는 `cd posthog-exporter && node --test`로 실행합니다.
 - PostHog exporter는 컨테이너 시작 시 저장소를 clone하므로 `posthog-exporter/index.js` 변경에는
   같은 변경에서 `k8s/posthog-exporter/deployment.yaml`의 `SOURCE_REVISION`을 갱신해 Pod rollout을
   유도합니다.
