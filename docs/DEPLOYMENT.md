@@ -80,6 +80,9 @@ Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존
 - 기존 ServiceMonitor가 1분마다 수집합니다. Grafana는 instant query로 최신 건수를 읽으며
   수집 실패 뒤 과거 정상 건수를 `lastNotNull`로 재사용하지 않습니다. 대시보드 시간 선택과
   무관하게 선택 구간의 끝 시점에서 직전 24시간을 집계한 값입니다.
+- `/metrics`에서 로그를 집계하므로 100m CPU 제한의 운영 Pod에서 응답이 약 1.2초 걸렸습니다.
+  readiness/liveness timeout은 5초이며 Prometheus 수집 제한은 10초입니다. 로그량 증가로
+  수집이 실패하면 실제 소요 시간부터 확인합니다.
 - 검증: `python3 -m unittest discover -s dispatcher-exporter -v`, `kubectl kustomize .`,
   Deployment server dry-run → commit/push → Argo CD 새 revision → exporter rollout →
   `openclaw_log_read_error == 0` 및 `openclaw_log_errors_24h` → Grafana 실제 패널을 확인합니다.
