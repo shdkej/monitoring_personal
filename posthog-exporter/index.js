@@ -109,7 +109,7 @@ new client.Gauge({
     }
     for (const scope of ['policycock', 'Virtue']) {
       if (snapshot.metrics.has(scope)) continue;
-      for (const metric of ['shareNewVisitors7d', 'sharedActivated', 'sharedPending', 'otherActivated', 'otherPending']) {
+      for (const metric of ['shareNewVisitors7d', 'sharedActivated', 'sharedPending', 'otherActivated', 'otherPending', 'sharedDropped', 'otherDropped']) {
         this.set({scope, metric}, 0);
       }
     }
