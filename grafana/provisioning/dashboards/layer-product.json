@@ -361,7 +361,7 @@
       "id": 7,
       "type": "timeseries",
       "title": "제품 세션 수",
-      "description": "UTC 기준 최근 완료된 7일. PostHog 공유 프로젝트에서 등록한 앱 ID와 호스트별로 집계하며 합성 이벤트를 제외합니다. 비어 있지 않은 고유 세션 ID 수입니다.",
+      "description": "UTC 기준 최근 완료된 7일. 접근 가능한 PostHog 프로젝트에서 앱 ID와 호스트로 분류하며 합성 이벤트를 제외합니다. 비어 있지 않은 고유 세션 ID 수입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -416,7 +416,7 @@
       "id": 8,
       "type": "timeseries",
       "title": "핵심 작업 완료 건수",
-      "description": "PostHog에서 UTC 기준 최근 완료된 7일간의 핵심 행동 발생 건수를 셉니다. policycock은 사례 열람(case_opened), miniapp-image-tools는 이미지 변환 완료(transform_succeeded)이며 합성 이벤트를 제외합니다.",
+      "description": "PostHog에서 UTC 기준 최근 완료된 7일간의 핵심 행동 발생 건수를 셉니다. policycock은 사례 열람(case_opened), miniapp-image-tools는 이미지 변환 완료(transform_succeeded), Virtue는 덕행 저장(deed_saved)이며 합성 이벤트를 제외합니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
