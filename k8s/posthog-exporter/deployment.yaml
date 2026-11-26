@@ -17,15 +17,24 @@ spec:
       labels:
         app: posthog-exporter
     spec:
+      volumes:
+        - name: ga4-engagement
+          configMap:
+            name: ga4-session-engagement
+            optional: true
       containers:
         - name: exporter
           image: node:20-alpine
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: ga4-engagement
+              mountPath: /etc/ga4-engagement
+              readOnly: true
           workingDir: /tmp
           # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
             - name: SOURCE_REVISION
-              value: "layer-integration-2026-11-26"
+              value: "product-task-engagement-2026-11-26"
             - name: POSTHOG_HOST
               value: https://us.posthog.com
             - name: POSTHOG_PROJECTS

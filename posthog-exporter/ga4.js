@@ -1,4 +1,5 @@
 const client = require('prom-client');
+const {readFile} = require('node:fs/promises');
 const SOURCE = 'https://status.aws.shdkej.com/analytics-ga4.json';
 // The publisher runs once a day at 10:15 KST. Allow six hours for a delayed run.
 const MAX_AGE_MS = 30 * 3600 * 1000;
@@ -21,7 +22,7 @@ function readRows(feed) {
   });
 }
 
-function registerGA4(registry, clock = Date.now) {
+function registerGA4(registry, clock = Date.now, readEngagement = () => readFile('/etc/ga4-engagement/report.json', 'utf8')) {
   let rows = [];
   new client.Gauge({
     name: 'ga4_app_rolling7d_count',
@@ -33,6 +34,32 @@ function registerGA4(registry, clock = Date.now) {
       for (const {scope, observed, values} of rows) {
         if (!values || observed > now || now - observed > MAX_AGE_MS) continue;
         for (const metric of ['newUsers', 'sessions']) this.set({scope, metric}, values[metric]);
+      }
+    },
+  });
+  new client.Gauge({
+    name: 'ga4_app_session_engagement_seconds',
+    help: 'Average engagement time per session in seconds, last seven days in the GA4 property',
+    labelNames: ['scope'], registers: [registry],
+    async collect() {
+      this.reset();
+      let report;
+      try {
+        report = JSON.parse(await readEngagement());
+      } catch {
+        // The optional volume can be empty until the scheduled collector succeeds.
+        return;
+      }
+      if (report?.schemaVersion !== 1 || !Array.isArray(report.rows)) return;
+      const now = clock();
+      for (const row of report.rows) {
+        const observed = Date.parse(row?.observedAt);
+        if (row?.status === 'ok' && typeof row.scope === 'string' &&
+            Number.isSafeInteger(row.sessions) && row.sessions > 0 &&
+            Number.isSafeInteger(row.seconds) && row.seconds >= 0 &&
+            observed <= now && now - observed <= MAX_AGE_MS) {
+          this.set({scope: row.scope}, row.seconds);
+        }
       }
     },
   });

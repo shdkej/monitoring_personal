@@ -62,7 +62,7 @@
   같은 변경에서 `k8s/posthog-exporter/deployment.yaml`의 `SOURCE_REVISION`을 갱신해 Pod rollout을
   유도합니다.
 - 고객 레이어(`layer-customer`)의 신규 사용자와 유입 채널별 세션 패널에서 앱을 선택합니다. GA4 `ga4_app_rolling7d_count{scope,metric}`은 Space의 HTTPS `analytics-ga4.json`을 15분마다 읽어 등록 속성의 최근 7일 신규 사용자와 세션을 제공합니다. Space 원천은 매일 10:15 KST에 갱신합니다. 앱 수집 실패 또는 마지막 관측 후 30시간이 지나면 해당 값은 노출하지 않습니다. `ga4_app_observed_timestamp_seconds`로 속성별 원천 시각을 조회합니다.
-- 제품 레이어(`layer-product`)의 제품 세션 수는 UTC 최근 완료 7일에 확인한 앱별 고유 세션 ID 수입니다. `posthog_app_health{scope,metric}`은 같은 앱 귀속 조건으로 15분마다 한 번 조회합니다. 이탈 사용자·재방문율·예외는 이동 구간, LCP·INP는 최근 30일 관측값의 p75입니다. 재방문율 분모나 Web Vitals 관측값이 없으면 빈 값입니다. 비교 차트는 45분을 넘긴 PostHog 관측을 숨깁니다. 그래프 가로축은 scrape 시각이고 신규 게이지 이력은 배포 후 쌓입니다.
+- 제품 레이어(`layer-product`)의 제품 세션 수는 UTC 최근 완료 7일에 확인한 앱별 고유 세션 ID 수입니다. `posthog_app_health{scope,metric}`은 같은 앱 귀속 조건으로 15분마다 한 번 조회합니다. 이탈 사용자·재방문율·예외는 이동 구간, LCP·INP는 최근 30일 관측값의 p75입니다. 재방문율 분모나 Web Vitals 관측값이 없으면 빈 값입니다. 핵심 작업 완료 건수는 UTC 최근 완료 7일의 앱별 지정 이벤트 건수입니다. 제품 레이어의 세션당 참여시간은 Space 예약 수집기가 monitoring/ga4-session-engagement ConfigMap에 기록한 GA4 최근 7일 평균을 초 단위로 표시합니다. 세션이 없거나 평균이 수집되지 않은 경우 빈 값입니다. 비교 차트는 45분을 넘긴 PostHog 관측을 숨깁니다. 그래프 가로축은 scrape 시각이고 신규 게이지 이력은 배포 후 쌓입니다.
 - GA4 속성이 추가되면 Space Status의 원천 목록과 운영 수집기를 갱신하고 새 공개 피드 행을 확인합니다. exporter와 앱 선택기는 피드에서 새 속성을 읽습니다. PostHog 앱 등록은 `posthog-exporter/calendar.js`의 프로젝트·앱 귀속과 Space Status 공개 인벤토리를 함께 확인합니다. 별도 프로젝트는 해당 계정 권한·이벤트 단위·공개 범위를 확인한 뒤 귀속 쿼리에 연결합니다.
 - 변경 완료 보고에는 수정한 문서, source commit, Argo CD revision, Prometheus/Grafana 검증
   결과와 남은 화면 검증 경계를 함께 적습니다.

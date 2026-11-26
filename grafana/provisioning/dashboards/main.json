@@ -199,8 +199,8 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "제품 · 핵심 작업 완료율",
-      "description": "PostHog 공유 프로젝트 424014의 판정 시도→저장 이벤트 기준 30일 전환율입니다.",
+      "title": "제품 · 핵심 작업 완료 건수",
+      "description": "PostHog에서 UTC 기준 최근 완료된 7일간의 핵심 행동 발생 건수를 셉니다. policycock은 사례 열람(case_opened), miniapp-image-tools는 이미지 변환 완료(transform_succeeded)이며 합성 이벤트를 제외합니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -219,13 +219,15 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_conversion_rate{service=\"virtue\"}",
-          "range": true
+          "expr": "max by (scope) (posthog_app_health{metric=\"taskCompletions7d\"})",
+          "range": false,
+          "instant": true,
+          "legendFormat": "{{scope}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
+          "unit": "short",
           "noValue": "N/A",
           "links": [
             {
@@ -238,23 +240,6 @@
           ],
           "color": {
             "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
           }
         },
         "overrides": []
@@ -268,7 +253,7 @@
           "fields": ""
         },
         "orientation": "auto",
-        "textMode": "auto",
+        "textMode": "value_and_name",
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",

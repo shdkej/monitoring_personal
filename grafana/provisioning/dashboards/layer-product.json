@@ -75,9 +75,9 @@
     },
     {
       "id": 2,
-      "type": "stat",
-      "title": "화면 로딩 p99",
-      "description": "CloudWatch RUM · PerformanceNavigationDuration p99 CloudWatch RUM series 미수집 시 N/A입니다.",
+      "type": "timeseries",
+      "title": "세션당 참여시간",
+      "description": "GA4 속성 기준 최근 7일의 총 참여시간을 총 세션 수로 나눈 평균입니다. GA4 홈에 표시된 초 단위 값이며 세션이 없으면 비워 둡니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -96,35 +96,36 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "aws_rum_performance_navigation_duration_p99",
+          "expr": "max by (scope) (ga4_app_session_engagement_seconds{scope=~\"${app:regex}\"})",
+          "legendFormat": "{{scope}}",
           "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ms",
-          "noValue": "N/A",
+          "unit": "s",
+          "min": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
@@ -413,9 +414,9 @@
     },
     {
       "id": 8,
-      "type": "stat",
-      "title": "핵심 작업 완료율",
-      "description": "PostHog 공유 프로젝트 424014의 판정 시도→저장 이벤트 기준 30일 전환율입니다.",
+      "type": "timeseries",
+      "title": "핵심 작업 완료 건수",
+      "description": "PostHog에서 UTC 기준 최근 완료된 7일간의 핵심 행동 발생 건수를 셉니다. policycock은 사례 열람(case_opened), miniapp-image-tools는 이미지 변환 완료(transform_succeeded)이며 합성 이벤트를 제외합니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -434,35 +435,36 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_conversion_rate{service=\"virtue\"}",
+          "expr": "max by (scope) (posthog_app_health{metric=\"taskCompletions7d\",scope=~\"${app:regex}\"})",
+          "legendFormat": "{{scope}}",
           "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
-          "noValue": "N/A",
+          "unit": "short",
+          "min": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     }
   ],
@@ -483,8 +485,8 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(posthog_app_calendar_count, scope)",
-        "query": "label_values(posthog_app_calendar_count, scope)",
+        "definition": "label_values({__name__=~\"ga4_app_rolling7d_count|posthog_app_calendar_count\"}, scope)",
+        "query": "label_values({__name__=~\"ga4_app_rolling7d_count|posthog_app_calendar_count\"}, scope)",
         "multi": true,
         "includeAll": true,
         "allValue": ".*",
@@ -496,7 +498,7 @@
         "options": [],
         "sort": 1,
         "refresh": 1,
-        "description": "PostHog에서 앱별로 집계하는 지표에 적용합니다."
+        "description": "GA4와 PostHog 앱별 지표에 적용합니다."
       }
     ]
   },
