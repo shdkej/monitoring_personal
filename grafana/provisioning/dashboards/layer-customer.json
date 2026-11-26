@@ -20,21 +20,13 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [
-    {
-      "title": "GA4 · PostHog 앱별 비교",
-      "url": "/d/app-analytics",
-      "type": "link",
-      "icon": "dashboard",
-      "keepTime": true
-    }
-  ],
+  "links": [],
   "liveNow": false,
   "panels": [
     {
       "id": 1,
       "type": "timeseries",
-      "title": "GA4 · 신규 사용자",
+      "title": "신규 사용자",
       "description": "GA4 속성 기준 지난 7일. Space가 매일 10:15 KST에 갱신합니다. 관측 후 30시간이 지나거나 해당 앱 수집에 실패하면 선이 끊깁니다.",
       "datasource": {
         "type": "prometheus",
@@ -54,7 +46,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"newUsers\"})",
+          "expr": "max by (scope) (ga4_app_rolling7d_count{scope=~\"${app:regex}\",metric=\"newUsers\"})",
           "legendFormat": "{{scope}}",
           "range": true
         }
@@ -90,10 +82,10 @@
       "id": 2,
       "type": "timeseries",
       "title": "유입 채널별 세션",
-      "description": "GA4 직접 연결 속성 blog·afzma의 최근 30일 채널별 일간 세션입니다. 전체 속성의 세션 추이는 상단 앱별 비교에서 확인합니다.",
+      "description": "선택한 GA4 속성의 지난 7일 전체 세션과 blog·afzma에서 직접 조회할 수 있는 최근 30일의 일간 채널별 세션입니다. 범례에 앱과 집계 기간을 표시합니다.",
       "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "ga4"
+        "type": "mixed",
+        "uid": "-- Mixed --"
       },
       "gridPos": {
         "x": 6,
@@ -116,7 +108,11 @@
           "startDate": "30daysAgo",
           "endDate": "today",
           "filtersExpression": "",
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "ga4"
+          }
         },
         {
           "accountId": "383859191",
@@ -132,7 +128,22 @@
           "startDate": "30daysAgo",
           "endDate": "today",
           "filtersExpression": "",
-          "refId": "B"
+          "refId": "B",
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "ga4"
+          }
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"sessions\",scope=~\"${app:regex}\"})",
+          "legendFormat": "{{scope}} · 7일 전체",
+          "range": true
         }
       ],
       "fieldConfig": {
@@ -143,53 +154,94 @@
             "mode": "palette-classic"
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "blog · ${__field.name}"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "afzma · ${__field.name}"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
-      }
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "A"
+          },
+          "options": {
+            "regex": "^(.+)\\|sessions$",
+            "renamePattern": "blog · 일간 · $1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "A"
+          },
+          "options": {
+            "regex": "^(.+)\\|date$",
+            "renamePattern": "blog · 일간 · $1 날짜"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "filter": {
+            "id": "byRefId",
+            "options": "A"
+          },
+          "options": {
+            "include": {
+              "pattern": "^(${app:regex}) · "
+            }
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "B"
+          },
+          "options": {
+            "regex": "^(.+)\\|sessions$",
+            "renamePattern": "afzma · 일간 · $1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "B"
+          },
+          "options": {
+            "regex": "^(.+)\\|date$",
+            "renamePattern": "afzma · 일간 · $1 날짜"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "filter": {
+            "id": "byRefId",
+            "options": "B"
+          },
+          "options": {
+            "include": {
+              "pattern": "^(${app:regex}) · "
+            }
+          }
+        }
+      ]
     },
     {
       "id": 3,
       "type": "timeseries",
-      "title": "PostHog · 이탈 사용자",
+      "title": "이탈 사용자 수",
       "description": "PostHog 앱별 이동 집계. 합성 이벤트를 제외합니다. 직전 7일에 페이지를 본 고유 사용자와 그 전 7일의 고유 사용자를 비교합니다. 앞 기간에만 방문한 사용자 수입니다.",
       "datasource": {
         "type": "prometheus",
@@ -209,7 +261,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (posthog_app_health{metric=\"churned7d\"})",
+          "expr": "max by (scope) (posthog_app_health{scope=~\"${app:regex}\",metric=\"churned7d\"})",
           "legendFormat": "{{scope}}",
           "range": true
         }
@@ -244,7 +296,7 @@
     {
       "id": 4,
       "type": "timeseries",
-      "title": "PostHog · 재방문율",
+      "title": "7일 재방문율",
       "description": "PostHog 앱별 이동 집계. 합성 이벤트를 제외합니다. 직전 7일에 페이지를 본 고유 사용자와 그 전 7일의 고유 사용자를 비교합니다. 두 기간 모두 방문한 수를 앞 기간의 활성 사용자 수로 나눕니다. 분모가 0이면 빈 값입니다.",
       "datasource": {
         "type": "prometheus",
@@ -264,7 +316,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (posthog_app_health{metric=\"retentionPercent\"})",
+          "expr": "max by (scope) (posthog_app_health{scope=~\"${app:regex}\",metric=\"retentionPercent\"})",
           "legendFormat": "{{scope}}",
           "range": true
         }
@@ -521,7 +573,31 @@
     "4-layer"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "name": "app",
+        "label": "앱",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values({__name__=~\"ga4_app_rolling7d_count|posthog_app_calendar_count\"}, scope)",
+        "query": "label_values({__name__=~\"ga4_app_rolling7d_count|posthog_app_calendar_count\"}, scope)",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [],
+        "sort": 1,
+        "refresh": 1,
+        "description": "GA4와 PostHog에서 앱별로 집계하는 지표에 적용합니다."
+      }
+    ]
   },
   "time": {
     "from": "now-30d",

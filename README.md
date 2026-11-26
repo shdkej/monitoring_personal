@@ -1,7 +1,7 @@
 # monitoring_personal
 
 Grafana·Prometheus 기반의 개인 서비스 모니터링 구성입니다. 비즈니스·고객·제품·시스템의
-4개 레이어를 관찰하며, 고객·제품·Overview 상단의 **GA4 · PostHog 앱별 비교**에서 지표별로 여러 앱을 한 차트에 표시합니다. 앱 선택기의 기본값은 전체입니다.
+4개 레이어에 각각 8개 지표를 표시합니다. 고객·제품 레이어에서 앱을 여러 개 선택하면 해당 지표의 차트에 앱별 범례가 표시됩니다. 기본값은 전체 앱입니다.
 지표 정의와 실제 데이터 공백은
 [`docs/business-layer-design.md`](docs/business-layer-design.md)에 기록합니다.
 Overview 상단의 비즈니스·고객·제품·시스템 링크로 각 상세 대시보드로 바로 이동할 수 있고,

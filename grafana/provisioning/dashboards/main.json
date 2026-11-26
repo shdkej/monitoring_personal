@@ -32,13 +32,6 @@
       "targetBlank": false,
       "title": "레이어 대시보드",
       "type": "dashboards"
-    },
-    {
-      "title": "GA4 · PostHog 앱별 비교",
-      "url": "/d/app-analytics",
-      "type": "link",
-      "icon": "dashboard",
-      "keepTime": true
     }
   ],
   "liveNow": false,

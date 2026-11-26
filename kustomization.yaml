@@ -39,9 +39,6 @@ configMapGenerator:
   - name: grafana-dashboard-layer-business
     files:
       - layer-business.json=grafana/provisioning/dashboards/layer-business.json
-  - name: grafana-dashboard-app-analytics
-    files:
-      - app-analytics.json=grafana/provisioning/dashboards/app-analytics.json
   - name: grafana-dashboard-layer-customer
     files:
       - layer-customer.json=grafana/provisioning/dashboards/layer-customer.json

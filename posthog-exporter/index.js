@@ -272,7 +272,7 @@ new client.Gauge({
 const health = createSnapshotCache(() => collectHealth(hogql));
 new client.Gauge({
   name: 'posthog_app_health',
-  help: 'Per-app rolling activity, retention, errors and web vitals from PostHog',
+  help: 'Per-app rolling churn, retention, errors and web vitals from PostHog',
   labelNames: ['scope', 'metric'], registers: [register],
   collect() {
     this.reset();
