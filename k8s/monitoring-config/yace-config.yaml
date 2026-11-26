@@ -72,7 +72,6 @@ data:
         dimensionNameRequirements: [BucketName, StorageType]
         period: 86400
         length: 259200
-        roundingPeriod: 3600
         nilToZero: false
         addCloudwatchTimestamp: false
         metrics:

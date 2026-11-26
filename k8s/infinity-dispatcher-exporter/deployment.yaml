@@ -38,7 +38,7 @@ spec:
             - name: OPENCLAW_LOG_DIR
               value: /data/openclaw-logs
             - name: SOURCE_REVISION
-              value: openclaw-error-details-20261126
+              value: openclaw-error-details-20261126-v2
           volumeMounts:
             - name: dispatcher-snapshot
               mountPath: /data/snapshot

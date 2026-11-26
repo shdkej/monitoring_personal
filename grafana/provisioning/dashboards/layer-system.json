@@ -359,18 +359,8 @@
           "root_selector": "errors",
           "columns": [
             {
-              "selector": "time",
-              "text": "발생 시각",
-              "type": "timestamp"
-            },
-            {
-              "selector": "level",
-              "text": "레벨",
-              "type": "string"
-            },
-            {
-              "selector": "message",
-              "text": "에러 내용",
+              "selector": "entry",
+              "text": "발생 시각 · 에러 내용",
               "type": "string"
             }
           ]
@@ -388,43 +378,14 @@
           },
           "noValue": "—"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "발생 시각"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dateTimeAsIso"
-              },
-              {
-                "id": "custom.width",
-                "value": 170
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "레벨"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 70
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "showHeader": true,
         "cellHeight": "sm",
         "sortBy": [
           {
-            "displayName": "발생 시각",
+            "displayName": "발생 시각 · 에러 내용",
             "desc": true
           }
         ]

@@ -75,7 +75,7 @@ class ExporterTest(unittest.TestCase):
             now = datetime.now(timezone.utc)
             records = [{"time": (now - timedelta(minutes=i)).isoformat(),
                         "_meta": {"logLevelName": "ERROR"},
-                        "message": 'Authorization: Bearer private-token\nemail=user@example.com password="super secret"',
+                        "message": 'Authorization: Bearer private-token\nemail=user@example.com password="super secret" sessionKey=private-session-key chatId=private-chat-id',
                         "session_id": "do-not-export"} for i in range(60)]
             records.append({"time": (now - timedelta(hours=25)).isoformat(),
                             "_meta": {"logLevelName": "ERROR"}, "message": "old"})
@@ -89,7 +89,7 @@ class ExporterTest(unittest.TestCase):
             self.assertEqual(len(result["errors"]), 50)
             self.assertGreaterEqual(result["errors"][0]["time"], result["errors"][-1]["time"])
             encoded = json.dumps(result)
-            for secret in ("private-token", "user@example.com", "super secret", "do-not-export"):
+            for secret in ("private-token", "user@example.com", "super secret", "do-not-export", "private-session-key", "private-chat-id"):
                 self.assertNotIn(secret, encoded)
             self.assertIn("[REDACTED]", encoded)
 

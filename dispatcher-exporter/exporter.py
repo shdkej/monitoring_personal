@@ -15,12 +15,12 @@ OPENCLAW_LOG_DIR = Path(os.getenv("OPENCLAW_LOG_DIR", "/data/openclaw-logs"))
 def redact_message(message):
     text = str(message)
     text = re.sub(r"(?i)Bearer\s+[A-Za-z0-9._~+/=-]+", "Bearer [REDACTED]", text)
-    text = re.sub(r"(?i)((?:password|passwd|token|api[_-]?key|access[_-]?key|secret(?:[_-]?key)?|authorization|cookie|session[_-]?id)[\"']?\s*[:=]\s*)(?:\"[^\"]*\"|'[^']*'|[^\s,;}]+)", r"\1[REDACTED]", text)
+    text = re.sub(r"(?i)((?:password|passwd|token|api[_-]?key|access[_-]?key|secret(?:[_-]?key)?|authorization|cookie|session[_-]?(?:id|key)|chat[_-]?id|user[_-]?id|message[_-]?id|conn)[\"']?\s*[:=]\s*)(?:\"[^\"]*\"|'[^']*'|[^\s,;}]+)", r"\1[REDACTED]", text)
     text = re.sub(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\b(?:sk-|xox[baprs]-|gh[pousr]_)[A-Za-z0-9_-]{10,}", "[REDACTED]", text)
     text = re.sub(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+", "[REDACTED]", text)
     text = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "[REDACTED]", text)
     text = re.sub(r"(https?://)[^/\s:@]+:[^/\s@]+@", r"\1[REDACTED]@", text)
-    text = re.sub(r"\b[0-9]{10,16}\b", "[REDACTED]", text)
+    text = re.sub(r"\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b|\b[0-9]{10,16}\b", "[REDACTED]", text)
     text = re.sub(r"\x1b\[[0-9;]*[a-zA-Z]|[\x00-\x08\x0b-\x1f\x7f]", "", text)
     return text[:2000]
 
@@ -58,9 +58,11 @@ def openclaw_details():
     for timestamp, level, record in recent_openclaw_records():
         if level in ("ERROR", "FATAL"):
             count += 1
+            message = redact_message(record.get("message", record.get("0", "(메시지 없음)")))
+            local_time = timestamp.astimezone(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S KST")
             errors.append({"time": timestamp.astimezone(timezone.utc).isoformat(),
-                           "level": level,
-                           "message": redact_message(record.get("message", record.get("0", "(메시지 없음)")))})
+                           "level": level, "message": message,
+                           "entry": f"{local_time} · {level}\n{message}"})
             errors.sort(key=lambda row: row["time"], reverse=True)
             del errors[50:]
     return {"total": count, "errors": errors}

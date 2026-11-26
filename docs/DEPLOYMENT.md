@@ -115,7 +115,7 @@ Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존
   AWS가 안내하는 처리 성능 기준이며 고정 한도가 아닙니다. 현재 AWS/S3에는 저장량·객체 수만
   있어 요청률·지연·503 성능 여유는 미측정입니다. 유료 request metrics 활성화는 별도 비용 승인
   이후 대상 버킷·prefix와 지표를 정합니다.
-- ConfigMap 배포 후 YACE reload(실제 지원 여부 확인) 또는 대상 Deployment rollout을 실행하고
+- ConfigMap 배포 후 대상 YACE Deployment rollout을 실행하고
   `/metrics`의 S3/요금 시계열과 Prometheus, Grafana 카드를 대조합니다. 복구는 변경 커밋 revert와
   YACE rollout입니다. S3 버킷·객체·스토리지 클래스는 변경하지 않습니다.
 
@@ -134,6 +134,8 @@ Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존
   실제 ConfigMap의 기존 plugins 목록을 보존하여 추가하고 Grafana plugin API 설치/실제 로딩을
   검증합니다. datasource 정본은 이 저장소 `k8s/monitoring-config/grafana-datasource.yaml`이며
   allowedHosts는 해당 내부 Service만 허용합니다. OpenClaw 크론·설정·재시작은 바꾸지 않습니다.
+
+OpenClaw 메시지 표는 모바일에서 열이 찌그러지지 않도록 KST 발생 시각·레벨·메시지를 한 셀에 줄바꿈하여 표시합니다. UUID와 sessionKey·chatId·messageId 같은 메시지 내부 식별자도 마스킹합니다.
 
 ### 내 지표 지도
 
