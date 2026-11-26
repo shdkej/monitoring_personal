@@ -82,7 +82,7 @@
       "id": 2,
       "type": "timeseries",
       "title": "유입 채널별 세션",
-      "description": "유입 보기에서 전체 채널, 인스타그램 유입 세션, 인스타그램이 첫 유입 소스인 신규 사용자, 계정별 조회·도달을 선택합니다. GA4는 속성 기준 직전 7일, Instagram은 인사이트 화면 기준 최근 7일입니다. 계정 지표는 앱 선택과 독립이며 출처에 표시된 도달 또는 조회한 사람 명칭을 따릅니다. 전체 채널 보기에는 blog·afzma의 일간 상세도 포함됩니다.",
+      "description": "유입 보기에서 전체 채널, 인스타그램 유입 세션, 인스타그램이 첫 유입 소스인 신규 사용자, 계정별 조회·도달을 선택합니다. GA4는 속성 기준 직전 7일, Instagram은 인사이트 화면 기준 최근 7일입니다. GA4 유입은 인스타그램 전체 소스에서 각 앱으로 들어온 수치입니다. 계정 지표는 앱 선택과 독립이며 출처에 표시된 도달 또는 조회한 사람 명칭을 따릅니다. 전체 채널 보기에는 blog·afzma의 일간 상세도 포함됩니다.",
       "datasource": {
         "type": "mixed",
         "uid": "-- Mixed --"
@@ -242,7 +242,7 @@
           },
           "options": {
             "regex": "^(.+)\\|sessions$",
-            "renamePattern": "0 · blog · 일간 · $1"
+            "renamePattern": "blog · 일간 · $1"
           }
         },
         {
@@ -253,7 +253,7 @@
           },
           "options": {
             "regex": "^(.+)\\|date$",
-            "renamePattern": "0 · blog · 일간 · $1 날짜"
+            "renamePattern": "blog · 일간 · $1 날짜"
           }
         },
         {
@@ -264,7 +264,7 @@
           },
           "options": {
             "include": {
-              "pattern": "^${acquisition:raw} · (${app:regex}) · .*$"
+              "pattern": "^(?:$){${acquisition:raw}}(${app:regex}) · .*$"
             }
           }
         },
@@ -276,7 +276,7 @@
           },
           "options": {
             "regex": "^(.+)\\|sessions$",
-            "renamePattern": "0 · afzma · 일간 · $1"
+            "renamePattern": "afzma · 일간 · $1"
           }
         },
         {
@@ -287,7 +287,7 @@
           },
           "options": {
             "regex": "^(.+)\\|date$",
-            "renamePattern": "0 · afzma · 일간 · $1 날짜"
+            "renamePattern": "afzma · 일간 · $1 날짜"
           }
         },
         {
@@ -298,30 +298,8 @@
           },
           "options": {
             "include": {
-              "pattern": "^${acquisition:raw} · (${app:regex}) · .*$"
+              "pattern": "^(?:$){${acquisition:raw}}(${app:regex}) · .*$"
             }
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "A"
-          },
-          "options": {
-            "regex": "^0 · ",
-            "renamePattern": ""
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "B"
-          },
-          "options": {
-            "regex": "^0 · ",
-            "renamePattern": ""
           }
         }
       ]
