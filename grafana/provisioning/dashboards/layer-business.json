@@ -46,8 +46,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_north_star_value{service=\"$service\"}",
-          "range": true
+          "expr": "business_north_star_value{service=~\"${service:regex}\"}",
+          "range": true,
+          "legendFormat": "{{service}}"
         }
       ],
       "fieldConfig": {
@@ -100,8 +101,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_net_revenue{service=\"$service\"}",
-          "range": true
+          "expr": "business_net_revenue{service=~\"${service:regex}\"}",
+          "range": true,
+          "legendFormat": "{{service}}"
         }
       ],
       "fieldConfig": {
@@ -154,8 +156,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_revenue_growth_percent{service=\"$service\"}",
-          "range": true
+          "expr": "business_revenue_growth_percent{service=~\"${service:regex}\"}",
+          "range": true,
+          "legendFormat": "{{service}}"
         }
       ],
       "fieldConfig": {
@@ -208,8 +211,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_paying_customers{service=\"$service\"}",
-          "range": true
+          "expr": "business_paying_customers{service=~\"${service:regex}\"}",
+          "range": true,
+          "legendFormat": "{{service}}"
         }
       ],
       "fieldConfig": {
@@ -262,8 +266,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_paid_conversion_rate{service=\"$service\"}",
-          "range": true
+          "expr": "business_paid_conversion_rate{service=~\"${service:regex}\"}",
+          "range": true,
+          "legendFormat": "{{service}}"
         }
       ],
       "fieldConfig": {
@@ -316,8 +321,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_arppu{service=\"$service\"}",
-          "range": true
+          "expr": "business_arppu{service=~\"${service:regex}\"}",
+          "range": true,
+          "legendFormat": "{{service}}"
         }
       ],
       "fieldConfig": {
@@ -370,8 +376,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_refund_rate{service=\"$service\"}",
-          "range": true
+          "expr": "business_refund_rate{service=~\"${service:regex}\"}",
+          "range": true,
+          "legendFormat": "{{service}}"
         }
       ],
       "fieldConfig": {
@@ -424,8 +431,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_cac{service=\"$service\"}",
-          "range": true
+          "expr": "business_cac{service=~\"${service:regex}\"}",
+          "range": true,
+          "legendFormat": "{{service}}"
         }
       ],
       "fieldConfig": {
@@ -472,12 +480,17 @@
         "query": "virtue,blog,afzma",
         "current": {
           "selected": true,
-          "text": "virtue",
-          "value": "virtue"
+          "text": "All",
+          "value": "$__all"
         },
         "options": [
           {
             "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
             "text": "virtue",
             "value": "virtue"
           },
@@ -493,9 +506,10 @@
           }
         ],
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "multi": false,
-        "skipUrlSync": false
+        "skipUrlSync": false,
+        "allValue": ".*"
       }
     ]
   },
