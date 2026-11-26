@@ -6,7 +6,7 @@ apiVersion: 1
 
 # 대시보드 제공자 목록
 providers:
-  # 4개 모니터링 레이어 + 운영 상세 대시보드
+  # 모니터링 개요와 4개 레이어 대시보드
   - name: 'layer-dashboards'
     orgId: 1
     folder: '4 Layer Monitoring'

@@ -27,12 +27,6 @@ configMapGenerator:
   - name: grafana-dashboard-layer-system
     files:
       - layer-system.json=grafana/provisioning/dashboards/layer-system.json
-  - name: grafana-dashboard-layer-data
-    files:
-      - layer-data.json=grafana/provisioning/dashboards/layer-data.json
-  - name: grafana-dashboard-layer-app
-    files:
-      - layer-app.json=grafana/provisioning/dashboards/layer-app.json
   - name: grafana-dashboard-layer-product
     files:
       - layer-product.json=grafana/provisioning/dashboards/layer-product.json
