@@ -134,3 +134,14 @@ spec:
             summary: "높은 네트워크 송신 트래픽"
             description: "{{ $labels.nodename }}의 {{ $labels.device }} 인터페이스에서 높은 송신 트래픽이 감지되었습니다. ({{ $value | humanize }}B/s)"
             dashboard_url: "https://grafana.oracle.shdkej.com/d/layer-system/layer-3?viewPanel=network"
+
+    - name: analytics_collection
+      rules:
+        - alert: AnalyticsApiCollectionFailed
+          expr: analytics_api_consecutive_failures >= 3 or time() - analytics_api_last_success_timestamp_seconds > 10800
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: '분석 원천 수집 지연'
+            description: '{{ $labels.source }} / {{ $labels.scope }} API 수집 상태를 확인하세요.'

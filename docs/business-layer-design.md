@@ -72,7 +72,7 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 ## 앱·데이터 원천 현황
 
 - 2026-11-26 원천 대조에서 GA4 계정 3개와 속성 4개(blog, afzma, policycock, purple-place-bb6ce)를 확인했다. Grafana의 GA4 직접 연결 권한은 blog·afzma에 있으며, 네 속성의 공통 지표는 Space의 일간 집계 피드에서 읽는다.
-- PostHog 접근 가능 프로젝트는 424014 한 개이다. 등록 범위는 policycock, miniapp-image-tools, Infinity, shdkej.com, Virtue와 앱 미지정이다. 최근 90일의 명시적 앱 ID는 policycock·miniapp-image-tools였다. 기존 `service="virtue"`는 공유 프로젝트 전체를 조회했던 라벨이다. 앱별 패널은 `scope`를 사용한다.
+- PostHog 접근 가능 프로젝트는 424014 한 개이다. 등록 범위는 policycock, miniapp-image-tools, Infinity, shdkej.com, Virtue와 앱 미지정이다. 최근 90일의 명시적 앱 ID는 policycock·miniapp-image-tools였다. 2026-11-26 전환 이후 `service="virtue"`도 Virtue 앱만 집계한다. 과거 시계열에는 공유 프로젝트 전체 값이 남아 있다. 앱별 패널은 `scope`를 사용한다.
 - YACE exporter와 ServiceMonitor scrape target은 정상(up)이다. YACE `/metrics`에는 Lambda invocation/error 및 DynamoDB capacity metric names가 있지만, 확인 시 Lambda samples는 NaN, DynamoDB consumed capacity는 0, throttling series는 없었다. CloudWatch RUM 로그에는 `No metrics data found`가 반복되고 RUM Prometheus series도 없다. 값이 0인지 데이터/리소스 범위가 잘못됐는지 임의 추정하지 않는다.
 - 노드 CPU·메모리·디스크·네트워크·헬스 시계열은 Prometheus에 있다. HPA와 black-box latency probe 시계열은 없다.
 - Gmail connector는 현재 설치·연결되지 않았다. 메일을 조회하기 전에 사용자가 지원 주소 또는 Gmail 라벨과 집계 단위(스레드/메시지)를 지정해야 한다.

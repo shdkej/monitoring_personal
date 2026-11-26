@@ -1,4 +1,5 @@
 const client = require('prom-client');
+const {apiRows} = require('./analytics-api');
 const {readFile} = require('node:fs/promises');
 const SOURCE = 'https://status.aws.shdkej.com/analytics-ga4.json';
 // The publisher runs once a day at 10:15 KST. Allow six hours for a delayed run.
@@ -22,32 +23,34 @@ function readRows(feed) {
   });
 }
 
-function registerGA4(registry, clock = Date.now, readEngagement = () => readFile('/etc/ga4-engagement/report.json', 'utf8'),
-                     readInstagram = () => readFile('/etc/ga4-engagement/instagram.json', 'utf8')) {
+function registerGA4(registry, {
+  clock = Date.now, readEngagement = () => readFile('/etc/ga4-engagement/report.json', 'utf8'),
+  readInstagram = () => readFile('/etc/ga4-engagement/instagram.json', 'utf8'), api,
+} = {}) {
   let rows = [];
   async function currentPrivateRows() {
+    if (api?.ga4.size) return apiRows([], api.ga4, clock());
     let report;
     try {
       report = JSON.parse(await readEngagement());
     } catch {
       // The optional volume can be empty until the scheduled collector succeeds.
-      return [];
     }
-    if (report?.schemaVersion !== 1 || !Array.isArray(report.rows)) return [];
     const now = clock();
-    return report.rows.filter(row => {
+    const legacy = report?.schemaVersion === 1 && Array.isArray(report.rows) ? report.rows : [];
+    return legacy.filter(row => {
       const observed = Date.parse(row?.observedAt);
       return typeof row?.scope === 'string' && observed <= now && now - observed <= MAX_AGE_MS;
     });
   }
   new client.Gauge({
     name: 'ga4_app_rolling7d_count',
-    help: 'GA4 last seven days by property in the Space analytics feed',
+    help: 'GA4 last seven completed days by property',
     labelNames: ['scope', 'metric'], registers: [registry],
     collect() {
       this.reset();
       const now = clock();
-      for (const {scope, observed, values} of rows) {
+      for (const {scope, observed, values} of apiRows(rows, api?.ga4, now)) {
         if (!values || observed > now || now - observed > MAX_AGE_MS) continue;
         for (const metric of ['newUsers', 'sessions']) this.set({scope, metric}, values[metric]);
       }
@@ -61,7 +64,7 @@ function registerGA4(registry, clock = Date.now, readEngagement = () => readFile
       this.reset();
       for (const row of await currentPrivateRows()) {
         if (row.status === 'ok' && Number.isSafeInteger(row.sessions) && row.sessions > 0 &&
-            Number.isSafeInteger(row.seconds) && row.seconds >= 0) {
+            Number.isFinite(row.seconds) && row.seconds >= 0) {
           this.set({scope: row.scope}, row.seconds);
         }
       }
@@ -102,11 +105,14 @@ function registerGA4(registry, clock = Date.now, readEngagement = () => readFile
     async collect() {
       this.reset();
       let report;
-      try { report = JSON.parse(await readInstagram()); } catch { return; }
-      if (report?.schemaVersion !== 1 || report.source !== 'instagram' || !Array.isArray(report.rows)) return;
+      if (!api?.instagram.size) {
+        try { report = JSON.parse(await readInstagram()); } catch { /* Optional legacy file. */ }
+      }
+      const legacy = report?.schemaVersion === 1 && report.source === 'instagram' && Array.isArray(report.rows) ? report.rows : [];
       const now = clock();
+      const accounts = apiRows(legacy, api?.instagram, now);
       for (const account of ['minimal_collector', 'every.policy']) {
-        const valid = report.rows.filter(row => row?.scope === account);
+        const valid = accounts.filter(row => row?.scope === account);
         if (valid.length !== 1 || valid[0].status !== 'ok') continue;
         const {observedAt, values} = valid[0];
         const observed = Date.parse(observedAt);
@@ -123,13 +129,14 @@ function registerGA4(registry, clock = Date.now, readEngagement = () => readFile
     labelNames: ['scope'], registers: [registry],
     collect() {
       this.reset();
-      for (const {scope, observed} of rows) {
+      for (const {scope, observed} of apiRows(rows, api?.ga4, clock())) {
         if (Number.isFinite(observed)) this.set({scope}, observed / 1000);
       }
     },
   });
 
   return async function refresh(fetchFeed = fetch) {
+    if (api?.ga4.size) return;
     const response = await fetchFeed(SOURCE, {signal: AbortSignal.timeout(15000), redirect: 'error'});
     if (!response.ok) throw new Error('GA4 feed HTTP ' + response.status);
     rows = readRows(await response.json());

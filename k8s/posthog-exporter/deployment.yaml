@@ -18,6 +18,17 @@ spec:
         app: posthog-exporter
     spec:
       volumes:
+        - name: analytics-ga4
+          secret:
+            secretName: grafana-ga4-credentials
+            optional: true
+            items:
+              - key: GA4_PRIVATE_KEY
+                path: credentials.json
+        - name: analytics-instagram
+          secret:
+            secretName: analytics-instagram-api
+            optional: true
         - name: ga4-engagement
           configMap:
             name: ga4-session-engagement
@@ -27,6 +38,12 @@ spec:
           image: node:20-alpine
           imagePullPolicy: IfNotPresent
           volumeMounts:
+            - name: analytics-ga4
+              mountPath: /etc/analytics-ga4
+              readOnly: true
+            - name: analytics-instagram
+              mountPath: /etc/analytics-instagram
+              readOnly: true
             - name: ga4-engagement
               mountPath: /etc/ga4-engagement
               readOnly: true
@@ -34,15 +51,13 @@ spec:
           # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
             - name: SOURCE_REVISION
-              value: "instagram-acquisition-2026-11-26"
+              value: "analytics-direct-api-2026-11-26"
+            - name: GA4_API_ENABLED
+              value: "true"
+            - name: INSTAGRAM_API_ENABLED
+              value: "false"
             - name: POSTHOG_HOST
               value: https://us.posthog.com
-            - name: POSTHOG_PROJECTS
-              value: "virtue:424014"
-            - name: PRODUCT_APPS
-              value: "virtue,blog,afzma"
-            - name: POSTHOG_FUNNELS
-              value: "virtue:deed_judge_attempted:deed_saved"
             # Personal API Key는 민감정보 → Secret 참조 (repo가 public이므로 평문 금지)
             # 생성: kubectl -n monitoring create secret generic posthog-credentials \
             #         --from-literal=access-token='phx_...'

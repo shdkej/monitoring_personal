@@ -1,6 +1,7 @@
 const express = require('express');
 const {registerGA4} = require('./ga4');
-const {collectHealth} = require('./app-health');
+const {createAnalyticsApi, HOUR} = require('./analytics-api');
+const {projectMetrics, registerActivity} = require('./project-metrics');
 const {firstVisitMetrics} = require('./first-visit');
 const client = require('prom-client');
 const {collectSnapshot, createSnapshotCache} = require('./calendar');
@@ -16,34 +17,6 @@ const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://us.posthog.com';
 const TOKEN = process.env.POSTHOG_ACCESS_TOKEN;
 const FETCH_INTERVAL = Number(process.env.FETCH_INTERVAL_MS) || 5 * 60 * 1000; // 5분
 
-// 연동된 앱 → PostHog 프로젝트ID 매핑. 예: "virtue:424014,blog:111"
-function parseProjects() {
-  const map = {};
-  (process.env.POSTHOG_PROJECTS || 'virtue:424014').split(',').forEach((entry) => {
-    const [name, pid] = entry.trim().split(':');
-    if (name && pid) map[name] = pid;
-  });
-  return map;
-}
-const projects = parseProjects();
-
-// 대시보드에 표시할 전체 앱 목록. 연동 안 된 앱은 N/A로 노출(connected=0).
-const allApps = (process.env.PRODUCT_APPS || 'virtue,blog,afzma')
-  .split(',').map((s) => s.trim()).filter(Boolean);
-
-// 앱별 전환 퍼널: "app:startEvent:convertEvent" (쉼표 구분). 전환율 = convert유저/start유저
-// funnel 정의가 없는 앱은 전환 메트릭 미노출 → 대시보드 N/A
-// virtue: 판정 시도(deed_judge_attempted) → 저장(deed_saved). add_flow_started는 배포본 미발생이라 제외.
-function parseFunnels() {
-  const map = {};
-  (process.env.POSTHOG_FUNNELS || 'virtue:deed_judge_attempted:deed_saved').split(',').forEach((entry) => {
-    const [app, start, convert] = entry.trim().split(':');
-    if (app && start && convert) map[app] = { start, convert };
-  });
-  return map;
-}
-const funnels = parseFunnels();
-
 if (!TOKEN) {
   console.error('POSTHOG_ACCESS_TOKEN 환경변수가 필요합니다');
   process.exit(1);
@@ -54,96 +27,6 @@ if (!TOKEN) {
 // ============================================
 
 const register = new client.Registry();
-
-const appConnected = new client.Gauge({
-  name: 'product_app_connected',
-  help: '앱이 PostHog에 연동됐는지 (1=연동, 0=미연동→대시보드 N/A)',
-  labelNames: ['service'],
-});
-const activeUsers = new client.Gauge({
-  name: 'product_active_users',
-  help: '활성 유저 ($pageview 기준 distinct person)',
-  labelNames: ['service', 'period'],
-});
-const pageViews = new client.Gauge({
-  name: 'product_page_views',
-  help: '페이지뷰 수',
-  labelNames: ['service', 'period'],
-});
-const churnedUsers = new client.Gauge({
-  name: 'product_churned_users',
-  help: '이탈 유저 (이전 7일 활성 중 최근 7일 $pageview 미발생). PostHog person 코호트 기반 (추정 아님)',
-  labelNames: ['service'],
-});
-const conversions = new client.Gauge({
-  name: 'product_conversions',
-  help: '핵심 전환 유저 수 (앱별 funnel의 convert 이벤트, 30일 distinct person)',
-  labelNames: ['service'],
-});
-const funnelStartedUsers = new client.Gauge({
-  name: 'product_funnel_started_users',
-  help: '핵심 퍼널 시작 유저 수 (30일 distinct person)',
-  labelNames: ['service'],
-});
-const conversionRate = new client.Gauge({
-  name: 'product_conversion_rate',
-  help: '전환율 % (convert 유저 / funnel start 유저 × 100, 30일)',
-  labelNames: ['service'],
-});
-const funnelDropoffRate = new client.Gauge({
-  name: 'product_funnel_dropoff_rate',
-  help: '핵심 퍼널 이탈률 % (1 - convert 유저 / start 유저, 30일). 시작 유저가 없으면 계열을 내보내지 않음',
-  labelNames: ['service'],
-});
-const retainedUsers = new client.Gauge({
-  name: 'product_retained_users',
-  help: '재방문 유저 (이전 7일 활성 중 최근 7일도 $pageview 발생)',
-  labelNames: ['service'],
-});
-const retentionRate = new client.Gauge({
-  name: 'product_retention_rate',
-  help: '주간 재방문율 % (retained / 이전 7일 활성 × 100). 이탈율 = 100 − 이 값',
-  labelNames: ['service'],
-});
-// --- 프로덕트 헬스 (L2) ---
-const webVitalsLcp = new client.Gauge({
-  name: 'product_web_vitals_lcp_ms',
-  help: 'LCP p75 (ms, PostHog $web_vitals 30일). Google 기준: <2500 양호, >4000 불량',
-  labelNames: ['service'],
-});
-const webVitalsInp = new client.Gauge({
-  name: 'product_web_vitals_inp_ms',
-  help: 'INP p75 (ms, FID 후속 지표). Google 기준: <200 양호, >500 불량',
-  labelNames: ['service'],
-});
-const productErrors = new client.Gauge({
-  name: 'product_errors',
-  help: '프론트 에러 수 ($exception 7일)',
-  labelNames: ['service'],
-});
-const productSessions = new client.Gauge({
-  name: 'product_sessions',
-  help: '세션 수 (7일 uniq $session_id). 서비스 정상 여부 지표',
-  labelNames: ['service'],
-});
-register.registerMetric(appConnected);
-register.registerMetric(activeUsers);
-register.registerMetric(pageViews);
-register.registerMetric(churnedUsers);
-register.registerMetric(conversions);
-register.registerMetric(funnelStartedUsers);
-register.registerMetric(conversionRate);
-register.registerMetric(funnelDropoffRate);
-register.registerMetric(retainedUsers);
-register.registerMetric(retentionRate);
-register.registerMetric(webVitalsLcp);
-register.registerMetric(webVitalsInp);
-register.registerMetric(productErrors);
-register.registerMetric(productSessions);
-
-// ============================================
-// PostHog Query API (HogQL)
-// ============================================
 
 async function hogql(projectId, query) {
   const res = await fetch(`${POSTHOG_HOST}/api/projects/${projectId}/query/`, {
@@ -162,85 +45,9 @@ async function hogql(projectId, query) {
   return data.results; // [[value], ...]
 }
 
-async function fetchApp(name, projectId) {
-  const svc = { service: name };
-  const dau = await hogql(projectId,
-    "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 1 day");
-  const wau = await hogql(projectId,
-    "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day");
-  const pv = await hogql(projectId,
-    "SELECT count() FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day");
-  // 리텐션 코호트: 이전 7일(7~14d) 활성 = 분모, 그중 최근 7일(0~7d)도 활성 = retained
-  const prevActive = await hogql(projectId,
-    "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day AND timestamp <= now() - interval 7 day");
-  const retained = await hogql(projectId,
-    "SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp > now() - interval 14 day AND timestamp <= now() - interval 7 day AND person_id IN (SELECT DISTINCT person_id FROM events WHERE event = '$pageview' AND timestamp > now() - interval 7 day)");
-  const prev = Number(prevActive?.[0]?.[0]) || 0;
-  const ret = Number(retained?.[0]?.[0]) || 0;
-
-  activeUsers.set({ ...svc, period: '1d' }, Number(dau?.[0]?.[0]) || 0);
-  activeUsers.set({ ...svc, period: '7d' }, Number(wau?.[0]?.[0]) || 0);
-  pageViews.set({ ...svc, period: '7d' }, Number(pv?.[0]?.[0]) || 0);
-  // 이탈·재방문은 같은 코호트에서 일관 산출 (이탈 = 이전활성 − 재방문)
-  retainedUsers.set(svc, ret);
-  churnedUsers.set(svc, Math.max(0, prev - ret));
-  retentionRate.set(svc, prev > 0 ? (ret / prev) * 100 : 0);
-
-  // 프로덕트 헬스: web vitals(p75, 30일) · 프론트 에러 · 세션
-  const lcp = await hogql(projectId,
-    "SELECT round(quantile(0.75)(toFloat(properties['$web_vitals_LCP_value'])), 0) FROM events WHERE event = '$web_vitals' AND timestamp > now() - interval 30 day");
-  const inp = await hogql(projectId,
-    "SELECT round(quantile(0.75)(toFloat(properties['$web_vitals_INP_value'])), 0) FROM events WHERE event = '$web_vitals' AND timestamp > now() - interval 30 day");
-  const errs = await hogql(projectId,
-    "SELECT count() FROM events WHERE event = '$exception' AND timestamp > now() - interval 7 day");
-  const sess = await hogql(projectId,
-    "SELECT uniq(properties['$session_id']) FROM events WHERE timestamp > now() - interval 7 day");
-  webVitalsLcp.set(svc, Number(lcp?.[0]?.[0]) || 0);
-  webVitalsInp.set(svc, Number(inp?.[0]?.[0]) || 0);
-  productErrors.set(svc, Number(errs?.[0]?.[0]) || 0);
-  productSessions.set(svc, Number(sess?.[0]?.[0]) || 0);
-
-  // 전환 퍼널 (앱별 정의가 있을 때만). 30일 distinct person 기준
-  const f = funnels[name];
-  if (f) {
-    const starts = await hogql(projectId,
-      `SELECT count(DISTINCT person_id) FROM events WHERE event = '${f.start}' AND timestamp > now() - interval 30 day`);
-    const convs = await hogql(projectId,
-      `SELECT count(DISTINCT person_id) FROM events WHERE event = '${f.convert}' AND timestamp > now() - interval 30 day`);
-    const s = Number(starts?.[0]?.[0]) || 0;
-    const c = Number(convs?.[0]?.[0]) || 0;
-    if (s > 0) {
-      funnelStartedUsers.set(svc, s);
-      conversions.set(svc, c);
-      conversionRate.set(svc, (c / s) * 100);
-      funnelDropoffRate.set(svc, ((s - c) / s) * 100);
-    } else {
-      // 퍼널 진입자가 없으면 이탈률은 0%가 아니라 측정 불가다.
-      funnelStartedUsers.remove(svc);
-      conversions.remove(svc);
-      conversionRate.remove(svc);
-      funnelDropoffRate.remove(svc);
-    }
-  }
-}
-
-async function fetchAll() {
-  for (const app of allApps) {
-    const pid = projects[app];
-    if (!pid) {
-      appConnected.set({ service: app }, 0); // 미연동 → 값 메트릭 없음 → Grafana N/A
-      continue;
-    }
-    appConnected.set({ service: app }, 1);
-    try {
-      await fetchApp(app, pid);
-      console.log(`[${new Date().toISOString()}] ${app}(${pid}) 수집 완료`);
-    } catch (err) {
-      console.error(`[${new Date().toISOString()}] ${app} 수집 실패:`, err.message);
-    }
-  }
-}
-
+const privateProjects = projectMetrics(POSTHOG_HOST, TOKEN, hogql);
+registerActivity(client, register, privateProjects);
+// Only the previously approved app list is served by the Space publication endpoint.
 const calendar = createSnapshotCache(() => collectSnapshot(hogql));
 new client.Gauge({
   name: 'posthog_app_calendar_count',
@@ -249,7 +56,7 @@ new client.Gauge({
   registers: [register],
   collect() {
     this.reset();
-    for (const row of calendar.current?.rows || []) {
+    for (const row of privateProjects.fresh.flatMap(p => p.calendar.rows)) {
       for (const [period, samples] of Object.entries({...row.periods, rolling7d: [row]})) {
         for (const sample of samples) {
           const labels = {scope: row.scope, period, period_start: sample.periodStart, period_end: sample.periodEnd};
@@ -266,19 +73,19 @@ new client.Gauge({
   help: 'Source observation time of the last complete PostHog app calendar snapshot',
   registers: [register],
   collect() {
-    this.set(calendar.current ? Date.parse(calendar.current.observedAt) / 1000 : 0);
+    const times = privateProjects.fresh.map(p => Date.parse(p.calendar.observedAt) / 1000);
+    this.set(times.length ? Math.min(...times) : 0);
   },
 });
 
-const health = createSnapshotCache(() => collectHealth(hogql));
+
 new client.Gauge({
   name: 'posthog_app_health',
   help: 'Per-app rolling churn, retention, errors and web vitals from PostHog',
   labelNames: ['scope', 'metric'], registers: [register],
   collect() {
     this.reset();
-    if (!health.current || Date.now() - health.current.observedAt > 45 * 60 * 1000) return;
-    for (const {scope, values} of health.current.rows) {
+    for (const {scope, values} of privateProjects.fresh.flatMap(p => p.health.rows)) {
       for (const [metric, value] of Object.entries(values)) this.set({scope, metric}, value);
     }
   },
@@ -329,20 +136,18 @@ app.get('/analytics-posthog.json', (req, res) => {
   res.json(calendar.current);
 });
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', host: POSTHOG_HOST, projects, allApps });
+  res.json({ status: 'ok', host: POSTHOG_HOST, projects: privateProjects.projects, allApps: privateProjects.fresh.flatMap(p => p.health.rows.map(r => r.scope)) });
 });
 
 // 첫 폴링을 끝낸 뒤 서빙 시작 (초기 데이터 보장). 실패해도 서버는 띄운다.
 async function start() {
-  try {
-    await fetchAll();
-  } catch (err) {
-    console.error('초기 수집 실패:', err.message);
-  }
-  setInterval(fetchAll, FETCH_INTERVAL);
-  const collectGA4 = registerGA4(register);
+  const analyticsApi = createAnalyticsApi(register);
+  const refreshApi = () => analyticsApi.refresh().catch(() => console.error('Analytics API refresh failed'));
+  void refreshApi();
+  setInterval(refreshApi, HOUR);
+  const collectGA4 = registerGA4(register, {api: analyticsApi});
   const refreshGA4 = () => collectGA4().catch(err => console.error('GA4 피드 수집 실패:', err.message));
-  const refreshHealth = () => health.refresh().catch(err => console.error('PostHog 앱 품질 수집 실패:', err.message));
+  const refreshHealth = () => privateProjects.refresh().catch(err => console.error('PostHog 앱 품질 수집 실패:', err.message));
   const refreshFirstVisits = () => firstVisits.refresh().catch(err => console.error('PostHog 첫 방문 수집 실패:', err.message));
   void refreshFirstVisits();
   setInterval(refreshFirstVisits, 15 * 60 * 1000);
@@ -354,8 +159,6 @@ async function start() {
   setInterval(refreshCalendar, Math.min(FETCH_INTERVAL, 5 * 60 * 1000));
   app.listen(PORT, () => {
     console.log(`posthog-exporter on port ${PORT}`);
-    console.log(`연동 앱: ${Object.entries(projects).map(([k, v]) => `${k}:${v}`).join(', ') || '(없음)'}`);
-    console.log(`전체 앱: ${allApps.join(', ')}`);
   });
 }
 start();

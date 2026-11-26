@@ -1,0 +1,166 @@
+const {readFile} = require('node:fs/promises');
+const {JWT} = require('google-auth-library');
+const {Gauge} = require('prom-client');
+
+const PROPERTIES = {blog: '252603434', afzma: '523848883', policycock: '565383231', 'purple-place-bb6ce': '376243766'};
+const INSTAGRAM = 'minimal_collector';
+const HOUR = 3600000;
+const MAX_AGE = 3 * HOUR;
+
+async function request(url, token, body) {
+  const headers = {Authorization: 'Bearer ' + token};
+  const options = {headers, redirect: 'error', signal: AbortSignal.timeout(20000)};
+  if (body) Object.assign(options, {method: 'POST', body: JSON.stringify(body)});
+  if (body) headers['Content-Type'] = 'application/json';
+  const response = await fetch(url, options);
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  return response.json();
+}
+
+const gaRange = {startDate: '7daysAgo', endDate: 'yesterday'};
+function gaReport(metrics, dimensions = []) {
+  return {dateRanges: [gaRange], metrics: metrics.map(name => ({name})), dimensions: dimensions.map(name => ({name})),
+    keepEmptyRows: true, limit: '10000'};
+}
+function attributed(rows, expected) {
+  if (rows.some(([source]) => typeof source !== 'string' || !source) || new Set(rows.map(([source]) => source)).size !== rows.length ||
+      rows.reduce((sum, [, count]) => sum + count, 0) !== expected) throw new Error('Incomplete GA4 sources');
+  const instagram = /^(?:ig|instagram|(?:[a-z0-9-]+\.)*instagram\.com|com\.instagram\.android)$/i;
+  return rows.reduce((sum, [source, count]) => instagram.test(source) ? sum + count : sum, 0);
+}
+
+function parseReport(report, query) {
+  const names = list => (list || []).map(header => header.name).join('|');
+  if (!report || names(report.metricHeaders) !== names(query.metrics) || names(report.dimensionHeaders) !== names(query.dimensions)) {
+    throw new Error('Unexpected GA4 report columns');
+  }
+  const rows = report.rows ?? [];
+  if (!Array.isArray(rows) || rows.length !== (report.rowCount ?? 0) ||
+      report.metadata?.dataLossFromOtherRow || report.metadata?.subjectToThresholding ||
+      report.metadata?.samplingMetadatas?.length) throw new Error('Incomplete GA4 report');
+  return rows.map(row => {
+    if (row.metricValues?.length !== query.metrics.length || (row.dimensionValues || []).length !== query.dimensions.length)
+      throw new Error('Incomplete GA4 row');
+    const counts = row.metricValues.map(({value}) => {
+      if (typeof value !== 'string' || !/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)))
+        throw new Error('Invalid GA4 count');
+      return Number(value);
+    });
+    return [...(row.dimensionValues || []).map(({value}) => value), ...counts];
+  });
+}
+
+async function readProperty(scope, property, token, now, get = request) {
+  const queries = [
+    gaReport(['newUsers', 'sessions', 'userEngagementDuration']),
+    gaReport(['sessions'], ['sessionDefaultChannelGroup']),
+    gaReport(['sessions'], ['sessionSource']),
+    gaReport(['newUsers'], ['firstUserSource']),
+  ];
+  const {reports} = await get('https://analyticsdata.googleapis.com/v1beta/properties/' + property + ':batchRunReports', token, {requests: queries});
+  if (reports?.length !== queries.length) throw new Error('Incomplete GA4 batch');
+  const [total, channels, sourcedSessions, sourcedUsers] = reports.map((report, i) => parseReport(report, queries[i]));
+  if (total.length > 1) throw new Error('Unexpected GA4 total rows');
+  const [newUsers, sessions, duration] = total[0] || [0, 0, 0];
+  const instagramAcquisition = {sessions: attributed(sourcedSessions, sessions), newUsers: attributed(sourcedUsers, newUsers)};
+  const channelSessions = Object.fromEntries(channels);
+  if (channels.length > 32 || channels.some(([name]) => typeof name !== 'string' || !name || name.length > 48) ||
+      Object.keys(channelSessions).length !== channels.length || channels.reduce((sum, [, n]) => sum + n, 0) !== sessions ||
+      instagramAcquisition.sessions > sessions || instagramAcquisition.newUsers > newUsers)
+    throw new Error('Inconsistent GA4 totals');
+  return {scope, observed: now, observedAt: new Date(now).toISOString(), status: sessions ? 'ok' : 'no_sessions',
+    values: {sessions, newUsers}, sessions, seconds: sessions ? duration / sessions : null, channelSessions, instagramAcquisition};
+}
+
+async function readAccount(token, accountId, now, get = request) {
+  if (accountId !== 'me' && !/^\d{5,30}$/.test(accountId)) throw new Error('Invalid Instagram account');
+  const base = 'https://graph.instagram.com/v27.0/';
+  const profile = await get(base + accountId + '?fields=id,username', token);
+  if (profile.username !== INSTAGRAM || !/^\d{5,30}$/.test(profile.id)) throw new Error('Unexpected Instagram account');
+  const until = Math.floor(now / 86400000) * 86400;
+  const params = new URLSearchParams({metric: 'views,reach', metric_type: 'total_value', period: 'day',
+    since: String(until - 7 * 86400), until: String(until)});
+  const {data} = await get(base + profile.id + '/insights?' + params, token);
+  if (!Array.isArray(data)) throw new Error('Missing Instagram insights');
+  const values = {};
+  for (const name of ['views', 'reach']) {
+    const rows = data.filter(row => row.name === name);
+    if (!rows.length && name === 'reach') continue;
+    const value = rows[0]?.total_value?.value;
+    if (rows.length !== 1 || !Number.isSafeInteger(value) || value < 0) throw new Error('Invalid Instagram insights');
+    values[name] = value;
+  }
+  return {scope: INSTAGRAM, observed: now, observedAt: new Date(now).toISOString(), status: 'ok', values};
+}
+
+async function optionalSecret(path) {
+  try { return (await readFile(path, 'utf8')).trim(); } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+    return null;
+  }
+}
+
+async function googleToken(credentials) {
+  const {client_email: email, private_key: key} = JSON.parse(credentials);
+  if (!email || !key) throw new Error('Missing GA4 service account');
+  const client = new JWT({email, key, scopes: ['https://www.googleapis.com/auth/analytics.readonly'], transporterOptions: {timeout: 20000}});
+  const {token} = await client.getAccessToken();
+  if (!token) throw new Error('Missing Google access token');
+  return token;
+}
+
+function createAnalyticsApi(registry, {
+  clock = Date.now, googleEnabled = process.env.GA4_API_ENABLED === 'true',
+  instagramEnabled = process.env.INSTAGRAM_API_ENABLED === 'true',
+} = {}) {
+  // A configured source owns its labels immediately, including after pod restarts.
+  // Empty entries are unavailable until a complete API response arrives.
+  const ga4 = new Map(googleEnabled ? Object.keys(PROPERTIES).map(scope => [scope, null]) : []);
+  const instagram = new Map(instagramEnabled ? [[INSTAGRAM, null]] : []);
+  const failures = new Gauge({name: 'analytics_api_consecutive_failures', help: 'Consecutive hourly API refresh failures',
+    labelNames: ['source', 'scope'], registers: [registry]});
+  const lastSuccess = new Gauge({name: 'analytics_api_last_success_timestamp_seconds', help: 'Last verified direct API result',
+    labelNames: ['source', 'scope'], registers: [registry]});
+  async function update(source, scope, cache, load) {
+    try {
+      const row = await load();
+      cache.set(scope, row);
+      lastSuccess.set({source, scope}, row.observed / 1000);
+      failures.set({source, scope}, 0);
+    } catch (err) {
+      failures.inc({source, scope});
+      // Provider or OAuth libraries may attach credentials to error objects.
+      const status = /^(HTTP \d{3})$/.test(err.message) ? err.message : 'invalid or unavailable response';
+      console.error(source + ' API ' + scope + ': ' + status);
+    }
+  }
+  async function refreshGoogle() {
+    if (!googleEnabled) return;
+    const auth = readFile('/etc/analytics-ga4/credentials.json', 'utf8').then(googleToken);
+    await Promise.all(Object.entries(PROPERTIES).map(([scope, property]) => update('ga4', scope, ga4,
+      async () => readProperty(scope, property, await auth, clock()))));
+  }
+  async function refreshInstagram() {
+    if (!instagramEnabled) return;
+    await update('instagram', INSTAGRAM, instagram, async () => {
+      const token = (await readFile('/etc/analytics-instagram/access-token', 'utf8')).trim();
+      const id = await optionalSecret('/etc/analytics-instagram/account-id');
+      return readAccount(token, id || 'me', clock());
+    });
+  }
+  let pending;
+  function refresh() {
+    if (!pending) pending = Promise.all([refreshGoogle(), refreshInstagram()]).finally(() => { pending = null; });
+    return pending;
+  }
+  return {ga4, instagram, refresh};
+}
+
+// Keep browser data only for scopes that have not been cut over.
+function apiRows(legacy, cache, now) {
+  if (!cache?.size) return legacy;
+  return [...legacy.filter(row => !cache.has(row.scope)), ...[...cache.values()].filter(row =>
+    row && now >= row.observed && now - row.observed <= MAX_AGE)];
+}
+
+module.exports = {createAnalyticsApi, apiRows, readProperty, readAccount, HOUR, PROPERTIES};

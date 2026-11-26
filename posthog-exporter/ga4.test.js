@@ -7,7 +7,7 @@ test('GA4 refresh keeps observed zero, isolates unavailable apps, and expires ol
   let now = Date.parse('2026-11-26T02:00:00Z');
   const registry = new Registry();
   let report = '';
-  const refresh = registerGA4(registry, () => now, () => report);
+  const refresh = registerGA4(registry, {clock: () => now, readEngagement: () => report});
   const sample = {scope: 'app', observedAt: '2026-11-26T01:00:00Z', status: 'ok', values: {newUsers: 0, sessions: 3}};
   const feed = rows => async () => ({ok: true, json: async () => ({schemaVersion: 1, source: 'ga4', rows})});
   await refresh(feed([sample, {...sample, scope: 'other', status: 'unavailable'}]));
@@ -35,7 +35,7 @@ test('channel totals are independently verified, finite, and expire with the pri
     {...measured, scope: 'invalid', channelSessions: {Direct: 5.5, Referral: -0.5}},
     {...measured, scope: 'no-events', sessions: 0, status: 'no_sessions', channelSessions: {}}]};
   const registry = new Registry();
-  registerGA4(registry, () => now, () => JSON.stringify(report));
+  registerGA4(registry, {clock: () => now, readEngagement: () => JSON.stringify(report)});
   const get = () => registry.getSingleMetric('ga4_app_channel_sessions').get().then(m => m.values);
   assert.deepEqual((await get()).map(r => [r.labels.scope, r.labels.channel, r.value]),
     [['app', 'Direct', 3], ['app', 'Referral', 2]]);
@@ -53,7 +53,7 @@ test('Instagram handling preserves observed zero, separates app/handle and drops
     {scope: 'every.policy', status: 'unavailable', observedAt: at, values: {views: 12}},
     {scope: 'anyone', status: 'ok', observedAt: at, values: {views: 12}},
   ]};
-  registerGA4(registry, () => now, () => JSON.stringify(apps), () => JSON.stringify(accounts));
+  registerGA4(registry, {clock: () => now, readEngagement: () => JSON.stringify(apps), readInstagram: () => JSON.stringify(accounts)});
   const samples = async name => (await registry.getSingleMetric(name).get()).values
     .map(v => [v.labels.account || v.labels.scope, v.labels.metric, v.value]);
   assert.deepEqual(await samples('instagram_account_discovery'), [

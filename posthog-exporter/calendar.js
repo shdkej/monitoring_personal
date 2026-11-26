@@ -3,9 +3,9 @@ const PROJECT = '424014';
 const scopes = [
   {name: 'policycock', appId: 'policycock'},
   {name: 'miniapp-image-tools', appId: 'miniapp-image-tools'},
-  {name: 'Infinity', hosts: ['infinity.aws.shdkej.com']},
+  {name: 'Infinity', appId: 'infinity', hosts: ['infinity.aws.shdkej.com']},
   {name: 'shdkej.com', hosts: ['shdkej.com']},
-  {name: 'Virtue', hosts: ['virtue.aws.shdkej.com', 'virtue.oracle.shdkej.com']},
+  {name: 'Virtue', appId: 'virtue', hosts: ['virtue.aws.shdkej.com', 'virtue.oracle.shdkej.com']},
   {name: '앱 미지정'},
 ];
 const DAY = 86400000;
@@ -35,24 +35,24 @@ function windowsFor(now) {
   };
 }
 
-function scopeSQL() {
-  const appIds = scopes.filter(scope => scope.appId).map(scope => "'" + scope.appId + "'");
+function scopeSQL(groups = scopes, privateScope = false) {
+  const appIds = groups.filter(scope => scope.appId).map(scope => "'" + scope.appId + "'");
   const conditions = [];
-  for (const [index, scope] of scopes.entries()) {
+  for (const [index, scope] of groups.entries()) {
     if (scope.appId) conditions.push("properties.app_id = '" + scope.appId + "'", index);
     if (scope.hosts) {
       const hosts = scope.hosts.map(host => "'" + host + "'").join(', ');
       conditions.push('properties.app_id IS NULL AND properties.$host IN (' + hosts + ')', index);
     }
   }
-  const attribution = 'multiIf(' + [...conditions, scopes.length - 1].join(', ') + ')';
+  const attribution = conditions.length ? 'multiIf(' + [...conditions, groups.length - 1].join(', ') + ')' : 'toInt64(0)';
   const filter = "coalesce(properties.traffic_kind, '') != 'synthetic' AND " +
     "(properties.app_id IS NULL OR properties.app_id IN (" + appIds.join(', ') + "))";
-  return {attribution, filter};
+  return {attribution, filter: privateScope ? "coalesce(properties.traffic_kind, '') != 'synthetic'" : filter};
 }
 
-function queryFor(windows) {
-  const {attribution, filter} = scopeSQL();
+function queryFor(windows, groups, privateScope) {
+  const {attribution, filter} = scopeSQL(groups, privateScope);
   const bucketCases = windows.slice(0, -1).flatMap((win, i) => ['timestamp < toDateTime(' + win.end + ')', i]);
   const bucket = bucketCases.length ? 'multiIf(' + [...bucketCases, windows.length - 1].join(', ') + ')' : 'toInt64(0)';
   const session = "properties['$session_id']";
@@ -65,28 +65,28 @@ function queryFor(windows) {
     GROUP BY app_scope, bucket_index`;
 }
 
-function parseCounts(results, windows) {
+function parseCounts(results, windows, groups) {
   if (!Array.isArray(results)) throw new Error('Missing PostHog aggregate rows');
-  const byScope = scopes.map(() => new Map());
+  const byScope = groups.map(() => new Map());
   for (const result of results) {
     if (!Array.isArray(result) || result.length !== 6 ||
         result.some(n => !Number.isSafeInteger(n) || n < 0)) throw new Error('Invalid PostHog aggregate');
     const [scope, bucket, events, pageviews, sessions, identified] = result;
-    if (scope >= scopes.length || bucket >= windows.length || byScope[scope].has(bucket) ||
+    if (scope >= groups.length || bucket >= windows.length || byScope[scope].has(bucket) ||
         pageviews > events || identified > events || sessions > identified) throw new Error('Inconsistent PostHog aggregate');
     byScope[scope].set(bucket, {values: {events, pageviews, sessions}, eventsWithSessionId: identified});
   }
   return byScope;
 }
 
-async function collectSnapshot(hogql, now = new Date()) {
+async function collectSnapshot(hogql, now = new Date(), {id = PROJECT, groups = scopes, privateScope = false} = {}) {
   const observedAt = now.toISOString();
-  const rows = scopes.map(scope => ({scope: scope.name, method: 'PostHog exporter · HogQL',
+  const rows = groups.map(scope => ({scope: scope.name, method: 'PostHog exporter · HogQL',
     observedAt, status: 'ok', periodStatus: 'ok', periods: {}}));
   // Each resolution is queried independently so one session across a date boundary
   // counts once in the longer bucket. All apps share one scan per resolution.
   for (const [period, windows] of Object.entries(windowsFor(now))) {
-    const data = parseCounts(await hogql(PROJECT, queryFor(windows)), windows);
+    const data = parseCounts(await hogql(id, queryFor(windows, groups, privateScope)), windows, groups);
     for (const [index, row] of rows.entries()) {
       const samples = windows.map(({periodStart, periodEnd, timeZone}, i) => ({
         periodStart, periodEnd, timeZone, observedAt,
