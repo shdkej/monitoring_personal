@@ -60,3 +60,30 @@
 고객 레이어의 첫 방문 지표는 policycock과 Virtue 웹의 동의 기반 이벤트를 15분마다 조회합니다. 시각 기준 지난 7일의 `first_session_started`를 브라우저의 첫 세션 ID별로 묶고, 같은 ID의 `first_session_activated`와 공유 유입 표시를 집계합니다. 브라우저 저장소가 지워지면 새 방문으로 관측될 수 있습니다. 시작 이벤트가 없으면 완료율은 비어 있으며 공유 유입 수는 0입니다.
 
 Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존 일일 Ego 작업이 비공개 ConfigMap에 전달합니다. 마지막 관측 후 30시간이 지나면 숨기며 API가 담당하는 `@minimal_collector`는 기존 시간별 API 값을 사용합니다.
+
+## OpenClaw 에러 로그 수
+
+- 시스템 레이어 5번 패널은 네트워크 지연 대신 `openclaw_log_errors_24h`를 표시합니다.
+  조회 시점 직전 24시간의 `ERROR`·`FATAL` JSONL 레코드 수이며 WARN, 메시지의 error 문자열,
+  크론 실패 횟수와는 다릅니다. 정수 건수이며 SLO를 정하지 않아 색상은 중립으로 유지합니다.
+- 기존 `infinity-dispatcher-exporter`의 `dispatcher-exporter/exporter.py`가 집계합니다.
+  Deployment는 OpenClaw 호스트 `oracle-arm-2`에 배치하고 `/home/ubuntu/.openclaw/logs`를
+  `/data/openclaw-logs`로 읽기 전용 마운트합니다. API 서비스 계정 토큰은 마운트하지 않습니다.
+  OpenClaw 설정·크론·재시작은 필요하지 않습니다. 별도 Loki나 로그 전송기를 설치하지 않습니다.
+- 기본 프로필 `openclaw-YYYY-MM-DD.log`와 `.1`~`.5` 회전 파일만 읽습니다. 날짜는 호스트
+  시간대 차이를 포함해 고르고, 실제 집계는 각 레코드의 시간대가 있는 `time`으로 제한합니다.
+  보존 파일에 남은 로그 기준이며, 보존 기간 단축이나 회전 파일 초과 삭제로 사라진 로그는 복원하지
+  않습니다. 파일 경로·프로필·로그 형식이 바뀌면 collector 계약도 갱신해야 합니다.
+- 로그 본문·사용자/세션 식별자는 내보내지 않습니다. 읽기·형식 오류 또는 최근 24시간 로그가
+  없으면 `openclaw_log_read_error=1`만 내보내고 건수는 숨깁니다. 정상 로그가 있고 에러가 없을 때만
+  0건입니다. 쓰는 중인 마지막 미완성 줄은 다음 수집으로 넘깁니다.
+- 기존 ServiceMonitor가 1분마다 수집합니다. Grafana는 instant query로 최신 건수를 읽으며
+  수집 실패 뒤 과거 정상 건수를 `lastNotNull`로 재사용하지 않습니다. 대시보드 시간 선택과
+  무관하게 선택 구간의 끝 시점에서 직전 24시간을 집계한 값입니다.
+- 검증: `python3 -m unittest discover -s dispatcher-exporter -v`, `kubectl kustomize .`,
+  Deployment server dry-run → commit/push → Argo CD 새 revision → exporter rollout →
+  `openclaw_log_read_error == 0` 및 `openclaw_log_errors_24h` → Grafana 실제 패널을 확인합니다.
+  exporter 수정 시 Deployment `SOURCE_REVISION`도 갱신합니다. 복구는 이 변경 커밋을 revert하여
+  push하고 Argo CD 동기화와 이전 snapshot 수집을 확인하는 경로입니다.
+- 형식·마운트 참고: [OpenClaw logging](https://docs.openclaw.ai/logging),
+  [Kubernetes hostPath](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath).

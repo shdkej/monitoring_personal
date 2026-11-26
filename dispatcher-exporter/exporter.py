@@ -1,12 +1,53 @@
 #!/usr/bin/env python3
-"""Prometheus exporter for a sanitized Infinity dispatcher snapshot."""
+"""Prometheus metrics for Infinity snapshots and OpenClaw log counts (no log text)."""
 import json
 import os
+import re
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 SNAPSHOT = Path(os.getenv("DISPATCHER_SNAPSHOT_FILE", "/data/snapshot/snapshot.json"))
 PORT = int(os.getenv("PORT", "9102"))
+OPENCLAW_LOG_DIR = Path(os.getenv("OPENCLAW_LOG_DIR", "/data/openclaw-logs"))
+
+
+def openclaw_metrics():
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(hours=24)
+    count, recent_records = 0, 0
+    out = ["# TYPE openclaw_log_read_error gauge"]
+    try:
+        # Include neighboring host dates to handle timezone offsets and numbered rotations.
+        for path in sorted(OPENCLAW_LOG_DIR.iterdir()):
+            match = re.fullmatch(r"openclaw-(\d{4}-\d{2}-\d{2})\.log(?:\.[1-5])?", path.name)
+            if not match or not (str((cutoff - timedelta(days=1)).date()) <= match[1]
+                                 <= str((now + timedelta(days=1)).date())):
+                continue
+            with os.fdopen(os.open(path, os.O_RDONLY | os.O_NOFOLLOW), encoding="utf-8") as handle:
+                for line in handle:
+                    # The gateway may still be writing the last JSONL record.
+                    if not line.endswith("\n"):
+                        break
+                    if not line.strip():
+                        continue
+                    record = json.loads(line)
+                    timestamp = datetime.fromisoformat(record["time"].replace("Z", "+00:00"))
+                    level = record["_meta"]["logLevelName"]
+                    if timestamp.tzinfo is None or level not in (
+                            "SILLY", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"):
+                        raise ValueError("invalid log metadata")
+                    if cutoff < timestamp <= now:
+                        recent_records += 1
+                        count += level in ("ERROR", "FATAL")
+        if not recent_records:
+            raise ValueError("no recent readable log records")
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        # Do not expose paths, messages or exceptions in metrics or server logs.
+        return out + ["openclaw_log_read_error 1"]
+    return out + ["openclaw_log_read_error 0",
+                  "# TYPE openclaw_log_errors_24h gauge",
+                  f"openclaw_log_errors_24h {count}"]
 
 
 def number(data, key):
@@ -38,6 +79,7 @@ def render():
     ]
     for state in ("inbox", "active", "waiting", "archive"):
         out.append(f'infinity_dispatcher_intents{{state="{state}"}} {number(data, state)}')
+    out.extend(openclaw_metrics())
     return "\n".join(out) + "\n"
 
 

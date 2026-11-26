@@ -14,6 +14,9 @@ spec:
       labels:
         app: infinity-dispatcher-exporter
     spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/hostname: oracle-arm-2
       containers:
         - name: exporter
           image: python:3.12-alpine
@@ -32,9 +35,16 @@ spec:
           env:
             - name: DISPATCHER_SNAPSHOT_FILE
               value: /data/snapshot/snapshot.json
+            - name: OPENCLAW_LOG_DIR
+              value: /data/openclaw-logs
+            - name: SOURCE_REVISION
+              value: openclaw-error-count-20261126
           volumeMounts:
             - name: dispatcher-snapshot
               mountPath: /data/snapshot
+              readOnly: true
+            - name: openclaw-logs
+              mountPath: /data/openclaw-logs
               readOnly: true
           readinessProbe:
             httpGet:
@@ -56,6 +66,10 @@ spec:
               cpu: 100m
               memory: 128Mi
       volumes:
+        - name: openclaw-logs
+          hostPath:
+            path: /home/ubuntu/.openclaw/logs
+            type: Directory
         - name: dispatcher-snapshot
           configMap:
             name: infinity-dispatcher-snapshot

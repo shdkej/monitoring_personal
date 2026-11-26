@@ -276,8 +276,8 @@
     {
       "id": 5,
       "type": "stat",
-      "title": "네트워크 지연",
-      "description": "black-box probe / 지연 계측 미설정. N/A 현재 probe exporter 미설정이라 N/A입니다.",
+      "title": "OpenClaw 에러 로그 수 · 최근 24시간",
+      "description": "최근 24시간에 기록된 OpenClaw ERROR·FATAL 로그 건수입니다. WARN과 메시지 본문의 error 단어는 제외합니다. 1분마다 수집하며 로그를 읽지 못하거나 최근 로그가 없으면 N/A로 표시합니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -296,13 +296,16 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "probe_duration_seconds",
-          "range": true
+          "expr": "max(openclaw_log_errors_24h and on(job, instance) (openclaw_log_read_error == 0) and on(job, instance) (up{job=\"infinity-dispatcher-exporter\"} == 1))",
+          "range": false,
+          "instant": true
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
+          "unit": "none",
+          "decimals": 0,
+          "min": 0,
           "noValue": "N/A",
           "color": {
             "mode": "fixed",
@@ -322,7 +325,7 @@
         "orientation": "auto",
         "textMode": "auto",
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "showPercentChange": false
       }
@@ -535,5 +538,5 @@
   "uid": "layer-system",
   "version": 1,
   "weekStart": "",
-  "description": "노드 용량·네트워크·AWS 자원 건강. 자동 확장 대상과 black-box latency probe는 아직 미확인."
+  "description": "노드 용량·네트워크·OpenClaw 에러 로그·AWS 자원 건강. 자동 확장 대상은 아직 미확인."
 }

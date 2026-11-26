@@ -12,3 +12,7 @@ Overview 상단의 비즈니스·고객·제품·시스템 링크로 각 상세 
 
 구성요소 관계, 변경 순서와 운영 검증 기준은 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)에
 정리합니다.
+
+시스템 레이어는 최근 24시간 OpenClaw 에러 로그 수를 표시합니다. 기존 dispatcher exporter가
+호스트 로그를 읽기 전용으로 집계하며, 원문은 외부로 전송하지 않습니다. 회귀 검증은
+`python3 -m unittest discover -s dispatcher-exporter -v`로 실행합니다.

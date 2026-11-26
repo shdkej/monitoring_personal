@@ -64,7 +64,7 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 | 2 | 메모리 사용률 | 노드별 사용률·가용 용량 | 연결됨: node-exporter |
 | 3 | 디스크 사용률 | 노드별 root mount 사용률·잔여 공간 | 연결됨: node-exporter |
 | 4 | 네트워크 트래픽 | 전체 노드 송수신 합계 | 연결됨: node-exporter |
-| 5 | 네트워크 지연 | 서비스/노드 왕복 지연 | 입력 필요: black-box probe 또는 적절한 CloudWatch 지표 |
+| 5 | OpenClaw 에러 로그 수 | 최근 24시간 ERROR·FATAL 로그 건수 | 연결됨: 기존 dispatcher exporter가 로컬 JSONL을 읽고 1분마다 Prometheus가 수집 |
 | 6 | 인스턴스·노드 상태 | node-exporter/대상 scrape 상태 | 연결됨: Prometheus `up` |
 | 7 | 자동 확장 여유 | 현재/최대 replica와 확장 실패 | 입력 필요: 현재 Prometheus에서 HPA series 없음. 대상 HPA/ASG와 최대 용량 계약 확인 |
 | 8 | 의존 서비스 포화·오류 | Lambda 오류·스로틀, DynamoDB 제한·지연 | 부분 연결: YACE scrape는 up. 현재 Lambda 호출·오류 샘플은 NaN, DynamoDB throttling series는 없음. 기대 리소스·CloudWatch 데이터 확인 필요 |
