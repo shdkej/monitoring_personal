@@ -42,3 +42,25 @@ test('channel totals are independently verified, finite, and expire with the pri
   now += 31 * 3600 * 1000;
   assert.deepEqual(await get(), []);
 });
+
+test('Instagram handling preserves observed zero, separates app/handle and drops missing or stale data', async () => {
+  const at = '2026-11-26T00:00:00Z';
+  let now = Date.parse(at);
+  const registry = new Registry();
+  const apps = {schemaVersion: 1, rows:[{scope: 'policycock', observedAt: at, instagramAcquisition: {sessions: 0, newUsers: 1}}]};
+  const accounts = {schemaVersion: 1, source: 'instagram', rows: [
+    {scope: 'minimal_collector', status: 'ok', observedAt: at, values: {views: 0, viewers: 3}},
+    {scope: 'every.policy', status: 'unavailable', observedAt: at, values: {views: 12}},
+    {scope: 'anyone', status: 'ok', observedAt: at, values: {views: 12}},
+  ]};
+  registerGA4(registry, () => now, () => JSON.stringify(apps), () => JSON.stringify(accounts));
+  const samples = async name => (await registry.getSingleMetric(name).get()).values
+    .map(v => [v.labels.account || v.labels.scope, v.labels.metric, v.value]);
+  assert.deepEqual(await samples('instagram_account_discovery'), [
+    ['minimal_collector', 'views', 0], ['minimal_collector', 'viewers', 3],
+  ]);
+  assert.deepEqual(await samples('ga4_app_instagram_acquisition'), [['policycock', 'sessions', 0], ['policycock', 'newUsers', 1]]);
+  now += 31 * 3600 * 1000;
+  assert.deepEqual(await samples('instagram_account_discovery'), []);
+  assert.deepEqual(await samples('ga4_app_instagram_acquisition'), []);
+});

@@ -22,7 +22,8 @@ function readRows(feed) {
   });
 }
 
-function registerGA4(registry, clock = Date.now, readEngagement = () => readFile('/etc/ga4-engagement/report.json', 'utf8')) {
+function registerGA4(registry, clock = Date.now, readEngagement = () => readFile('/etc/ga4-engagement/report.json', 'utf8'),
+                     readInstagram = () => readFile('/etc/ga4-engagement/instagram.json', 'utf8')) {
   let rows = [];
   async function currentPrivateRows() {
     let report;
@@ -79,6 +80,41 @@ function registerGA4(registry, clock = Date.now, readEngagement = () => readFile
             !channels.every(([name, count]) => name.length > 0 && name.length <= 48 && Number.isSafeInteger(count) && count >= 0) ||
             channels.reduce((sum, [, count]) => sum + count, 0) !== row.sessions) continue;
         for (const [channel, count] of channels) this.set({scope: row.scope, channel}, count);
+      }
+    },
+  });
+  new client.Gauge({
+    name: 'ga4_app_instagram_acquisition', help: 'Instagram-attributed sessions and first-user acquisitions in seven completed GA4 days',
+    labelNames: ['scope', 'metric'], registers: [registry],
+    async collect() {
+      this.reset();
+      for (const row of await currentPrivateRows()) {
+        for (const metric of ['sessions', 'newUsers']) {
+          const count = row.instagramAcquisition?.[metric];
+          if (Number.isSafeInteger(count) && count >= 0) this.set({scope: row.scope, metric}, count);
+        }
+      }
+    },
+  });
+  new client.Gauge({
+    name: 'instagram_account_discovery', help: 'Observed Instagram account views, viewers or reach for the most recent seven-day reporting window',
+    labelNames: ['account', 'metric'], registers: [registry],
+    async collect() {
+      this.reset();
+      let report;
+      try { report = JSON.parse(await readInstagram()); } catch { return; }
+      if (report?.schemaVersion !== 1 || report.source !== 'instagram' || !Array.isArray(report.rows)) return;
+      const now = clock();
+      for (const account of ['minimal_collector', 'every.policy']) {
+        const valid = report.rows.filter(row => row?.scope === account);
+        if (valid.length !== 1 || valid[0].status !== 'ok') continue;
+        const {observedAt, values} = valid[0];
+        const observed = Date.parse(observedAt);
+        if (!Number.isFinite(observed) || observed > now || now - observed > MAX_AGE_MS) continue;
+        for (const metric of ['views', 'reach', 'viewers']) {
+          const count = values?.[metric];
+          if (Number.isSafeInteger(count) && count >= 0) this.set({account, metric}, count);
+        }
       }
     },
   });

@@ -82,7 +82,7 @@
       "id": 2,
       "type": "timeseries",
       "title": "유입 채널별 세션",
-      "description": "선택한 GA4 속성의 지난 7일 전체 세션과 세션 기본 채널 그룹별 세션입니다. blog·afzma는 최근 30일의 일간 채널 상세도 함께 표시합니다.",
+      "description": "유입 보기에서 전체 채널, 인스타그램 유입 세션, 인스타그램이 첫 유입 소스인 신규 사용자, 계정별 조회·도달을 선택합니다. GA4는 속성 기준 직전 7일, Instagram은 인사이트 화면 기준 최근 7일입니다. 계정 지표는 앱 선택과 독립이며 출처에 표시된 도달 또는 조회한 사람 명칭을 따릅니다. 전체 채널 보기에는 blog·afzma의 일간 상세도 포함됩니다.",
       "datasource": {
         "type": "mixed",
         "uid": "-- Mixed --"
@@ -141,7 +141,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"sessions\",scope=~\"${app:regex}\"})",
+          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"sessions\",scope=~\"${app:regex}\"}) and on() (vector(${acquisition:raw}) == 0)",
           "legendFormat": "{{scope}} · 7일 전체",
           "range": true
         },
@@ -152,8 +152,63 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope, channel) (ga4_app_channel_sessions{scope=~\"${app:regex}\"})",
+          "expr": "max by (scope, channel) (ga4_app_channel_sessions{scope=~\"${app:regex}\"}) and on() (vector(${acquisition:raw}) == 0)",
           "legendFormat": "{{scope}} · 7일 · {{channel}}",
+          "range": true
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (scope) (ga4_app_instagram_acquisition{scope=~\"${app:regex}\",metric=\"sessions\"}) and on() (vector(${acquisition:raw}) == 1)",
+          "legendFormat": "{{scope}} · 인스타그램 유입 세션",
+          "range": true
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (scope) (ga4_app_instagram_acquisition{scope=~\"${app:regex}\",metric=\"newUsers\"}) and on() (vector(${acquisition:raw}) == 2)",
+          "legendFormat": "{{scope}} · 인스타그램 신규 사용자",
+          "range": true
+        },
+        {
+          "refId": "G",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (account) (instagram_account_discovery{metric=\"views\"}) and on() (vector(${acquisition:raw}) == 3)",
+          "legendFormat": "@{{account}} · 조회수",
+          "range": true
+        },
+        {
+          "refId": "H",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (account) (instagram_account_discovery{metric=\"reach\"}) and on() (vector(${acquisition:raw}) == 4)",
+          "legendFormat": "@{{account}} · 도달 계정 수",
+          "range": true
+        },
+        {
+          "refId": "I",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (account) (instagram_account_discovery{metric=\"viewers\"}) and on() (vector(${acquisition:raw}) == 4)",
+          "legendFormat": "@{{account}} · 조회한 사람",
           "range": true
         }
       ],
@@ -187,7 +242,7 @@
           },
           "options": {
             "regex": "^(.+)\\|sessions$",
-            "renamePattern": "blog · 일간 · $1"
+            "renamePattern": "0 · blog · 일간 · $1"
           }
         },
         {
@@ -198,7 +253,7 @@
           },
           "options": {
             "regex": "^(.+)\\|date$",
-            "renamePattern": "blog · 일간 · $1 날짜"
+            "renamePattern": "0 · blog · 일간 · $1 날짜"
           }
         },
         {
@@ -209,7 +264,7 @@
           },
           "options": {
             "include": {
-              "pattern": "^(${app:regex}) · .*$"
+              "pattern": "^${acquisition:raw} · (${app:regex}) · .*$"
             }
           }
         },
@@ -221,7 +276,7 @@
           },
           "options": {
             "regex": "^(.+)\\|sessions$",
-            "renamePattern": "afzma · 일간 · $1"
+            "renamePattern": "0 · afzma · 일간 · $1"
           }
         },
         {
@@ -232,7 +287,7 @@
           },
           "options": {
             "regex": "^(.+)\\|date$",
-            "renamePattern": "afzma · 일간 · $1 날짜"
+            "renamePattern": "0 · afzma · 일간 · $1 날짜"
           }
         },
         {
@@ -243,8 +298,30 @@
           },
           "options": {
             "include": {
-              "pattern": "^(${app:regex}) · .*$"
+              "pattern": "^${acquisition:raw} · (${app:regex}) · .*$"
             }
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "A"
+          },
+          "options": {
+            "regex": "^0 · ",
+            "renamePattern": ""
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "B"
+          },
+          "options": {
+            "regex": "^0 · ",
+            "renamePattern": ""
           }
         }
       ]
@@ -609,6 +686,48 @@
         "sort": 1,
         "refresh": 1,
         "description": "GA4와 PostHog에서 앱별로 집계하는 지표에 적용합니다."
+      },
+      {
+        "name": "acquisition",
+        "label": "유입 보기",
+        "type": "custom",
+        "query": "전체 채널별 세션 : 0, 인스타그램 유입 세션 : 1, 인스타그램 신규 사용자 : 2, 인스타그램 조회수 : 3, 인스타그램 도달·조회한 사람 : 4",
+        "current": {
+          "selected": true,
+          "text": "전체 채널별 세션",
+          "value": "0"
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": "전체 채널별 세션",
+            "value": "0"
+          },
+          {
+            "selected": false,
+            "text": "인스타그램 유입 세션",
+            "value": "1"
+          },
+          {
+            "selected": false,
+            "text": "인스타그램 신규 사용자",
+            "value": "2"
+          },
+          {
+            "selected": false,
+            "text": "인스타그램 조회수",
+            "value": "3"
+          },
+          {
+            "selected": false,
+            "text": "인스타그램 도달·조회한 사람",
+            "value": "4"
+          }
+        ],
+        "multi": false,
+        "includeAll": false,
+        "skipUrlSync": false,
+        "description": "유입 채널별 세션 패널의 집계 기준입니다. 인스타그램 조회·도달은 계정 단위입니다."
       }
     ]
   },
