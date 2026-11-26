@@ -276,7 +276,7 @@
     {
       "id": 5,
       "type": "stat",
-      "title": "OpenClaw 에러 수 · 24h",
+      "title": "에러 수 · 24h",
       "description": "최근 24시간에 기록된 OpenClaw ERROR·FATAL 로그 건수입니다. WARN과 메시지 본문의 error 단어는 제외합니다. 1분마다 수집하며 로그를 읽지 못하거나 최근 로그가 없으면 N/A로 표시합니다.",
       "datasource": {
         "type": "prometheus",
