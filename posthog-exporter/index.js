@@ -1,6 +1,7 @@
 const express = require('express');
 const {registerGA4} = require('./ga4');
 const {collectHealth} = require('./app-health');
+const {firstVisitMetrics} = require('./first-visit');
 const client = require('prom-client');
 const {collectSnapshot, createSnapshotCache} = require('./calendar');
 
@@ -283,6 +284,27 @@ new client.Gauge({
   },
 });
 
+const firstVisits = createSnapshotCache(async () => {
+  const observedAt = Date.now();
+  return {observedAt, metrics: await firstVisitMetrics(hogql, Math.floor(observedAt / 1000))};
+});
+new client.Gauge({
+  name: 'posthog_app_first_visits',
+  help: 'Seven-day new measured browser cohort, first-session activation and share referrals',
+  labelNames: ['scope', 'metric'], registers: [register],
+  collect() {
+    this.reset();
+    const snapshot = firstVisits.current;
+    if (!snapshot || Date.now() - snapshot.observedAt > 45 * 60 * 1000) return;
+    for (const [scope, metrics] of snapshot.metrics) {
+      for (const [metric, n] of Object.entries(metrics)) this.set({scope, metric}, n);
+    }
+    for (const scope of ['policycock', 'Virtue']) {
+      if (!snapshot.metrics.has(scope)) this.set({scope, metric: 'shareNewVisitors7d'}, 0);
+    }
+  },
+});
+
 async function refreshCalendar() {
   if (calendar.current && Date.now() - Date.parse(calendar.current.observedAt) < 15 * 60 * 1000) return;
   try {
@@ -321,6 +343,9 @@ async function start() {
   const collectGA4 = registerGA4(register);
   const refreshGA4 = () => collectGA4().catch(err => console.error('GA4 피드 수집 실패:', err.message));
   const refreshHealth = () => health.refresh().catch(err => console.error('PostHog 앱 품질 수집 실패:', err.message));
+  const refreshFirstVisits = () => firstVisits.refresh().catch(err => console.error('PostHog 첫 방문 수집 실패:', err.message));
+  void refreshFirstVisits();
+  setInterval(refreshFirstVisits, 15 * 60 * 1000);
   void refreshHealth();
   setInterval(refreshHealth, 15 * 60 * 1000);
   void refreshGA4();

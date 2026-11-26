@@ -67,3 +67,5 @@
 - GA4 속성이 추가되면 Space Status의 원천 목록과 운영 수집기를 갱신하고 새 공개 피드 행을 확인합니다. exporter와 앱 선택기는 피드에서 새 속성을 읽습니다. PostHog 앱 등록은 `posthog-exporter/calendar.js`의 프로젝트·앱 귀속과 Space Status 공개 인벤토리를 함께 확인합니다. 별도 프로젝트는 해당 계정 권한·이벤트 단위·공개 범위를 확인한 뒤 귀속 쿼리에 연결합니다.
 - 변경 완료 보고에는 수정한 문서, source commit, Argo CD revision, Prometheus/Grafana 검증
   결과와 남은 화면 검증 경계를 함께 적습니다.
+
+고객 레이어의 첫 방문 지표는 policycock과 Virtue 웹의 동의 기반 이벤트를 15분마다 조회합니다. 시각 기준 지난 7일의 `first_session_started`를 브라우저의 첫 세션 ID별로 묶고, 같은 ID의 `first_session_activated`와 공유 유입 표시를 집계합니다. 브라우저 저장소가 지워지면 새 방문으로 관측될 수 있습니다. 시작 이벤트가 없으면 완료율은 비어 있으며 공유 유입 수는 0입니다.
