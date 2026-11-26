@@ -24,6 +24,21 @@ function readRows(feed) {
 
 function registerGA4(registry, clock = Date.now, readEngagement = () => readFile('/etc/ga4-engagement/report.json', 'utf8')) {
   let rows = [];
+  async function currentPrivateRows() {
+    let report;
+    try {
+      report = JSON.parse(await readEngagement());
+    } catch {
+      // The optional volume can be empty until the scheduled collector succeeds.
+      return [];
+    }
+    if (report?.schemaVersion !== 1 || !Array.isArray(report.rows)) return [];
+    const now = clock();
+    return report.rows.filter(row => {
+      const observed = Date.parse(row?.observedAt);
+      return typeof row?.scope === 'string' && observed <= now && now - observed <= MAX_AGE_MS;
+    });
+  }
   new client.Gauge({
     name: 'ga4_app_rolling7d_count',
     help: 'GA4 last seven days by property in the Space analytics feed',
@@ -43,23 +58,27 @@ function registerGA4(registry, clock = Date.now, readEngagement = () => readFile
     labelNames: ['scope'], registers: [registry],
     async collect() {
       this.reset();
-      let report;
-      try {
-        report = JSON.parse(await readEngagement());
-      } catch {
-        // The optional volume can be empty until the scheduled collector succeeds.
-        return;
-      }
-      if (report?.schemaVersion !== 1 || !Array.isArray(report.rows)) return;
-      const now = clock();
-      for (const row of report.rows) {
-        const observed = Date.parse(row?.observedAt);
-        if (row?.status === 'ok' && typeof row.scope === 'string' &&
-            Number.isSafeInteger(row.sessions) && row.sessions > 0 &&
-            Number.isSafeInteger(row.seconds) && row.seconds >= 0 &&
-            observed <= now && now - observed <= MAX_AGE_MS) {
+      for (const row of await currentPrivateRows()) {
+        if (row.status === 'ok' && Number.isSafeInteger(row.sessions) && row.sessions > 0 &&
+            Number.isSafeInteger(row.seconds) && row.seconds >= 0) {
           this.set({scope: row.scope}, row.seconds);
         }
+      }
+    },
+  });
+  new client.Gauge({
+    name: 'ga4_app_channel_sessions',
+    help: 'Sessions by GA4 property and default session channel group for the last seven completed days',
+    labelNames: ['scope', 'channel'], registers: [registry],
+    async collect() {
+      this.reset();
+      for (const row of await currentPrivateRows()) {
+        if (!row.channelSessions || typeof row.channelSessions !== 'object' || Array.isArray(row.channelSessions)) continue;
+        const channels = Object.entries(row.channelSessions);
+        if (channels.length > 32 || !Number.isSafeInteger(row.sessions) || row.sessions < 0 ||
+            !channels.every(([name, count]) => name.length > 0 && name.length <= 48 && Number.isSafeInteger(count) && count >= 0) ||
+            channels.reduce((sum, [, count]) => sum + count, 0) !== row.sessions) continue;
+        for (const [channel, count] of channels) this.set({scope: row.scope, channel}, count);
       }
     },
   });

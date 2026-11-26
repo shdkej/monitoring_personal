@@ -35,8 +35,8 @@
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 6,
-        "h": 5
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -82,16 +82,16 @@
       "id": 2,
       "type": "timeseries",
       "title": "유입 채널별 세션",
-      "description": "선택한 GA4 속성의 지난 7일 전체 세션과 blog·afzma에서 직접 조회할 수 있는 최근 30일의 일간 채널별 세션입니다. 범례에 앱과 집계 기간을 표시합니다.",
+      "description": "선택한 GA4 속성의 지난 7일 전체 세션과 세션 기본 채널 그룹별 세션입니다. blog·afzma는 최근 30일의 일간 채널 상세도 함께 표시합니다.",
       "datasource": {
         "type": "mixed",
         "uid": "-- Mixed --"
       },
       "gridPos": {
-        "x": 6,
+        "x": 12,
         "y": 0,
-        "w": 6,
-        "h": 5
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -143,6 +143,17 @@
           "editorMode": "code",
           "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"sessions\",scope=~\"${app:regex}\"})",
           "legendFormat": "{{scope}} · 7일 전체",
+          "range": true
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (scope, channel) (ga4_app_channel_sessions{scope=~\"${app:regex}\"})",
+          "legendFormat": "{{scope}} · 7일 · {{channel}}",
           "range": true
         }
       ],
@@ -248,10 +259,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 6,
-        "h": 5
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -303,10 +314,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 18,
-        "y": 0,
-        "w": 6,
-        "h": 5
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -359,9 +370,9 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 6,
-        "w": 6,
-        "h": 5
+        "y": 16,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -412,10 +423,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 6,
-        "y": 6,
-        "w": 6,
-        "h": 5
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -466,10 +477,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 12,
-        "y": 6,
-        "w": 6,
-        "h": 5
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -520,10 +531,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 18,
-        "y": 6,
-        "w": 6,
-        "h": 5
+        "x": 12,
+        "y": 24,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {

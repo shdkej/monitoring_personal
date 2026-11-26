@@ -26,3 +26,19 @@ test('GA4 refresh keeps observed zero, isolates unavailable apps, and expires ol
   assert.deepEqual(await data(), []);
   assert.deepEqual(await engagement(), []);
 });
+
+test('channel totals are independently verified, finite, and expire with the private observation', async () => {
+  let now = Date.parse('2026-11-26T02:00:00Z');
+  const measured = {scope: 'app', observedAt: '2026-11-26T01:00:00Z', sessions: 5,
+    status: 'unavailable', channelSessions: {Direct: 3, Referral: 2}};
+  const report = {schemaVersion: 1, rows: [measured, {...measured, scope: 'mismatch', sessions: 3},
+    {...measured, scope: 'invalid', channelSessions: {Direct: 5.5, Referral: -0.5}},
+    {...measured, scope: 'no-events', sessions: 0, status: 'no_sessions', channelSessions: {}}]};
+  const registry = new Registry();
+  registerGA4(registry, () => now, () => JSON.stringify(report));
+  const get = () => registry.getSingleMetric('ga4_app_channel_sessions').get().then(m => m.values);
+  assert.deepEqual((await get()).map(r => [r.labels.scope, r.labels.channel, r.value]),
+    [['app', 'Direct', 3], ['app', 'Referral', 2]]);
+  now += 31 * 3600 * 1000;
+  assert.deepEqual(await get(), []);
+});
