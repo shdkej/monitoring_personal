@@ -198,7 +198,7 @@
           },
           "options": {
             "include": {
-              "pattern": "^(${app:regex}) · "
+              "pattern": "^(${app:regex}) · .*$"
             }
           }
         },
@@ -232,7 +232,7 @@
           },
           "options": {
             "include": {
-              "pattern": "^(${app:regex}) · "
+              "pattern": "^(${app:regex}) · .*$"
             }
           }
         }
