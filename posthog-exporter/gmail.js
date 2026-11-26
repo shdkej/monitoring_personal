@@ -29,6 +29,17 @@ async function prepareGog() {
   }
 }
 
+function validateGrant(scopes, mode) {
+  if (!Array.isArray(scopes)) throw new Error('Missing Gmail scopes');
+  const isReadable = [readScope, 'https://www.googleapis.com/auth/gmail.modify', 'https://mail.google.com/']
+    .some(scope => scopes.includes(scope));
+  if (mode === 'existing-gog' && isReadable) return;
+  const allowed = new Set([readScope, 'openid', 'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile']);
+  if (mode !== 'readonly' || !scopes.includes(readScope) || !scopes.every(scope => allowed.has(scope)))
+    throw new Error('Gmail grant does not match collector permissions');
+}
+
 async function authorize(account) {
   const credentials = JSON.parse(await readFile(join(secret, 'credentials.json'), 'utf8'));
   const {type, client_id, client_secret, refresh_token} = credentials;
@@ -39,10 +50,10 @@ async function authorize(account) {
   const {token} = await client.getAccessToken();
   if (!token) throw new Error('Missing Gmail access token');
   const info = await client.getTokenInfo(token);
-  const allowed = new Set([readScope, 'openid', 'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile']);
-  if (!info.scopes.includes(readScope) || !info.scopes.every(scope => allowed.has(scope)))
-    throw new Error('Gmail grant does not match collector permissions');
+  let mode;
+  try { mode = (await readFile(join(secret, 'grant-mode'), 'utf8')).trim(); }
+  catch (err) { if (err.code !== 'ENOENT') throw err; mode = 'readonly'; }
+  validateGrant(info.scopes, mode);
   const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile?fields=emailAddress', {
     headers: {Authorization: 'Bearer ' + token}, redirect: 'error', signal: AbortSignal.timeout(20000),
   });
@@ -153,7 +164,7 @@ async function readGmail(now) {
   const {bin, dir} = await prepareGog();
   const token = await authorize(account);
   return countQueries(account, now, scopes, async (q, pageToken) => {
-    const args = ['--readonly', '--gmail-no-send', '--no-input', '--json', '--account', account,
+    const args = ['--enable-commands-exact=gmail.messages.search', '--readonly', '--gmail-no-send', '--no-input', '--json', '--account', account,
       'gmail', 'messages', 'search', q, '--max', '100'];
     if (pageToken) args.push('--page', pageToken);
     try {
@@ -167,4 +178,4 @@ async function readGmail(now) {
   });
 }
 
-module.exports = {readGmail, tagsFor, countQueries};
+module.exports = {readGmail, tagsFor, countQueries, validateGrant};

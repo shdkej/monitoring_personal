@@ -1,7 +1,7 @@
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const {Registry} = require('prom-client');
-const {tagsFor, countQueries} = require('./gmail');
+const {tagsFor, countQueries, validateGrant} = require('./gmail');
 const {registerSupport} = require('./support');
 
 const page = (messages, nextPageToken = '') => ({messages: messages.map(([subject, threadId]) => ({subject, threadId})),
@@ -45,4 +45,12 @@ test('direct collector honors expiry, omits stale or unavailable data, never rea
   assert.deepEqual((await metric.get()).values.map(r=>r.value), [0,4]);
   now += 3 * 3600000 + 1;
   assert.deepEqual((await metric.get()).values, []);
+});
+
+test('shared gog credentials require explicit opt-in and actual Gmail read capability', () => {
+  const shared = ['https://www.googleapis.com/auth/gmail.modify', 'https://www.googleapis.com/auth/drive'];
+  assert.doesNotThrow(() => validateGrant(shared, 'existing-gog'));
+  assert.throws(() => validateGrant(shared, 'readonly'));
+  assert.throws(() => validateGrant(shared.slice(1), 'existing-gog'));
+  assert.throws(() => validateGrant(shared, 'typo'));
 });
