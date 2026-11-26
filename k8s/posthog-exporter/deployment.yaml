@@ -58,7 +58,7 @@ spec:
           # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
             - name: SOURCE_REVISION
-              value: "customer-support-counts-2026-11-27"
+              value: "customer-support-inventory-2026-11-27"
             - name: GA4_API_ENABLED
               value: "true"
             - name: INSTAGRAM_API_ENABLED

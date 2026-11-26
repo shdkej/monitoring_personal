@@ -39,7 +39,7 @@ Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살
 | 5 | 핵심 퍼널 이탈률 | 퍼널 시작자 중 완료 이벤트 미발생 비율 | 공유 프로젝트의 판정 시도·저장 이벤트. 시작자가 없으면 N/A |
 | 6 | 첫 방문 핵심 작업 완료율 | 최근 7일 첫 방문 중 첫 세션에서 핵심 행동을 완료한 비율 | policycock 사례 열람, Virtue 덕행 저장. 분모가 없으면 N/A |
 | 7 | 공유 링크 신규 방문자 수 | 공유 링크로 처음 관측된 동의 브라우저 수 | policycock·Virtue. 브라우저 데이터 삭제 또는 분석 동의 철회 후에는 이전 방문을 연결할 수 없음 |
-| 8 | 고객 문의 수 | 최근 7일 제목 맨 앞에 지원 앱 태그가 붙은 수신 대화 수 | 모두의정책·Virtue를 구분하고 같은 대화는 앱별 한 번 집계 |
+| 8 | 고객 문의 수 | 최근 7일 제목 맨 앞에 지원 앱 태그가 붙은 수신 대화 수 | Grafana 등록 앱 전체에서 같은 대화는 앱별 한 번 집계 |
 
 ### 3. 제품 — 사용자가 겪는 품질
 
@@ -75,7 +75,7 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 - PostHog 접근 가능 프로젝트는 424014 한 개이다. 등록 범위는 policycock, miniapp-image-tools, Infinity, shdkej.com, Virtue와 앱 미지정이다. 최근 90일의 명시적 앱 ID는 policycock·miniapp-image-tools였다. 2026-11-26 전환 이후 `service="virtue"`도 Virtue 앱만 집계한다. 과거 시계열에는 공유 프로젝트 전체 값이 남아 있다. 앱별 패널은 `scope`를 사용한다.
 - YACE exporter와 ServiceMonitor scrape target은 정상(up)이다. YACE `/metrics`에는 Lambda invocation/error 및 DynamoDB capacity metric names가 있지만, 확인 시 Lambda samples는 NaN, DynamoDB consumed capacity는 0, throttling series는 없었다. CloudWatch RUM 로그에는 `No metrics data found`가 반복되고 RUM Prometheus series도 없다. 값이 0인지 데이터/리소스 범위가 잘못됐는지 임의 추정하지 않는다.
 - 노드 CPU·메모리·디스크·네트워크·헬스 시계열은 Prometheus에 있다. HPA와 black-box latency probe 시계열은 없다.
-- SAM-PC의 읽기 전용 Gmail 조회는 제목 맨 앞의 [모두의정책]과 [virtue]를 분류한다. [AI 브리핑]과 일반 메일은 집계에서 제외한다.
+- SAM-PC의 읽기 전용 Gmail 조회는 제목 맨 앞의 [등록된 앱 이름]을 분류한다. [모두의정책]은 policycock의 별칭이다. [AI 브리핑]과 일반 메일은 집계에서 제외한다.
 - 매출·결제·광고비 원천은 저장소와 배포 설정에서 확인되지 않았다. 관련 Grafana 패널은 계획된 `business_*` placeholder query로 N/A 상태이며 실제 exporter 지표가 아니다. 값이나 North Star를 추정하지 않는다.
 - 고객 8번 패널은 customer_support_threads의 앱별 최근 7일 문의 수를 표시한다. 관측값의 유효 기간은 30시간이다.
 
