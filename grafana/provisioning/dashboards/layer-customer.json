@@ -20,7 +20,13 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [{"type":"link","title":"정책콕 첫 방문 퍼널·경로","url":"/d/policycock-first-visit/"}],
+  "links": [
+    {
+      "type": "link",
+      "title": "정책콕 첫 방문 퍼널·경로",
+      "url": "/d/policycock-first-visit/"
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
@@ -81,8 +87,8 @@
     {
       "id": 2,
       "type": "timeseries",
-      "title": "유입 채널별 세션",
-      "description": "유입 보기에서 전체 채널, 인스타그램 유입 세션, 인스타그램이 첫 유입 소스인 신규 사용자, 계정별 조회·도달을 선택합니다. GA4는 속성 기준 직전 7일, Instagram은 UTC 기준 최근 완료 7일입니다. GA4 유입은 인스타그램 전체 소스에서 각 앱으로 들어온 수치입니다. 계정 지표는 앱 선택과 독립입니다. API 도달 계정 수와 전환 전 화면의 조회한 사람은 각각 출처 명칭으로 표시합니다. 전체 채널 보기에는 blog·afzma의 일간 상세도 포함됩니다.",
+      "title": "유입 채널별 세션 추이",
+      "description": "기본 보기는 GA4 속성의 날짜별 세션을 앱·채널별로 표시합니다. 오늘 값은 집계 중일 수 있습니다. 최근 7일 합계 보기의 가로축은 집계값을 수집한 시각입니다. Instagram 보기는 기존 GA4 유입·신규 사용자와 계정 조회·도달 지표를 표시합니다.",
       "datasource": {
         "type": "mixed",
         "uid": "-- Mixed --"
@@ -141,7 +147,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"sessions\",scope=~\"${app:regex}\"}) and on() (vector(${acquisition:raw}) == 0)",
+          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"sessions\",scope=~\"${app:regex}\"}) and on() (vector(${acquisition:raw}) == 5)",
           "legendFormat": "{{scope}} · 7일 전체",
           "range": true
         },
@@ -152,7 +158,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope, channel) (ga4_app_channel_sessions{scope=~\"${app:regex}\"}) and on() (vector(${acquisition:raw}) == 0)",
+          "expr": "max by (scope, channel) (ga4_app_channel_sessions{scope=~\"${app:regex}\"}) and on() (vector(${acquisition:raw}) == 5)",
           "legendFormat": "{{scope}} · 7일 · {{channel}}",
           "range": true
         },
@@ -210,6 +216,46 @@
           "expr": "max by (account) (instagram_account_discovery{metric=\"viewers\"}) and on() (vector(${acquisition:raw}) == 4)",
           "legendFormat": "@{{account}} · 조회한 사람",
           "range": true
+        },
+        {
+          "accountId": "417124324",
+          "webPropertyId": "properties/565383231",
+          "profileId": "565383231",
+          "metrics": [
+            "sessions"
+          ],
+          "dimensions": [
+            "date",
+            "sessionDefaultChannelGrouping"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "J",
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "ga4"
+          }
+        },
+        {
+          "accountId": "110967461",
+          "webPropertyId": "properties/376243766",
+          "profileId": "376243766",
+          "metrics": [
+            "sessions"
+          ],
+          "dimensions": [
+            "date",
+            "sessionDefaultChannelGrouping"
+          ],
+          "startDate": "30daysAgo",
+          "endDate": "today",
+          "filtersExpression": "",
+          "refId": "K",
+          "datasource": {
+            "type": "blackcowmoo-googleanalytics-datasource",
+            "uid": "ga4"
+          }
         }
       ],
       "fieldConfig": {
@@ -295,6 +341,74 @@
           "filter": {
             "id": "byRefId",
             "options": "B"
+          },
+          "options": {
+            "include": {
+              "pattern": "^(?:$){${acquisition:raw}}(${app:regex}) · .*$"
+            }
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "J"
+          },
+          "options": {
+            "regex": "^(.+)\\|sessions$",
+            "renamePattern": "policycock · 일간 · $1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "J"
+          },
+          "options": {
+            "regex": "^(.+)\\|date$",
+            "renamePattern": "policycock · 일간 · $1 날짜"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "filter": {
+            "id": "byRefId",
+            "options": "J"
+          },
+          "options": {
+            "include": {
+              "pattern": "^(?:$){${acquisition:raw}}(${app:regex}) · .*$"
+            }
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "K"
+          },
+          "options": {
+            "regex": "^(.+)\\|sessions$",
+            "renamePattern": "purple-place-bb6ce · 일간 · $1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "filter": {
+            "id": "byRefId",
+            "options": "K"
+          },
+          "options": {
+            "regex": "^(.+)\\|date$",
+            "renamePattern": "purple-place-bb6ce · 일간 · $1 날짜"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "filter": {
+            "id": "byRefId",
+            "options": "K"
           },
           "options": {
             "include": {
@@ -416,18 +530,18 @@
     },
     {
       "id": 5,
-      "type": "stat",
-      "title": "핵심 퍼널 이탈률",
-      "description": "PostHog 공유 프로젝트 424014에서 판정 시도와 저장 이벤트를 센 30일 퍼널입니다. 시작자가 없으면 N/A입니다.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "title": "정책콕 · 첫 방문 유입과 사례 열람",
+      "description": "최근 7일간 측정에 동의한 정책콕 첫 방문 브라우저 기준입니다. 공유 링크와 그 외 유입에서 사례 열람·열람 전 이탈·관찰 중으로 이어진 첫 방문 브라우저 수입니다. 첫 방문 후 24시간이 지날 때까지 첫 세션의 사례 열람 기록이 없으면 이탈, 24시간 미경과·미열람이면 관찰 중입니다.",
       "gridPos": {
         "x": 0,
         "y": 16,
         "w": 12,
         "h": 8
+      },
+      "type": "volkovlabs-echarts-panel",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "targets": [
         {
@@ -436,36 +550,22 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "editorMode": "code",
-          "expr": "product_funnel_dropoff_rate{service=\"virtue\"}",
-          "range": true
+          "expr": "max by (metric) (posthog_app_first_visits{scope=\"policycock\",scope=~\"${app:regex}\",metric=~\"sharedActivated|sharedPending|otherActivated|otherPending|sharedDropped|otherDropped\"})",
+          "legendFormat": "{{metric}}",
+          "format": "time_series",
+          "instant": true,
+          "range": false
         }
       ],
+      "options": {
+        "getOption": "const selected = context.grafana.replaceVariables('${app:regex}');\nif (!new RegExp('^(?:' + selected + ')$').test('policycock')) {\n  return {title: {text: '정책콕을 선택하면 경로가 표시됩니다', left: 'center', top: 'middle', textStyle: {fontSize: 14}}};\n}\nconst counts = new Map();\nfor (const frame of context.panel.data.series) {\n  for (const field of frame.fields) {\n    if (field.type === 'number' && field.labels?.metric && field.values.length) {\n      counts.set(field.labels.metric, field.values[field.values.length - 1]);\n    }\n  }\n}\nconst cells = ['sharedActivated', 'sharedPending', 'otherActivated', 'otherPending', 'sharedDropped', 'otherDropped'];\nif (cells.some(key => !counts.has(key))) {\n  return {title: {text: '집계 대기 중', left: 'center', top: 'middle'}};\n}\nconst [sa, sp, oa, op, sd, od] = cells.map(key => counts.get(key));\nconst total = sa + sp + oa + op;\nconst dropped = sd + od;\nconst open = sp + op - dropped;\nconst summary = {text: '열람 전 이탈 ' + dropped + '건  ·  관찰 중 ' + open + '건',\n  left: 8, top: 6, textStyle: {fontSize: 14, fontWeight: 'normal'}};\nif (!total) return {title: {...summary, subtext: '측정된 첫 방문 0건'}};\nconst edges = [\n  ['공유 링크', '사례 열람', sa], ['공유 링크', '열람 전 이탈', sd], ['공유 링크', '관찰 중', sp - sd],\n  ['그 외 유입', '사례 열람', oa], ['그 외 유입', '열람 전 이탈', od], ['그 외 유입', '관찰 중', op - od]\n];\nconst links = edges.filter(([, , value]) => value > 0).map(([source, target, value]) => ({source, target, value}));\nconst totals = new Map([['공유 링크', sa + sp], ['그 외 유입', oa + op], ['사례 열람', sa + oa], ['열람 전 이탈', dropped], ['관찰 중', open]]);\nreturn {\n  title: summary,\n  tooltip: {trigger: 'item'},\n  series: [{type: 'sankey', left: 12, right: 110, top: 48, bottom: 24,\n    data: [...totals].filter(([, n]) => n > 0).map(([name]) => ({name})), links,\n    label: {formatter: p => p.name + ' ' + totals.get(p.name) + '건'},\n    lineStyle: {color: 'gradient', opacity: 0.45}, emphasis: {focus: 'adjacency'}}]\n};",
+        "renderer": "svg"
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
-          "noValue": "N/A",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
-          }
+          "min": 0
         },
         "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
       }
     },
     {
@@ -672,16 +772,16 @@
         "name": "acquisition",
         "label": "유입 보기",
         "type": "custom",
-        "query": "전체 채널별 세션 : 0, 인스타그램 유입 세션 : 1, 인스타그램 신규 사용자 : 2, 인스타그램 조회수 : 3, 인스타그램 도달·조회한 사람 : 4",
+        "query": "일간 채널별 세션 : 0, 인스타그램 유입 세션 : 1, 인스타그램 신규 사용자 : 2, 인스타그램 조회수 : 3, 인스타그램 도달·조회한 사람 : 4, 최근 7일 채널별 세션 : 5",
         "current": {
           "selected": true,
-          "text": "전체 채널별 세션",
+          "text": "일간 채널별 세션",
           "value": "0"
         },
         "options": [
           {
             "selected": true,
-            "text": "전체 채널별 세션",
+            "text": "일간 채널별 세션",
             "value": "0"
           },
           {
@@ -703,6 +803,11 @@
             "selected": false,
             "text": "인스타그램 도달·조회한 사람",
             "value": "4"
+          },
+          {
+            "selected": false,
+            "text": "최근 7일 채널별 세션",
+            "value": "5"
           }
         ],
         "multi": false,
