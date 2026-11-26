@@ -19,14 +19,14 @@ function projectScopes(project, rows) {
   return groups;
 }
 
-async function discover(base, token, hogql) {
+async function discover(base, token, hogql, previous = [], request = fetch) {
   const endpoint = new URL('/api/projects/', base);
   let next = endpoint.href;
   const ids = new Set();
   while (next) {
     const url = new URL(next, endpoint);
     if (url.origin !== endpoint.origin || url.pathname !== endpoint.pathname) throw Error('Invalid PostHog pagination');
-    const r = await fetch(url, {headers:{Authorization:'Bearer '+token}, redirect:'error', signal:AbortSignal.timeout(15000)});
+    const r = await request(url, {headers:{Authorization:'Bearer '+token}, redirect:'error', signal:AbortSignal.timeout(15000)});
     if (!r.ok) throw Error('PostHog inventory HTTP '+r.status);
     const page = await r.json();
     for (const p of page.results) {
@@ -39,11 +39,21 @@ async function discover(base, token, hogql) {
   if (!ids.has(PROJECT)) throw Error('Shared PostHog project missing from inventory');
   const projects = [];
   for (const id of ids) {
-    const rows = await hogql(id, `SELECT properties.app_id,
-      if(properties.app_id IS NULL AND endsWith(coalesce(toString(properties.$host), ''), '.shdkej.com'), properties.$host, NULL)
-      FROM events WHERE coalesce(properties.traffic_kind, '') != 'synthetic'
-      AND timestamp >= now() - interval 120 day GROUP BY 1, 2 LIMIT 201`);
-    projects.push({id, groups:projectScopes(id, rows), privateScope:true});
+    let groups;
+    try {
+      const rows = await hogql(id, `SELECT properties.app_id,
+        if(properties.app_id IS NULL AND endsWith(coalesce(toString(properties.$host), ''), '.shdkej.com'), properties.$host, NULL)
+        FROM events WHERE coalesce(properties.traffic_kind, '') != 'synthetic'
+        AND timestamp >= now() - interval 120 day GROUP BY 1, 2 LIMIT 201`);
+      groups = projectScopes(id, rows);
+    } catch (error) {
+      console.error('PostHog app inventory unavailable:', id, error.message);
+      groups = previous.find(p => p.id === id)?.groups;
+      // Known scopes can be queried independently of inventory permissions.
+      if (!groups && id === PROJECT) groups = scopes;
+    }
+    projects.push({id, groups, privateScope:true});
+
   }
   return projects;
 }

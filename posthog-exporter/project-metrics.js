@@ -8,10 +8,11 @@ function projectMetrics(host, token, hogql) {
   const snapshots = new Map();
   const refresh = createSnapshotCache(async () => {
     if (!inventory || Date.now() - inventory.at >= 60 * 60 * 1000) {
-      try { inventory = {projects: await discover(host, token, hogql), at:Date.now()}; }
+      try { inventory = {projects: await discover(host, token, hogql, inventory?.projects), at:Date.now()}; }
       catch (err) { if (!inventory) throw err; console.error('PostHog inventory refresh failed:', err.message); }
     }
     for (const project of inventory.projects) {
+      if (!project.groups) continue;
       try {
         const [calendar, health] = await Promise.all([
           collectSnapshot(hogql, new Date(), project), collectHealth(hogql, Date.now(), project),
@@ -53,6 +54,7 @@ function registerActivity(client, register, source) {
       const connected = new Set();
       for (const {health} of source.fresh) for (const row of health.rows) {
         const service = row.scope === 'Virtue' ? 'virtue' : row.scope;
+        if (name === 'product_app_connected' && row.scope.endsWith('앱 미지정')) continue;
         connected.add(service);
         for (const period of periods || [null]) {
           const n=value(row, period);
