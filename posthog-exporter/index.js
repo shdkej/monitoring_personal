@@ -108,7 +108,10 @@ new client.Gauge({
       for (const [metric, n] of Object.entries(metrics)) this.set({scope, metric}, n);
     }
     for (const scope of ['policycock', 'Virtue']) {
-      if (!snapshot.metrics.has(scope)) this.set({scope, metric: 'shareNewVisitors7d'}, 0);
+      if (snapshot.metrics.has(scope)) continue;
+      for (const metric of ['shareNewVisitors7d', 'sharedActivated', 'sharedPending', 'otherActivated', 'otherPending']) {
+        this.set({scope, metric}, 0);
+      }
     }
   },
 });

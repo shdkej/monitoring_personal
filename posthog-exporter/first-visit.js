@@ -4,7 +4,8 @@ async function firstVisitMetrics(hogql, end) {
   const start = end - 7 * 86400;
   // Group on the anonymous first-session UUID. Retries, reloads and repeated
   // completions represent one visit, and a completion must have its matching entry.
-  const query = `SELECT app, count(), countIf(completed >= entered AND completed <= entered + interval 24 hour), countIf(shared)
+  const activation = 'completed >= entered AND completed <= entered + interval 24 hour';
+  const query = `SELECT app, count(), countIf(${activation}), countIf(shared), countIf(shared AND ${activation})
     FROM (
       SELECT properties.app_id AS app, distinct_id,
         minIf(timestamp, event = 'first_session_started') AS entered,
@@ -21,12 +22,15 @@ async function firstVisitMetrics(hogql, end) {
   const scopes = {policycock: 'policycock', virtue: 'Virtue'};
   const metrics = new Map();
   for (const row of rows) {
-    if (!Array.isArray(row) || row.length !== 4) throw new Error('Invalid first visit row');
-    const [app, visits, activated, referrals] = row;
+    if (!Array.isArray(row) || row.length !== 5) throw new Error('Invalid first visit row');
+    const [app, visits, activated, referrals, sharedActivated] = row;
     const scope = Object.hasOwn(scopes, app) && scopes[app];
     if (!scope || metrics.has(scope) || !row.slice(1).every(n => Number.isSafeInteger(n) && n >= 0) ||
-        visits === 0 || activated > visits || referrals > visits) throw new Error('Invalid first visit counts');
-    metrics.set(scope, {firstVisitActivationPercent: 100 * activated / visits, shareNewVisitors7d: referrals});
+        visits === 0 || activated > visits || referrals > visits || sharedActivated > Math.min(referrals, activated) ||
+        activated - sharedActivated > visits - referrals) throw new Error('Invalid first visit counts');
+    metrics.set(scope, {firstVisitActivationPercent: 100 * activated / visits, shareNewVisitors7d: referrals,
+      sharedActivated, sharedPending: referrals - sharedActivated, otherActivated: activated - sharedActivated,
+      otherPending: visits - referrals - (activated - sharedActivated)});
   }
   return metrics;
 }

@@ -20,7 +20,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [{"type":"link","title":"정책콕 첫 방문 퍼널·경로","url":"/d/policycock-first-visit/"}],
   "liveNow": false,
   "panels": [
     {

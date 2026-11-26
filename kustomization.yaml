@@ -36,6 +36,9 @@ configMapGenerator:
   - name: grafana-dashboard-layer-customer
     files:
       - layer-customer.json=grafana/provisioning/dashboards/layer-customer.json
+  - name: grafana-dashboard-first-visit
+    files:
+      - first-visit.json=grafana/provisioning/dashboards/first-visit.json
   - name: grafana-dashboard-main
     files:
       - main.json=grafana/provisioning/dashboards/main.json

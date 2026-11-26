@@ -1,0 +1,145 @@
+{
+  "uid": "policycock-first-visit",
+  "title": "정책콕 · 첫 방문과 사례 열람",
+  "schemaVersion": 39,
+  "editable": false,
+  "timezone": "Asia/Seoul",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "refresh": "5m",
+  "tags": [
+    "policycock",
+    "acquisition"
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "title": "첫 방문 → 사례 열람",
+      "description": "최근 7일, 분석에 동의한 첫 방문 브라우저 기준. 비율의 분모는 첫 방문 수입니다.",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 11,
+        "h": 9
+      },
+      "type": "volkovlabs-echarts-panel",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by (metric) (posthog_app_first_visits{scope=\"policycock\",metric=~\"sharedActivated|sharedPending|otherActivated|otherPending\"})",
+          "legendFormat": "{{metric}}",
+          "format": "time_series",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "getOption": "const counts = new Map();\nfor (const frame of context.panel.data.series) {\n  for (const field of frame.fields) {\n    if (field.type === 'number' && field.labels?.metric && field.values.length) {\n      counts.set(field.labels.metric, field.values[field.values.length - 1]);\n    }\n  }\n}\nconst cells = ['sharedActivated', 'sharedPending', 'otherActivated', 'otherPending'];\nif (cells.some(key => !counts.has(key))) {\n  return {title: {text: '집계 대기 중', left: 'center', top: 'middle'}};\n}\nconst [sa, sp, oa, op] = cells.map(key => counts.get(key));\nconst total = sa + sp + oa + op;\nif (!total) return {title: {text: '측정된 첫 방문 0건', left: 'center', top: 'middle'}};\nconst labels = ['첫 방문', '사례 열람'];\nconst values = [total, sa + oa];\nreturn {\n  tooltip: {trigger: 'item'},\n  grid: {left: 12, right: 115, top: 24, bottom: 16, containLabel: true},\n  xAxis: {type: 'value', max: total, show: false},\n  yAxis: {type: 'category', inverse: true, data: labels, axisTick: {show: false}},\n  series: [{type: 'bar', data: values, barMaxWidth: 32,\n    itemStyle: {color: '#65a5dc', borderRadius: 5},\n    label: {show: true, position: 'right', formatter: p => p.value + '건 · ' + (100 * p.value / total).toFixed(1) + '%'}}]\n};",
+        "renderer": "svg"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "title": "첫 방문 유입별 사례 열람 경로",
+      "description": "같은 첫 방문 ID에서 관측된 유입과 열람입니다. 공유 링크 외 유입은 그 외로 묶고, 관측 시점까지 열람이 없으면 열람 기록 없음으로 표시합니다. 폭은 브라우저 수에 비례합니다.",
+      "gridPos": {
+        "x": 11,
+        "y": 0,
+        "w": 13,
+        "h": 9
+      },
+      "type": "volkovlabs-echarts-panel",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by (metric) (posthog_app_first_visits{scope=\"policycock\",metric=~\"sharedActivated|sharedPending|otherActivated|otherPending\"})",
+          "legendFormat": "{{metric}}",
+          "format": "time_series",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "getOption": "const counts = new Map();\nfor (const frame of context.panel.data.series) {\n  for (const field of frame.fields) {\n    if (field.type === 'number' && field.labels?.metric && field.values.length) {\n      counts.set(field.labels.metric, field.values[field.values.length - 1]);\n    }\n  }\n}\nconst cells = ['sharedActivated', 'sharedPending', 'otherActivated', 'otherPending'];\nif (cells.some(key => !counts.has(key))) {\n  return {title: {text: '집계 대기 중', left: 'center', top: 'middle'}};\n}\nconst [sa, sp, oa, op] = cells.map(key => counts.get(key));\nconst total = sa + sp + oa + op;\nif (!total) return {title: {text: '측정된 첫 방문 0건', left: 'center', top: 'middle'}};\nconst edges = [\n  ['공유 링크', '사례 열람', sa], ['공유 링크', '열람 기록 없음', sp],\n  ['그 외 유입', '사례 열람', oa], ['그 외 유입', '열람 기록 없음', op]\n];\nconst links = edges.filter(([, , value]) => value > 0).map(([source, target, value]) => ({source, target, value}));\nconst totals = new Map([['공유 링크', sa + sp], ['그 외 유입', oa + op], ['사례 열람', sa + oa], ['열람 기록 없음', sp + op]]);\nreturn {\n  tooltip: {trigger: 'item'},\n  series: [{type: 'sankey', left: 12, right: 110, top: 24, bottom: 24,\n    data: [...totals].filter(([, n]) => n > 0).map(([name]) => ({name})), links,\n    label: {formatter: p => p.name + ' ' + totals.get(p.name) + '건'},\n    lineStyle: {color: 'gradient', opacity: 0.45}, emphasis: {focus: 'adjacency'}}]\n};",
+        "renderer": "svg"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "GA4 · 유입 채널별 세션",
+      "description": "GA4 속성 기준 최근 완료 7일의 전체 세션. 재방문 포함. 위의 PostHog 첫 방문 브라우저와 집계 대상이 다릅니다.",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 24,
+        "h": 7
+      },
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by (channel) (ga4_app_channel_sessions{scope=\"policycock\"})",
+          "legendFormat": "{{channel}}",
+          "format": "time_series",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "displayMode": "basic",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "showUnfilled": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      }
+    }
+  ]
+}

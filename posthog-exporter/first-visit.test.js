@@ -8,10 +8,10 @@ test('first-session counts deduplicate within app and preserve absent denominato
     assert.match(query, /GROUP BY app, distinct_id/);
     assert.match(query, /HAVING countIf\(event = 'first_session_started'\) > 0/);
     assert.match(query, /properties.traffic_kind = 'user'/);
-    return [['virtue', 4, 1, 2], ['policycock', 1, 0, 0]];
+    return [['virtue', 4, 1, 2, 1], ['policycock', 1, 0, 0, 0]];
   }, 1800000000);
-  assert.deepEqual(data.get('Virtue'), {firstVisitActivationPercent: 25, shareNewVisitors7d: 2});
-  assert.deepEqual(data.get('policycock'), {firstVisitActivationPercent: 0, shareNewVisitors7d: 0});
+  assert.deepEqual(data.get('Virtue'), {firstVisitActivationPercent: 25, shareNewVisitors7d: 2, sharedActivated: 1, sharedPending: 1, otherActivated: 0, otherPending: 2});
+  assert.deepEqual(data.get('policycock'), {firstVisitActivationPercent: 0, shareNewVisitors7d: 0, sharedActivated: 0, sharedPending: 0, otherActivated: 0, otherPending: 1});
   assert.equal((await firstVisitMetrics(async () => [], 1800000000)).size, 0);
-  await assert.rejects(firstVisitMetrics(async () => [['virtue', 1, 2, 0]], 1800000000));
+  await assert.rejects(firstVisitMetrics(async () => [['virtue', 4, 3, 3, 0]], 1800000000));
 });
