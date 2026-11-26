@@ -1,5 +1,6 @@
 const express = require('express');
 const {registerGA4} = require('./ga4');
+const {registerSupport} = require('./support');
 const {createAnalyticsApi, HOUR} = require('./analytics-api');
 const {projectMetrics, registerActivity} = require('./project-metrics');
 const {firstVisitMetrics} = require('./first-visit');
@@ -27,6 +28,7 @@ if (!TOKEN) {
 // ============================================
 
 const register = new client.Registry();
+registerSupport(register);
 
 async function hogql(projectId, query) {
   const res = await fetch(`${POSTHOG_HOST}/api/projects/${projectId}/query/`, {

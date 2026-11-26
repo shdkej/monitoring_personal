@@ -582,7 +582,7 @@
       "id": 8,
       "type": "stat",
       "title": "고객 문의 수",
-      "description": "지원 메일 범위와 스레드/메시지 기준 확인 및 Gmail 연결 필요 아직 exporter가 없는 placeholder metric이며, 원천/이벤트를 연결하기 전까지 N/A입니다.",
+      "description": "최근 7일 수신 메일 중 제목이 [모두의정책] 또는 [virtue]로 시작하는 대화를 앱별로 집계합니다. 영문 태그는 대소문자를 구분하지 않으며 같은 대화는 앱별 한 건입니다. 보낸 편지·임시보관·스팸·휴지통은 제외합니다. 매일 오전 10:15(한국 시간)에 갱신합니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -601,8 +601,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "customer_support_threads{service=\"virtue\"}",
-          "range": true
+          "expr": "max by (scope) (customer_support_threads{scope=~\"${app:regex}\"})",
+          "range": false,
+          "legendFormat": "{{scope}}",
+          "instant": true
         }
       ],
       "fieldConfig": {
@@ -612,7 +614,8 @@
           "color": {
             "mode": "fixed",
             "fixedColor": "#9CA3AF"
-          }
+          },
+          "decimals": 0
         },
         "overrides": []
       },
@@ -625,9 +628,9 @@
           "fields": ""
         },
         "orientation": "auto",
-        "textMode": "auto",
+        "textMode": "value_and_name",
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "showPercentChange": false
       }
@@ -663,7 +666,7 @@
         "options": [],
         "sort": 1,
         "refresh": 1,
-        "description": "GA4와 PostHog에서 앱별로 집계하는 지표에 적용합니다."
+        "description": "GA4·PostHog·고객 문의의 앱별 지표에 적용합니다."
       },
       {
         "name": "acquisition",
