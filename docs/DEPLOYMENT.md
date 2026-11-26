@@ -134,3 +134,7 @@ Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존
   실제 ConfigMap의 기존 plugins 목록을 보존하여 추가하고 Grafana plugin API 설치/실제 로딩을
   검증합니다. datasource 정본은 이 저장소 `k8s/monitoring-config/grafana-datasource.yaml`이며
   allowedHosts는 해당 내부 Service만 허용합니다. OpenClaw 크론·설정·재시작은 바꾸지 않습니다.
+
+### 내 지표 지도
+
+`agent-metrics` ServiceMonitor가 default 네임스페이스의 앱 전용 metrics 포트를 1분마다 읽습니다. Grafana의 ‘내 지표 지도’(UID `agent-metrics-board`)는 저장한 정의가 있는 칸마다 최신 값과 원천 측정 시각을 표시합니다. 설정은 Metrics 앱에서 수정합니다. 수집 점검에는 `up{namespace="default",service="agent-metrics",endpoint="metrics"}`를 사용합니다.

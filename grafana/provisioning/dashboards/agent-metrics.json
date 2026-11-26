@@ -1,0 +1,123 @@
+{
+  "uid": "agent-metrics-board",
+  "title": "내 지표 지도",
+  "schemaVersion": 39,
+  "editable": false,
+  "tags": [
+    "metrics"
+  ],
+  "timezone": "Asia/Seoul",
+  "refresh": "1m",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "저장한 지표",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 19
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by (slot, floor, metric, period, unit, state) (agent_board_slot_value)",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by (slot) (agent_board_slot_observed_timestamp_seconds) * 1000",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "slot",
+            "mode": "outerTabular"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true
+            },
+            "indexByName": {
+              "slot": 0,
+              "floor": 1,
+              "metric": 2,
+              "period": 3,
+              "Value #A": 4,
+              "unit": 5,
+              "Value #B": 6,
+              "state": 7
+            },
+            "renameByName": {
+              "slot": "칸",
+              "floor": "층",
+              "metric": "지표명",
+              "period": "집계 기간",
+              "Value #A": "값",
+              "unit": "단위",
+              "Value #B": "마지막 측정",
+              "state": "상태"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "—"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "마지막 측정"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsLocal"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "칸",
+            "desc": false
+          }
+        ]
+      }
+    }
+  ]
+}
