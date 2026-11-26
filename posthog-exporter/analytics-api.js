@@ -72,9 +72,11 @@ async function readProperty(scope, property, token, now, get = request) {
     values: {sessions, newUsers}, sessions, seconds: sessions ? duration / sessions : null, channelSessions, instagramAcquisition};
 }
 
-async function readAccount(token, accountId, now, get = request) {
+async function readAccount(token, accountId, now, get = request, graphHost = 'graph.instagram.com') {
   if (accountId !== 'me' && !/^\d{5,30}$/.test(accountId)) throw new Error('Invalid Instagram account');
-  const base = 'https://graph.instagram.com/v27.0/';
+  if (!['graph.instagram.com', 'graph.facebook.com'].includes(graphHost)) throw new Error('Invalid Instagram API host');
+  if (graphHost === 'graph.facebook.com' && accountId === 'me') throw new Error('Instagram account ID required for this login');
+  const base = 'https://' + graphHost + '/v27.0/';
   const profile = await get(base + accountId + '?fields=id,username', token);
   if (profile.username !== INSTAGRAM || !/^\d{5,30}$/.test(profile.id)) throw new Error('Unexpected Instagram account');
   const until = Math.floor(now / 86400000) * 86400;
@@ -145,7 +147,8 @@ function createAnalyticsApi(registry, {
     await update('instagram', INSTAGRAM, instagram, async () => {
       const token = (await readFile('/etc/analytics-instagram/access-token', 'utf8')).trim();
       const id = await optionalSecret('/etc/analytics-instagram/account-id');
-      return readAccount(token, id || 'me', clock());
+      const host = await optionalSecret('/etc/analytics-instagram/graph-host');
+      return readAccount(token, id || 'me', clock(), request, host || 'graph.instagram.com');
     });
   }
   let pending;

@@ -41,6 +41,12 @@ test('Instagram verifies account and seven-day account totals, and keeps missing
   const row = await readAccount('example', 'me', now, response);
   assert.deepEqual(row.values, {views: 0});
   await assert.rejects(readAccount('example', 'me', now, async () => ({username: 'other', id: '123456789'})), /Unexpected Instagram/);
+  const facebook = await readAccount('example', '123456789', now, url => {
+    assert.equal(new URL(url).hostname, 'graph.facebook.com');
+    return response(url);
+  }, 'graph.facebook.com');
+  assert.deepEqual(facebook.values, {views:0});
+  await assert.rejects(readAccount('example', '123456789', now, response, 'example.org'), /Invalid Instagram API host/);
 });
 
 test('cutover survives restart and expired direct samples never revive browser values', async () => {

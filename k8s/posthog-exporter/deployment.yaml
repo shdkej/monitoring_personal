@@ -51,11 +51,11 @@ spec:
           # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
             - name: SOURCE_REVISION
-              value: "analytics-direct-api-2026-11-26b"
+              value: "analytics-direct-api-2026-11-26c"
             - name: GA4_API_ENABLED
               value: "true"
             - name: INSTAGRAM_API_ENABLED
-              value: "false"
+              value: "true"
             - name: POSTHOG_HOST
               value: https://us.posthog.com
             # Personal API Key는 민감정보 → Secret 참조 (repo가 public이므로 평문 금지)
