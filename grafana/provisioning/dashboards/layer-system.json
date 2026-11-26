@@ -563,12 +563,17 @@
           ],
           "fields": ""
         },
-        "orientation": "auto",
+        "orientation": "vertical",
         "textMode": "value_and_name",
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "wideLayout": true,
+        "text": {
+          "titleSize": 12,
+          "valueSize": 20
+        }
       },
       "links": [
         {
