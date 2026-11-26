@@ -24,74 +24,19 @@
   "liveNow": false,
   "panels": [
     {
-      "id": 1,
-      "type": "timeseries",
-      "title": "신규 사용자",
-      "description": "GA4 속성 기준 지난 7일. Space가 매일 10:15 KST에 갱신합니다. 관측 후 30시간이 지나거나 해당 앱 수집에 실패하면 선이 끊깁니다.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 0,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "max by (scope) (ga4_app_rolling7d_count{scope=~\"${app:regex}\",metric=\"newUsers\"})",
-          "legendFormat": "{{scope}}",
-          "range": true
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "min": 0,
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "lineInterpolation": "stepAfter",
-            "showPoints": "auto",
-            "spanNulls": false
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
       "id": 2,
-      "type": "timeseries",
+      "type": "volkovlabs-echarts-panel",
       "title": "유입 채널별 세션 추이",
-      "description": "기본 보기는 GA4 속성의 날짜별 세션을 앱·채널별로 표시합니다. 오늘 값은 집계 중일 수 있습니다. 최근 7일 합계 보기의 가로축은 집계값을 수집한 시각입니다. Instagram 보기는 기존 GA4 유입·신규 사용자와 계정 조회·도달 지표를 표시합니다.",
+      "description": "위 그래프는 선택한 앱의 GA4 날짜별 채널 세션입니다. 아래는 최근 완료 7일의 앱별 전체·채널별 세션과 Instagram(IG) 유입 세션·첫 유입 신규 사용자입니다. IG 유입은 채널 집계에 포함될 수 있습니다. 하단 계정 조회·도달은 앱 필터와 독립적인 Instagram 계정 지표입니다. —는 집계값 없음을 뜻합니다.",
       "datasource": {
         "type": "mixed",
         "uid": "-- Mixed --"
       },
       "gridPos": {
-        "x": 12,
+        "x": 0,
         "y": 0,
-        "w": 12,
-        "h": 8
+        "w": 24,
+        "h": 18
       },
       "targets": [
         {
@@ -141,9 +86,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"sessions\",scope=~\"${app:regex}\"}) and on() (vector(${acquisition:raw}) == 5)",
+          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"sessions\",scope=~\"${app:regex}\"})",
           "legendFormat": "{{scope}} · 7일 전체",
-          "range": true
+          "range": false,
+          "instant": true
         },
         {
           "refId": "D",
@@ -152,9 +98,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope, channel) (ga4_app_channel_sessions{scope=~\"${app:regex}\"}) and on() (vector(${acquisition:raw}) == 5)",
+          "expr": "max by (scope, channel) (ga4_app_channel_sessions{scope=~\"${app:regex}\"})",
           "legendFormat": "{{scope}} · 7일 · {{channel}}",
-          "range": true
+          "range": false,
+          "instant": true
         },
         {
           "refId": "E",
@@ -163,9 +110,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (ga4_app_instagram_acquisition{scope=~\"${app:regex}\",metric=\"sessions\"}) and on() (vector(${acquisition:raw}) == 1)",
+          "expr": "max by (scope) (ga4_app_instagram_acquisition{scope=~\"${app:regex}\",metric=\"sessions\"})",
           "legendFormat": "{{scope}} · 인스타그램 유입 세션",
-          "range": true
+          "range": false,
+          "instant": true
         },
         {
           "refId": "F",
@@ -174,9 +122,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (ga4_app_instagram_acquisition{scope=~\"${app:regex}\",metric=\"newUsers\"}) and on() (vector(${acquisition:raw}) == 2)",
+          "expr": "max by (scope) (ga4_app_instagram_acquisition{scope=~\"${app:regex}\",metric=\"newUsers\"})",
           "legendFormat": "{{scope}} · 인스타그램 신규 사용자",
-          "range": true
+          "range": false,
+          "instant": true
         },
         {
           "refId": "G",
@@ -185,9 +134,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (account) (instagram_account_discovery{metric=\"views\"}) and on() (vector(${acquisition:raw}) == 3)",
+          "expr": "max by (account) (instagram_account_discovery{metric=\"views\"})",
           "legendFormat": "@{{account}} · 조회수",
-          "range": true
+          "range": false,
+          "instant": true
         },
         {
           "refId": "H",
@@ -196,9 +146,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (account) (instagram_account_discovery{metric=\"reach\"}) and on() (vector(${acquisition:raw}) == 4)",
+          "expr": "max by (account) (instagram_account_discovery{metric=\"reach\"})",
           "legendFormat": "@{{account}} · 도달 계정 수",
-          "range": true
+          "range": false,
+          "instant": true
         },
         {
           "refId": "I",
@@ -207,9 +158,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (account) (instagram_account_discovery{metric=\"viewers\"}) and on() (vector(${acquisition:raw}) == 4)",
+          "expr": "max by (account) (instagram_account_discovery{metric=\"viewers\"})",
           "legendFormat": "@{{account}} · 조회한 사람",
-          "range": true
+          "range": false,
+          "instant": true
         },
         {
           "accountId": "417124324",
@@ -263,6 +215,54 @@
         "overrides": []
       },
       "options": {
+        "getOption": "const properties = {A: 'blog', B: 'afzma', J: 'policycock', K: 'purple-place-bb6ce'};\nconst filter = new RegExp('^(?:' + context.grafana.replaceVariables('${app:regex}') + ')$');\nconst apps = [...new Set(Object.values(properties))].filter(name => filter.test(name));\nconst summaries = new Map(apps.map(name => [name, {channels: new Map()}]));\nconst accounts = new Map();\nconst lines = [];\nfor (const frame of context.panel.data.series) {\n  const app = properties[frame.refId];\n  const time = frame.fields.find(f => f.type === 'time');\n  for (const field of frame.fields.filter(f => f.type === 'number')) {\n    if (app) {\n      if (!summaries.has(app) || !time) continue;\n      const channel = (field.config?.displayName || frame.name || '').split('|')[0];\n      const data = Array.from(time.values, (t, i) => [Number(t), field.values[i]]);\n      if (data.length) lines.push({name: app + ' · ' + channel, type: 'line', data, symbolSize: 5});\n      continue;\n    }\n    const value = field.values[field.values.length - 1];\n    if (!Number.isFinite(value)) continue;\n    const {scope, channel, account} = field.labels || {};\n    const row = summaries.get(scope);\n    if (row) {\n      if (frame.refId === 'C') row.total = value;\n      if (frame.refId === 'D') row.channels.set(channel, value);\n      if (frame.refId === 'E') row.sessions = value;\n      if (frame.refId === 'F') row.users = value;\n    }\n    if (account) {\n      if (!accounts.has(account)) accounts.set(account, {});\n      accounts.get(account)[frame.refId] = value;\n    }\n  }\n}\n\nconst width = context.panel.chart.getWidth();\nconst height = context.panel.chart.getHeight();\nconst columns = Math.max(1, Math.min(apps.length, Math.floor(width / 180)));\nconst rows = Math.ceil(apps.length / columns);\nconst fmt = value => Number.isFinite(value) ? value.toLocaleString('ko-KR') : '—';\nconst titles = [];\nfunction heading(text, left, top, subtext = '') {\n  titles.push({text, left, top, subtext, itemGap: 4, textStyle: {fontSize: 13},\n    subtextStyle: {fontSize: 12, lineHeight: 18}});\n}\nconst channelNames = [...new Set([...summaries.values()].flatMap(row => [...row.channels.keys()]))];\nconst maxChannels = Math.max(1, ...[...summaries.values()].map(row => row.channels.size));\nconst rowHeight = 64 + maxChannels * 18;\nconst accountHeight = 32 + Math.max(1, accounts.size) * 20;\nconst summaryY = Math.max(135, height - (rows * rowHeight + accountHeight + 48));\nheading('GA4 · 일별 채널 세션', 4, 0);\nif (!lines.length) heading('일별 세션 데이터 없음', 'center', 60);\nheading('최근 완료 7일 · 앱별 유입', 4, summaryY);\napps.forEach((name, i) => {\n  const row = summaries.get(name);\n  const channels = channelNames.filter(c => row.channels.has(c))\n    .map(c => c + '  ' + fmt(row.channels.get(c)));\n  heading(name + ' · 전체 ' + fmt(row.total) + '세션', (100 * (i % columns) / columns) + '%',\n    summaryY + 26 + Math.floor(i / columns) * rowHeight,\n    [...channels, 'IG 유입 ' + fmt(row.sessions) + '세션', 'IG 첫 유입 신규 ' + fmt(row.users) + '명'].join('\\n'));\n});\nif (!apps.length) heading('선택한 앱의 GA4 속성 없음', 4, summaryY + 23);\nconst accountY = summaryY + 32 + Math.max(rows * rowHeight, 26);\nconst accountLines = [...accounts].map(([name, data]) => '@' + name + ' · 조회 ' + fmt(data.G) + '회 · 도달 ' + fmt(data.H) + '계정' +\n  (data.I === undefined ? '' : ' · 조회한 사람 ' + fmt(data.I) + '명'));\nheading('Instagram 계정 · 최근 완료 7일', 4, accountY, accountLines.join('\\n') || '데이터 없음');\nreturn {\n  title: titles, tooltip: {trigger: 'axis', renderMode: 'richText'},\n  legend: {type: 'scroll', top: 25, left: 5, right: 12, data: lines.map(line => line.name)},\n  grid: {left: 12, right: 18, top: 60, height: Math.max(48, summaryY - 72), containLabel: true},\n  xAxis: {type: 'time', show: !!lines.length, axisLabel: {formatter: '{MM}/{dd}'}},\n  yAxis: {type: 'value', show: !!lines.length, minInterval: 1}, series: lines\n};",
+        "renderer": "svg"
+      }
+    },
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "신규 사용자",
+      "description": "GA4 속성 기준 지난 7일. Space가 매일 10:15 KST에 갱신합니다. 관측 후 30시간이 지나거나 해당 앱 수집에 실패하면 선이 끊깁니다.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (scope) (ga4_app_rolling7d_count{scope=~\"${app:regex}\",metric=\"newUsers\"})",
+          "legendFormat": "{{scope}}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
         "legend": {
           "showLegend": true,
           "displayMode": "list",
@@ -272,145 +272,7 @@
           "mode": "multi",
           "sort": "desc"
         }
-      },
-      "transformations": [
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "A"
-          },
-          "options": {
-            "regex": "^(.+)\\|sessions$",
-            "renamePattern": "blog · 일간 · $1"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "A"
-          },
-          "options": {
-            "regex": "^(.+)\\|date$",
-            "renamePattern": "blog · 일간 · $1 날짜"
-          }
-        },
-        {
-          "id": "filterFieldsByName",
-          "filter": {
-            "id": "byRefId",
-            "options": "A"
-          },
-          "options": {
-            "include": {
-              "pattern": "^(?:$){${acquisition:raw}}(${app:regex}) · .*$"
-            }
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "B"
-          },
-          "options": {
-            "regex": "^(.+)\\|sessions$",
-            "renamePattern": "afzma · 일간 · $1"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "B"
-          },
-          "options": {
-            "regex": "^(.+)\\|date$",
-            "renamePattern": "afzma · 일간 · $1 날짜"
-          }
-        },
-        {
-          "id": "filterFieldsByName",
-          "filter": {
-            "id": "byRefId",
-            "options": "B"
-          },
-          "options": {
-            "include": {
-              "pattern": "^(?:$){${acquisition:raw}}(${app:regex}) · .*$"
-            }
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "J"
-          },
-          "options": {
-            "regex": "^(.+)\\|sessions$",
-            "renamePattern": "policycock · 일간 · $1"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "J"
-          },
-          "options": {
-            "regex": "^(.+)\\|date$",
-            "renamePattern": "policycock · 일간 · $1 날짜"
-          }
-        },
-        {
-          "id": "filterFieldsByName",
-          "filter": {
-            "id": "byRefId",
-            "options": "J"
-          },
-          "options": {
-            "include": {
-              "pattern": "^(?:$){${acquisition:raw}}(${app:regex}) · .*$"
-            }
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "K"
-          },
-          "options": {
-            "regex": "^(.+)\\|sessions$",
-            "renamePattern": "purple-place-bb6ce · 일간 · $1"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "filter": {
-            "id": "byRefId",
-            "options": "K"
-          },
-          "options": {
-            "regex": "^(.+)\\|date$",
-            "renamePattern": "purple-place-bb6ce · 일간 · $1 날짜"
-          }
-        },
-        {
-          "id": "filterFieldsByName",
-          "filter": {
-            "id": "byRefId",
-            "options": "K"
-          },
-          "options": {
-            "include": {
-              "pattern": "^(?:$){${acquisition:raw}}(${app:regex}) · .*$"
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "id": 3,
@@ -422,8 +284,8 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 0,
-        "y": 8,
+        "x": 12,
+        "y": 18,
         "w": 12,
         "h": 8
       },
@@ -477,8 +339,8 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 12,
-        "y": 8,
+        "x": 0,
+        "y": 26,
         "w": 12,
         "h": 8
       },
@@ -527,8 +389,8 @@
       "title": "앱별 첫 방문 경로",
       "description": "최근 7일간 측정에 동의한 첫 방문 브라우저 기준입니다. 공유 링크·그 외 유입에서 정책콕은 사례 열람, Virtue는 덕행 저장으로 이어진 경로를 봅니다. 첫 방문 후 24시간이 지나도록 첫 세션의 완료 기록이 없으면 이탈, 그 전이면 관찰 중입니다. 선 굵기는 각 앱 안에서의 비중이며, 앱 간 규모는 첫 방문 건수로 비교합니다.",
       "gridPos": {
-        "x": 0,
-        "y": 16,
+        "x": 12,
+        "y": 26,
         "w": 12,
         "h": 8
       },
@@ -572,8 +434,8 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 12,
-        "y": 16,
+        "x": 0,
+        "y": 34,
         "w": 12,
         "h": 8
       },
@@ -627,8 +489,8 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 0,
-        "y": 24,
+        "x": 12,
+        "y": 34,
         "w": 12,
         "h": 8
       },
@@ -682,8 +544,8 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 12,
-        "y": 24,
+        "x": 0,
+        "y": 42,
         "w": 12,
         "h": 8
       },
@@ -761,53 +623,6 @@
         "sort": 1,
         "refresh": 1,
         "description": "GA4·PostHog·고객 문의의 앱별 지표에 적용합니다."
-      },
-      {
-        "name": "acquisition",
-        "label": "유입 보기",
-        "type": "custom",
-        "query": "일간 채널별 세션 : 0, 인스타그램 유입 세션 : 1, 인스타그램 신규 사용자 : 2, 인스타그램 조회수 : 3, 인스타그램 도달·조회한 사람 : 4, 최근 7일 채널별 세션 : 5",
-        "current": {
-          "selected": true,
-          "text": "일간 채널별 세션",
-          "value": "0"
-        },
-        "options": [
-          {
-            "selected": true,
-            "text": "일간 채널별 세션",
-            "value": "0"
-          },
-          {
-            "selected": false,
-            "text": "인스타그램 유입 세션",
-            "value": "1"
-          },
-          {
-            "selected": false,
-            "text": "인스타그램 신규 사용자",
-            "value": "2"
-          },
-          {
-            "selected": false,
-            "text": "인스타그램 조회수",
-            "value": "3"
-          },
-          {
-            "selected": false,
-            "text": "인스타그램 도달·조회한 사람",
-            "value": "4"
-          },
-          {
-            "selected": false,
-            "text": "최근 7일 채널별 세션",
-            "value": "5"
-          }
-        ],
-        "multi": false,
-        "includeAll": false,
-        "skipUrlSync": false,
-        "description": "유입 채널별 세션 패널의 집계 기준입니다. 인스타그램 조회·도달은 계정 단위입니다."
       }
     ]
   },
