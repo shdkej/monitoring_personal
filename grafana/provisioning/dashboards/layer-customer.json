@@ -15,22 +15,30 @@
       }
     ]
   },
-  "description": "고객 획득·전환·재방문·문의. GA4는 blog·afzma 속성, PostHog는 현재 연결된 virtue 서비스 기준입니다.",
+  "description": "GA4 앱별 신규 사용자, 채널별 유입, PostHog 앱별 재방문과 전환을 확인합니다.",
   "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "title": "GA4 · PostHog 앱별 비교",
+      "url": "/d/app-analytics",
+      "type": "link",
+      "icon": "dashboard",
+      "keepTime": true
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
       "id": 1,
       "type": "timeseries",
-      "title": "신규 사용자",
-      "description": "GA4 · 최근 30일 일별. blog와 afzma 속성",
+      "title": "GA4 · 신규 사용자",
+      "description": "GA4 속성 기준 지난 7일. Space가 매일 10:15 KST에 갱신합니다. 관측 후 30시간이 지나거나 해당 앱 수집에 실패하면 선이 끊깁니다.",
       "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "ga4"
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 0,
@@ -40,90 +48,49 @@
       },
       "targets": [
         {
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "newUsers"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": ""
-        },
-        {
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "newUsers"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": ""
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"newUsers\"})",
+          "legendFormat": "{{scope}}",
+          "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "noValue": "N/A",
+          "min": 0,
           "color": {
             "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "blog"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "afzma"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 2,
       "type": "timeseries",
       "title": "유입 채널별 세션",
-      "description": "GA4 · 최근 30일. blog와 afzma 속성의 유입 채널별 세션 (범례는 채널명)",
+      "description": "GA4 직접 연결 속성 blog·afzma의 최근 30일 채널별 일간 세션입니다. 전체 속성의 세션 추이는 상단 앱별 비교에서 확인합니다.",
       "datasource": {
         "type": "blackcowmoo-googleanalytics-datasource",
         "uid": "ga4"
@@ -148,7 +115,8 @@
           ],
           "startDate": "30daysAgo",
           "endDate": "today",
-          "filtersExpression": ""
+          "filtersExpression": "",
+          "refId": "A"
         },
         {
           "accountId": "383859191",
@@ -163,7 +131,8 @@
           ],
           "startDate": "30daysAgo",
           "endDate": "today",
-          "filtersExpression": ""
+          "filtersExpression": "",
+          "refId": "B"
         }
       ],
       "fieldConfig": {
@@ -174,7 +143,32 @@
             "mode": "palette-classic"
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "blog · ${__field.name}"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "afzma · ${__field.name}"
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "reduceOptions": {
@@ -194,9 +188,9 @@
     },
     {
       "id": 3,
-      "type": "stat",
-      "title": "이탈 사용자 수",
-      "description": "PostHog · 이전 활성 코호트 중 최근 7일 미방문. 현재 연결된 virtue 기준",
+      "type": "timeseries",
+      "title": "PostHog · 이탈 사용자",
+      "description": "PostHog 앱별 이동 집계. 합성 이벤트를 제외합니다. 직전 7일에 페이지를 본 고유 사용자와 그 전 7일의 고유 사용자를 비교합니다. 앞 기간에만 방문한 사용자 수입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -215,42 +209,43 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_churned_users{service=\"virtue\"}",
+          "expr": "max by (scope) (posthog_app_health{metric=\"churned7d\"})",
+          "legendFormat": "{{scope}}",
           "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "noValue": "N/A",
+          "min": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 4,
-      "type": "stat",
-      "title": "7일 재방문율",
-      "description": "PostHog · 동일한 이전 7일 활성 코호트 기준. 현재 연결된 virtue 기준",
+      "type": "timeseries",
+      "title": "PostHog · 재방문율",
+      "description": "PostHog 앱별 이동 집계. 합성 이벤트를 제외합니다. 직전 7일에 페이지를 본 고유 사용자와 그 전 7일의 고유 사용자를 비교합니다. 두 기간 모두 방문한 수를 앞 기간의 활성 사용자 수로 나눕니다. 분모가 0이면 빈 값입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -269,42 +264,43 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_retention_rate{service=\"virtue\"}",
+          "expr": "max by (scope) (posthog_app_health{metric=\"retentionPercent\"})",
+          "legendFormat": "{{scope}}",
           "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
-          "noValue": "N/A",
+          "min": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 5,
       "type": "stat",
       "title": "핵심 퍼널 이탈률",
-      "description": "PostHog · virtue 판정 시도→저장, 30일. 시작자 0이면 N/A",
+      "description": "PostHog 공유 프로젝트 424014에서 판정 시도와 저장 이벤트를 센 30일 퍼널입니다. 시작자가 없으면 N/A입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"

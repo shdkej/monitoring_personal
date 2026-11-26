@@ -35,7 +35,7 @@ function windowsFor(now) {
   };
 }
 
-function queryFor(windows) {
+function scopeSQL() {
   const appIds = scopes.filter(scope => scope.appId).map(scope => "'" + scope.appId + "'");
   const conditions = [];
   for (const [index, scope] of scopes.entries()) {
@@ -46,6 +46,13 @@ function queryFor(windows) {
     }
   }
   const attribution = 'multiIf(' + [...conditions, scopes.length - 1].join(', ') + ')';
+  const filter = "coalesce(properties.traffic_kind, '') != 'synthetic' AND " +
+    "(properties.app_id IS NULL OR properties.app_id IN (" + appIds.join(', ') + "))";
+  return {attribution, filter};
+}
+
+function queryFor(windows) {
+  const {attribution, filter} = scopeSQL();
   const bucketCases = windows.slice(0, -1).flatMap((win, i) => ['timestamp < toDateTime(' + win.end + ')', i]);
   const bucket = bucketCases.length ? 'multiIf(' + [...bucketCases, windows.length - 1].join(', ') + ')' : 'toInt64(0)';
   const session = "properties['$session_id']";
@@ -54,8 +61,7 @@ function queryFor(windows) {
     count(), countIf(event = '$pageview'), uniqExactIf(${session}, ${identified}), countIf(${identified})
     FROM events
     WHERE timestamp >= toDateTime(${windows[0].start}) AND timestamp < toDateTime(${windows.at(-1).end})
-      AND coalesce(properties.traffic_kind, '') != 'synthetic'
-      AND (properties.app_id IS NULL OR properties.app_id IN (${appIds.join(', ')}))
+      AND ${filter}
     GROUP BY app_scope, bucket_index`;
 }
 
@@ -105,4 +111,4 @@ function createSnapshotCache(load) {
   };
 }
 
-module.exports = {collectSnapshot, createSnapshotCache};
+module.exports = {collectSnapshot, createSnapshotCache, scopeSQL, scopes, PROJECT};

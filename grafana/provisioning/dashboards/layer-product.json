@@ -17,7 +17,15 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "title": "GA4 · PostHog 앱별 비교",
+      "url": "/d/app-analytics",
+      "type": "link",
+      "icon": "dashboard",
+      "keepTime": true
+    }
+  ],
   "panels": [
     {
       "id": 1,
@@ -129,9 +137,9 @@
     },
     {
       "id": 3,
-      "type": "stat",
-      "title": "프론트엔드 예외",
-      "description": "PostHog · $exception 7일 건수. virtue만",
+      "type": "timeseries",
+      "title": "PostHog · 프론트엔드 예외",
+      "description": "PostHog 앱별 이동 집계. 합성 이벤트를 제외합니다. 직전 7일간 $exception 건수입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -150,42 +158,43 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_errors{service=\"$service\"}",
+          "expr": "max by (scope) (posthog_app_health{metric=\"errors7d\"})",
+          "legendFormat": "{{scope}}",
           "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "noValue": "N/A",
+          "min": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 4,
       "type": "timeseries",
       "title": "Core Web Vitals",
-      "description": "LCP·INP p75 (ms) · PostHog. CLS는 현재 Prometheus에 RUM 시계열이 없어 별도 계측 확인 필요.",
+      "description": "PostHog 앱별 이동 집계. 합성 이벤트를 제외합니다. 직전 30일 LCP·INP p75를 앱별 밀리초로 표시합니다. 관측값이 있어야 표시합니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -204,9 +213,9 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_web_vitals_lcp_ms{service=\"$service\"}",
-          "range": true,
-          "legendFormat": "LCP p75"
+          "expr": "max by (scope) (posthog_app_health{metric=\"lcpP75ms\"})",
+          "legendFormat": "{{scope}} · LCP",
+          "range": true
         },
         {
           "refId": "B",
@@ -215,35 +224,36 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_web_vitals_inp_ms{service=\"$service\"}",
-          "range": true,
-          "legendFormat": "INP p75"
+          "expr": "max by (scope) (posthog_app_health{metric=\"inpP75ms\"})",
+          "legendFormat": "{{scope}} · INP",
+          "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
-          "noValue": "N/A",
+          "min": 0,
           "color": {
             "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
@@ -269,7 +279,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_login_success_rate{service=\"$service\"}",
+          "expr": "product_login_success_rate{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -323,7 +333,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_payment_success_rate{service=\"$service\"}",
+          "expr": "product_payment_success_rate{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -356,9 +366,9 @@
     },
     {
       "id": 7,
-      "type": "stat",
-      "title": "제품 세션 수",
-      "description": "PostHog · 최근 7일 고유 세션 수. virtue만",
+      "type": "timeseries",
+      "title": "PostHog · 식별된 세션",
+      "description": "UTC 기준 최근 완료된 7일. PostHog 공유 프로젝트에서 등록한 앱 ID와 호스트별로 집계하며 합성 이벤트를 제외합니다. 비어 있지 않은 고유 세션 ID 수입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -377,42 +387,43 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_sessions{service=\"$service\"}",
+          "expr": "max by (scope) (posthog_app_calendar_count{period=\"rolling7d\",metric=\"sessions\"} and on (job, instance) (time() - posthog_app_calendar_observed_timestamp_seconds < 2700))",
+          "legendFormat": "{{scope}}",
           "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "noValue": "N/A",
+          "min": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto",
+            "spanNulls": false
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 8,
       "type": "stat",
       "title": "핵심 작업 완료율",
-      "description": "PostHog · virtue 판정 시도→저장 퍼널 완료율, 30일",
+      "description": "PostHog 공유 프로젝트 424014의 판정 시도→저장 이벤트 기준 30일 전환율입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -431,7 +442,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "product_conversion_rate{service=\"$service\"}",
+          "expr": "product_conversion_rate{service=\"virtue\"}",
           "range": true
         }
       ],
@@ -471,40 +482,7 @@
     "4-layer"
   ],
   "templating": {
-    "list": [
-      {
-        "name": "service",
-        "label": "앱",
-        "type": "custom",
-        "query": "virtue,blog,afzma",
-        "current": {
-          "selected": true,
-          "text": "virtue",
-          "value": "virtue"
-        },
-        "options": [
-          {
-            "selected": true,
-            "text": "virtue",
-            "value": "virtue"
-          },
-          {
-            "selected": false,
-            "text": "blog",
-            "value": "blog"
-          },
-          {
-            "selected": false,
-            "text": "afzma",
-            "value": "afzma"
-          }
-        ],
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "skipUrlSync": false
-      }
-    ]
+    "list": []
   },
   "time": {
     "from": "now-30d",

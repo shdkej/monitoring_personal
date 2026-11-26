@@ -1,4 +1,6 @@
 const express = require('express');
+const {registerGA4} = require('./ga4');
+const {collectHealth} = require('./app-health');
 const client = require('prom-client');
 const {collectSnapshot, createSnapshotCache} = require('./calendar');
 
@@ -267,6 +269,20 @@ new client.Gauge({
   },
 });
 
+const health = createSnapshotCache(() => collectHealth(hogql));
+new client.Gauge({
+  name: 'posthog_app_health',
+  help: 'Per-app rolling activity, retention, errors and web vitals from PostHog',
+  labelNames: ['scope', 'metric'], registers: [register],
+  collect() {
+    this.reset();
+    if (!health.current || Date.now() - health.current.observedAt > 45 * 60 * 1000) return;
+    for (const {scope, values} of health.current.rows) {
+      for (const [metric, value] of Object.entries(values)) this.set({scope, metric}, value);
+    }
+  },
+});
+
 async function refreshCalendar() {
   if (calendar.current && Date.now() - Date.parse(calendar.current.observedAt) < 15 * 60 * 1000) return;
   try {
@@ -302,6 +318,13 @@ async function start() {
     console.error('초기 수집 실패:', err.message);
   }
   setInterval(fetchAll, FETCH_INTERVAL);
+  const collectGA4 = registerGA4(register);
+  const refreshGA4 = () => collectGA4().catch(err => console.error('GA4 피드 수집 실패:', err.message));
+  const refreshHealth = () => health.refresh().catch(err => console.error('PostHog 앱 품질 수집 실패:', err.message));
+  void refreshHealth();
+  setInterval(refreshHealth, 15 * 60 * 1000);
+  void refreshGA4();
+  setInterval(refreshGA4, 15 * 60 * 1000);
   void refreshCalendar();
   setInterval(refreshCalendar, Math.min(FETCH_INTERVAL, 5 * 60 * 1000));
   app.listen(PORT, () => {

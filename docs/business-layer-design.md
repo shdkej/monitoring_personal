@@ -4,8 +4,8 @@
 
 Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살핀다. 각 레이어는 대표 지표 8개로 고정하되, 실제 원천이 연결되지 않은 값은 0으로 꾸미지 않고 `N/A`로 표시한다. 현재 저장소에 쿼리가 있다는 사실과 데이터가 실제로 유입된다는 사실은 구분한다.
 
-- **GA4**: 유입·사용자 획득(현재 Grafana 데이터소스에 `blog`, `afzma` 속성 설정)
-- **PostHog**: 제품 내 행동·퍼널·재방문·Web Vitals(현재 exporter에 `virtue` 연결, 다른 앱은 N/A)
+- **GA4**: Space의 GA4 속성별 신규 사용자·세션. 채널별 직접 조회는 blog·afzma
+- **PostHog**: 공유 프로젝트의 앱별 사용·재방문·품질. 판정 시도→저장 퍼널은 프로젝트 단위
 - **CloudWatch / Prometheus**: 노드 계측은 연결됨. YACE exporter는 scrape되나 Lambda 유효 샘플·DynamoDB throttling·RUM 데이터는 확인되지 않음
 - **이메일/CS**: 지정된 지원 메일함·라벨과 집계 범위를 확인한 뒤 연결. 일반 메일은 읽거나 집계하지 않는다.
 
@@ -32,12 +32,12 @@ Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살
 
 | # | 지표 | 산출 기준 | 현재 상태 / 필요한 입력 |
 |---|---|---|---|
-| 1 | 신규 사용자 수 | GA4 신규 사용자, 앱·기간별 | 부분 연결: blog 속성에서 최근 30일 시계열 반환 확인. afzma는 같은 기간 시계열이 보이지 않아 속성/유입 확인 필요 |
-| 2 | 세션 수 | GA4 세션 수, 앱·기간별 | 연결 확인: GA4 최근 30일 세션 쿼리 응답 확인. 현재 고객 화면은 blog·afzma 속성을 함께 조회 |
+| 1 | 신규 사용자 수 | GA4 신규 사용자, 앱·기간별 | 연결됨. Space GA4 피드의 4개 속성, 속성 기준 지난 7일 |
+| 2 | 세션 수 | GA4 세션 수, 앱·기간별 | 연결됨. 앱별 비교에서 4개 GA4 속성의 지난 7일 세션 비교 |
 | 3 | 채널별 유입 | 기본 채널별 세션 수 | 연결 확인: GA4 쿼리 응답 확인. blog·afzma 속성을 함께 조회하며 범례는 채널명 |
 | 4 | 캠페인 전환율 | 캠페인 유입 중 지정 전환을 만든 비율 | 조건부: 전환 이벤트 이름과 GA4 key event 필요 |
 | 5 | 핵심 퍼널 이탈률 | 퍼널 시작자 중 완료 이벤트 미발생 비율 | 부분 연결: virtue 2단계 퍼널 있음, 시작자 0이면 N/A |
-| 6 | 7일 재방문율 | 직전 7일 활성자 중 최근 7일 재방문자 비율 | 연결됨: PostHog 코호트 쿼리, virtue만 |
+| 6 | 7일 재방문율 | 직전 7일 활성자 중 최근 7일 재방문자 비율 | 연결됨. 앱별 7일 코호트의 교집합을 직전 기간 활성자 수로 나눔 |
 | 7 | CTA 클릭률(CTR) | CTA 클릭 ÷ CTA 노출 | 입력 필요: CTA 노출·클릭 이벤트. 일반 autocapture 클릭은 대체값으로 쓰지 않음 |
 | 8 | 고객 문의 수 | 지정된 지원 메일 스레드 또는 문의 건수 | 입력 필요: Gmail 연결 및 주소/라벨·건수 기준 |
 
@@ -49,11 +49,11 @@ Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살
 |---|---|---|---|
 | 1 | 화면 전환 지연 p95 | CloudWatch RUM 탐색 시간 p95 | 입력 필요: Prometheus에 RUM 시계열이 아직 없음 |
 | 2 | 화면 전환 지연 p99 | CloudWatch RUM 탐색 시간 p99 | 입력 필요: Prometheus에 RUM 시계열이 아직 없음 |
-| 3 | 프론트엔드 예외 | PostHog `$exception` 건수 | 연결됨: virtue exporter, blog·afzma N/A |
-| 4 | Core Web Vitals | LCP·INP의 지정 백분위 | 부분 연결: PostHog LCP/INP는 virtue 값 있음. CloudWatch RUM CLS 시계열은 아직 없음 |
+| 3 | 프론트엔드 예외 | PostHog `$exception` 건수 | 연결됨. PostHog 앱별 최근 7일 예외 건수 |
+| 4 | Core Web Vitals | LCP·INP의 지정 백분위 | 부분 연결. 앱별 PostHog 실측 LCP·INP의 최근 30일 p75. 표본이 없으면 N/A |
 | 5 | 로그인 성공률 | 성공 로그인 ÷ 로그인 시도 | 입력 필요: 로그인 시도·성공 이벤트 |
 | 6 | 결제 성공률 | 성공 결제 ÷ 결제 시도 | 입력 필요: 결제 시도·성공·실패 이벤트 |
-| 7 | 제품 세션 수 | 앱 내 고유 세션 수 | 연결됨: PostHog, virtue만 |
+| 7 | 제품 세션 수 | 앱 내 고유 세션 수 | 연결됨. PostHog 앱별 UTC 기준 최근 완료 7일의 고유 세션 ID 수 |
 | 8 | 핵심 작업 완료율 | 앱별 핵심 시작 이벤트 중 완료 이벤트 비율 | 부분 연결: virtue의 판정 시도→저장 퍼널만 구성됨. 앱별 North Star/완료 이벤트 확인 필요 |
 
 CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 서버/API p95·p99가 필요하면 앱별 서버 계측이나 CloudWatch 서비스 지표를 별도 연결한다. FID는 현재 Core Web Vitals의 상호작용 반응성 지표가 아니므로 새 대시보드에는 INP를 사용한다.
@@ -73,8 +73,8 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 
 ## 앱·데이터 원천 현황
 
-- PostHog exporter의 앱 목록은 `virtue`, `blog`, `afzma`; 프로젝트 연결은 `virtue`만이다. 연결되지 않은 앱을 0으로 해석하지 않고 N/A로 표시한다.
-- GA4 datasource의 blog·afzma 속성 쿼리는 Grafana에서 응답(HTTP 200)했다. 최근 30일 신규 사용자 그래프에는 blog series가 보였고 afzma series는 보이지 않았다. 데이터가 실제 0인지 속성/태깅 문제인지는 이 증거만으로 판별하지 않는다. 고객 대시보드는 GA4 두 속성을 함께 보여주고, PostHog 카드만 현재 연동된 virtue에 고정한다.
+- 2026-11-26 원천 대조에서 GA4 계정 3개와 속성 4개(blog, afzma, policycock, purple-place-bb6ce)를 확인했다. Grafana의 GA4 직접 연결 권한은 blog·afzma에 있으며, 네 속성의 공통 지표는 Space의 일간 집계 피드에서 읽는다.
+- PostHog 접근 가능 프로젝트는 424014 한 개이다. 등록 범위는 policycock, miniapp-image-tools, Infinity, shdkej.com, Virtue와 앱 미지정이다. 최근 90일의 명시적 앱 ID는 policycock·miniapp-image-tools였다. 기존 `service="virtue"`는 공유 프로젝트 전체를 조회했던 라벨이다. 앱별 패널은 `scope`를 사용한다.
 - YACE exporter와 ServiceMonitor scrape target은 정상(up)이다. YACE `/metrics`에는 Lambda invocation/error 및 DynamoDB capacity metric names가 있지만, 확인 시 Lambda samples는 NaN, DynamoDB consumed capacity는 0, throttling series는 없었다. CloudWatch RUM 로그에는 `No metrics data found`가 반복되고 RUM Prometheus series도 없다. 값이 0인지 데이터/리소스 범위가 잘못됐는지 임의 추정하지 않는다.
 - 노드 CPU·메모리·디스크·네트워크·헬스 시계열은 Prometheus에 있다. HPA와 black-box latency probe 시계열은 없다.
 - Gmail connector는 현재 설치·연결되지 않았다. 메일을 조회하기 전에 사용자가 지원 주소 또는 Gmail 라벨과 집계 단위(스레드/메시지)를 지정해야 한다.

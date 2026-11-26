@@ -61,5 +61,8 @@
 - PostHog exporter는 컨테이너 시작 시 저장소를 clone하므로 `posthog-exporter/index.js` 변경에는
   같은 변경에서 `k8s/posthog-exporter/deployment.yaml`의 `SOURCE_REVISION`을 갱신해 Pod rollout을
   유도합니다.
+- 앱별 비교 대시보드 UID는 `app-analytics`입니다. GA4 `ga4_app_rolling7d_count{scope,metric}`은 Space의 HTTPS `analytics-ga4.json`을 15분마다 읽어 등록 속성의 최근 7일 신규 사용자와 세션을 제공합니다. Space 원천은 매일 10:15 KST에 갱신합니다. 앱 수집 실패 또는 마지막 관측 후 30시간이 지나면 해당 값은 노출하지 않습니다. `ga4_app_observed_timestamp_seconds`로 속성별 원천 시각을 조회합니다.
+- PostHog 비교 패널은 달력 집계 중 UTC 최근 완료 7일의 수신 이벤트, 페이지뷰, 식별된 세션, 세션 ID가 있는 이벤트를 사용합니다. `posthog_app_health{scope,metric}`은 같은 앱 귀속 조건으로 15분마다 한 번 조회합니다. 활성·이탈·재방문·예외는 이동 구간, LCP·INP는 최근 30일 관측값의 p75입니다. 재방문율 분모나 Web Vitals 관측값이 없으면 빈 값입니다. 비교 차트는 45분을 넘긴 PostHog 관측을 숨깁니다. 그래프 가로축은 scrape 시각이고 신규 게이지 이력은 배포 후 쌓입니다.
+- GA4 속성이 추가되면 Space Status의 원천 목록과 운영 수집기를 갱신하고 새 공개 피드 행을 확인합니다. exporter와 앱 선택기는 피드에서 새 속성을 읽습니다. PostHog 앱 등록은 `posthog-exporter/calendar.js`의 프로젝트·앱 귀속과 Space Status 공개 인벤토리를 함께 확인합니다. 별도 프로젝트는 해당 계정 권한·이벤트 단위·공개 범위를 확인한 뒤 귀속 쿼리에 연결합니다.
 - 변경 완료 보고에는 수정한 문서, source commit, Argo CD revision, Prometheus/Grafana 검증
   결과와 남은 화면 검증 경계를 함께 적습니다.

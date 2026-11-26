@@ -32,6 +32,13 @@
       "targetBlank": false,
       "title": "레이어 대시보드",
       "type": "dashboards"
+    },
+    {
+      "title": "GA4 · PostHog 앱별 비교",
+      "url": "/d/app-analytics",
+      "type": "link",
+      "icon": "dashboard",
+      "keepTime": true
     }
   ],
   "liveNow": false,
@@ -119,10 +126,10 @@
       "id": 2,
       "type": "stat",
       "title": "고객 · 신규 사용자",
-      "description": "GA4 · 최근 30일 신규 사용자 합계 (blog + afzma)",
+      "description": "GA4 속성 기준 지난 7일. Space가 매일 10:15 KST에 갱신합니다. 관측 후 30시간이 지나거나 해당 앱 수집에 실패하면 선이 끊깁니다.",
       "datasource": {
-        "type": "blackcowmoo-googleanalytics-datasource",
-        "uid": "ga4"
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "gridPos": {
         "x": 12,
@@ -132,32 +139,16 @@
       },
       "targets": [
         {
-          "accountId": "110967461",
-          "webPropertyId": "properties/252603434",
-          "profileId": "252603434",
-          "metrics": [
-            "newUsers"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": ""
-        },
-        {
-          "accountId": "383859191",
-          "webPropertyId": "properties/523848883",
-          "profileId": "523848883",
-          "metrics": [
-            "newUsers"
-          ],
-          "dimensions": [
-            "date"
-          ],
-          "startDate": "30daysAgo",
-          "endDate": "today",
-          "filtersExpression": ""
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (scope) (ga4_app_rolling7d_count{metric=\"newUsers\"})",
+          "legendFormat": "{{scope}}",
+          "range": false,
+          "instant": true
         }
       ],
       "fieldConfig": {
@@ -216,7 +207,7 @@
       "id": 3,
       "type": "stat",
       "title": "제품 · 핵심 작업 완료율",
-      "description": "PostHog · virtue 판정 시도→저장 전환율",
+      "description": "PostHog 공유 프로젝트 424014의 판정 시도→저장 이벤트 기준 30일 전환율입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
