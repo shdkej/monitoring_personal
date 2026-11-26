@@ -18,6 +18,10 @@ spec:
         app: posthog-exporter
     spec:
       volumes:
+        - name: analytics-gmail
+          secret:
+            secretName: analytics-gmail-api
+            optional: true
         - name: customer-support
           configMap:
             name: customer-support-counts
@@ -42,6 +46,9 @@ spec:
           image: node:20-alpine
           imagePullPolicy: IfNotPresent
           volumeMounts:
+            - name: analytics-gmail
+              mountPath: /etc/analytics-gmail
+              readOnly: true
             - name: customer-support
               mountPath: /etc/customer-support
               readOnly: true
@@ -58,7 +65,9 @@ spec:
           # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
             - name: SOURCE_REVISION
-              value: "customer-support-inventory-2026-11-27"
+              value: "customer-support-gog-2026-11-27"
+            - name: GMAIL_GOG_ENABLED
+              value: "true"
             - name: GA4_API_ENABLED
               value: "true"
             - name: INSTAGRAM_API_ENABLED

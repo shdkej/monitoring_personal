@@ -28,7 +28,6 @@ if (!TOKEN) {
 // ============================================
 
 const register = new client.Registry();
-registerSupport(register);
 
 async function hogql(projectId, query) {
   const res = await fetch(`${POSTHOG_HOST}/api/projects/${projectId}/query/`, {
@@ -144,6 +143,7 @@ app.get('/health', (req, res) => {
 // 첫 폴링을 끝낸 뒤 서빙 시작 (초기 데이터 보장). 실패해도 서버는 띄운다.
 async function start() {
   const analyticsApi = createAnalyticsApi(register);
+  registerSupport(register, undefined, undefined, analyticsApi);
   const refreshApi = () => analyticsApi.refresh().catch(() => console.error('Analytics API refresh failed'));
   void refreshApi();
   setInterval(refreshApi, HOUR);

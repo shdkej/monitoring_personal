@@ -77,7 +77,7 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 - 노드 CPU·메모리·디스크·네트워크·헬스 시계열은 Prometheus에 있다. HPA와 black-box latency probe 시계열은 없다.
 - SAM-PC의 읽기 전용 Gmail 조회는 제목 맨 앞의 [등록된 앱 이름]을 분류한다. [모두의정책]은 policycock의 별칭이다. [AI 브리핑]과 일반 메일은 집계에서 제외한다.
 - 매출·결제·광고비 원천은 저장소와 배포 설정에서 확인되지 않았다. 관련 Grafana 패널은 계획된 `business_*` placeholder query로 N/A 상태이며 실제 exporter 지표가 아니다. 값이나 North Star를 추정하지 않는다.
-- 고객 8번 패널은 customer_support_threads의 앱별 최근 7일 문의 수를 표시한다. 관측값의 유효 기간은 30시간이다.
+- 고객 8번 패널은 customer_support_threads의 앱별 최근 7일 문의 수를 표시한다. 클러스터 exporter의 gog 수집 주기는 한 시간이며 관측값의 유효 기간은 3시간이다.
 
 ## 메트릭 구현 계약
 

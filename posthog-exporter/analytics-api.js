@@ -1,6 +1,7 @@
 const {readFile} = require('node:fs/promises');
 const {JWT} = require('google-auth-library');
 const {Gauge} = require('prom-client');
+const {readGmail} = require('./gmail');
 
 const PROPERTIES = {blog: '252603434', afzma: '523848883', policycock: '565383231', 'purple-place-bb6ce': '376243766'};
 const INSTAGRAM = 'minimal_collector';
@@ -114,11 +115,13 @@ async function googleToken(credentials) {
 function createAnalyticsApi(registry, {
   clock = Date.now, googleEnabled = process.env.GA4_API_ENABLED === 'true',
   instagramEnabled = process.env.INSTAGRAM_API_ENABLED === 'true',
+  gmailEnabled = process.env.GMAIL_GOG_ENABLED === 'true',
 } = {}) {
   // A configured source owns its labels immediately, including after pod restarts.
   // Empty entries are unavailable until a complete API response arrives.
   const ga4 = new Map(googleEnabled ? Object.keys(PROPERTIES).map(scope => [scope, null]) : []);
   const instagram = new Map(instagramEnabled ? [[INSTAGRAM, null]] : []);
+  const gmail = new Map(gmailEnabled ? [['customer-support', null]] : []);
   const failures = new Gauge({name: 'analytics_api_consecutive_failures', help: 'Consecutive hourly API refresh failures',
     labelNames: ['source', 'scope'], registers: [registry]});
   const lastSuccess = new Gauge({name: 'analytics_api_last_success_timestamp_seconds', help: 'Last verified direct API result',
@@ -151,12 +154,18 @@ function createAnalyticsApi(registry, {
       return readAccount(token, id || 'me', clock(), request, host || 'graph.instagram.com');
     });
   }
-  let pending;
-  function refresh() {
-    if (!pending) pending = Promise.all([refreshGoogle(), refreshInstagram()]).finally(() => { pending = null; });
-    return pending;
+  function onceAtATime(load) {
+    let pending;
+    return () => {
+      if (!pending) pending = load().finally(() => { pending = null; });
+      return pending;
+    };
   }
-  return {ga4, instagram, refresh};
+  const sources = [refreshGoogle, refreshInstagram];
+  if (gmailEnabled) sources.push(() => update('gmail', 'customer-support', gmail, () => readGmail(clock())));
+  const collectors = sources.map(onceAtATime);
+  const refresh = () => Promise.all(collectors.map(collect => collect()));
+  return {ga4, instagram, gmail, refresh};
 }
 
 // Keep browser data only for scopes that have not been cut over.

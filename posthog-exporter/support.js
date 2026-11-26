@@ -9,12 +9,20 @@ function validScope(scope) {
 }
 const maxAge = 30 * 3600;
 
-function registerSupport(registry, read = () => readFile('/etc/customer-support/report.json', 'utf8'), clock = Date.now) {
+function registerSupport(registry, read = () => readFile('/etc/customer-support/report.json', 'utf8'), clock = Date.now, api) {
   new Gauge({
     name: 'customer_support_threads', help: 'Unique inbound support threads with a leading app tag in the last seven days',
     labelNames: ['scope'], registers: [registry],
     async collect() {
       this.reset();
+      if (api?.gmail.has('customer-support')) {
+        const row = api.gmail.get('customer-support');
+        const age = row && clock() - row.observed;
+        if (row && age >= 0 && age <= 3 * 3600000) {
+          for (const [scope, count] of Object.entries(row.counts)) this.set({scope}, count);
+        }
+        return;
+      }
       let report;
       try { report = JSON.parse(await read()); } catch { return; }
       const now = Math.floor(clock() / 1000);
@@ -31,4 +39,4 @@ function registerSupport(registry, read = () => readFile('/etc/customer-support/
   });
 }
 
-module.exports = {registerSupport};
+module.exports = {registerSupport, validScope};

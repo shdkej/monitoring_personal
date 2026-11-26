@@ -44,7 +44,7 @@
   비즈니스·고객·제품·시스템 4개 레이어에 8개씩 배치합니다. 미연동 앱, 미정의 이벤트, 분모가
   없는 비율은 0으로 채우지 않고 `N/A`와 필요한 입력을 표시합니다.
 - 제품 데이터는 PostHog, 유입 데이터는 GA4, 운영 데이터는 Prometheus/CloudWatch에서 읽습니다.
-  고객 문의는 SAM-PC가 Gmail 읽기 권한으로 최근 7일 수신 대화를 매일 10:15 KST에 집계합니다. 대상 앱은 고객 대시보드의 GA4·PostHog 앱 목록에서 갱신하고 미지정 범위는 제외합니다. 클러스터에는 앱별 건수, 집계 대상 앱 목록과 관측 시각만 들어갑니다. monitoring/customer-support-counts의 report.json을 마운트하고 30시간이 지난 건수는 숨깁니다.
+  고객 문의는 exporter에서 매시간 gog로 최근 7일 수신 대화를 조회합니다. 앱 이름은 GA4·PostHog 앱 범위에서 가져옵니다. 모호한 짧은 이름과 미지정 범위를 제외합니다. `monitoring/analytics-gmail-api`에는 대상 계정(`account`)과 Gmail 읽기 전용 OAuth 자격 증명(`credentials.json`)이 필요합니다. exporter는 액세스 토큰의 권한과 사서함 계정을 확인하고, gog 프로세스에 단기 토큰만 전달합니다. gog v0.48.1 공식 Linux 배포본의 SHA256을 검사하며 amd64 및 arm64를 지원합니다. `analytics_api_last_success_timestamp_seconds{source="gmail"}`로 수집 시각을 확인합니다. 오류가 지속되어 마지막 확인 이후 3시간이 지나면 건수를 숨깁니다.
 - 새 PostHog 퍼널 지표는 `start > 0`일 때만 전환·이탈률 series를 발행합니다. 시작자가 없을 때
   이탈률을 0%로 오인하지 않도록 해당 series는 내보내지 않습니다.
 - exporter는 PostHog 프로젝트 목록을 시간마다 탐색하고, 15분마다 프로젝트와 앱별로 집계합니다. 공유 프로젝트 424014에서는 승인된 앱 ID를 먼저 적용하고 호스트를 보조로 사용합니다. 개인 Grafana는 새 프로젝트, 최근 120일의 유효한 앱 ID와 소유 도메인의 새 호스트를 포함합니다. 식별되지 않은 이벤트는 해당 프로젝트의 ‘앱 미지정’으로 묶고 합성 트래픽은 제외합니다. 앱별 집계는 45분 동안 유효합니다. `product_sessions{service="virtue"}`를 포함한 기존 지표도 해당 앱의 값입니다. 핵심 작업과 퍼널은 이벤트 정의가 있는 앱에만 적용합니다.
