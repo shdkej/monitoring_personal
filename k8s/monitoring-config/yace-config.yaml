@@ -63,3 +63,36 @@ data:
               statistics: [Sum]
             - name: PerformanceNavigationDuration
               statistics: [Average, p95, p99]
+
+    # Daily S3 metrics do not require tagged buckets or paid request-metric opt-in.
+    customNamespace:
+      - name: s3-storage
+        namespace: AWS/S3
+        regions: [ap-northeast-2, ap-northeast-1, ap-south-1, us-east-1, eu-central-1]
+        dimensionNameRequirements: [BucketName, StorageType]
+        period: 86400
+        length: 259200
+        roundingPeriod: 3600
+        nilToZero: false
+        addCloudwatchTimestamp: false
+        metrics:
+          - name: BucketSizeBytes
+            statistics: [Average]
+          - name: NumberOfObjects
+            statistics: [Average]
+    static:
+      - name: s3-monthly-charge
+        namespace: AWS/Billing
+        regions: [us-east-1]
+        dimensions:
+          - name: ServiceName
+            value: AmazonS3
+          - name: Currency
+            value: USD
+        metrics:
+          - name: EstimatedCharges
+            statistics: [Maximum]
+            period: 21600
+            length: 172800
+            nilToZero: false
+            addCloudwatchTimestamp: false

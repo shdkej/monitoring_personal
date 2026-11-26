@@ -64,9 +64,9 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 | 2 | 메모리 사용률 | 노드별 사용률·가용 용량 | 연결됨: node-exporter |
 | 3 | 디스크 사용률 | 노드별 root mount 사용률·잔여 공간 | 연결됨: node-exporter |
 | 4 | 네트워크 트래픽 | 전체 노드 송수신 합계 | 연결됨: node-exporter |
-| 5 | OpenClaw 에러 로그 수 | 최근 24시간 ERROR·FATAL 로그 건수 | 연결됨: 기존 dispatcher exporter가 로컬 JSONL을 읽고 1분마다 Prometheus가 수집 |
+| 5 | OpenClaw 에러 로그 | 최근 24시간 ERROR·FATAL 건수와 최신 50개 발생 시각·마스킹 메시지 | 연결됨: Prometheus 건수 + 내부 JSON API의 상세 표 |
 | 6 | 인스턴스·노드 상태 | node-exporter/대상 scrape 상태 | 연결됨: Prometheus `up` |
-| 7 | 자동 확장 여유 | 현재/최대 replica와 확장 실패 | 입력 필요: 현재 Prometheus에서 HPA series 없음. 대상 HPA/ASG와 최대 용량 계약 확인 |
+| 7 | S3 사용량·요금 | 일간 저장량·객체 수·관측 버킷 수와 S3 월 누적 예상 요금 | 연결됨: AWS/S3·AWS/Billing. 무료 혜택·월 예산·요청 성능은 실제 확인 상태와 구분 |
 | 8 | 의존 서비스 포화·오류 | Lambda 오류·스로틀, DynamoDB 제한·지연 | 부분 연결: YACE scrape는 up. 현재 Lambda 호출·오류 샘플은 NaN, DynamoDB throttling series는 없음. 기대 리소스·CloudWatch 데이터 확인 필요 |
 
 ## 앱·데이터 원천 현황
@@ -86,3 +86,5 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 - SLO/목표치를 합의하지 않은 지표에는 임의의 초록·노랑·빨강 기준을 적용하지 않는다. 현재 stat 카드는 중립 회색이며 `N/A`도 회색으로 표시한다.
 - 새 지표를 추가할 때 exporter/Prometheus 쿼리와 Grafana 패널, 이 카탈로그의 상태를 같은 변경에서 갱신한다.
 - PostHog exporter는 원천 쿼리만 맡고 추정식으로 수익·고객·지원 문의를 만들어 내지 않는다.
+
+OpenClaw는 건수와 메시지 표를 나란히 배치하지만 같은 지표로 관리합니다. S3 상세 화면은 시스템 7번 지표의 드릴다운입니다.

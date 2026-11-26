@@ -69,6 +69,37 @@ class ExporterTest(unittest.TestCase):
         output = self.log_output({"": line + "\n" + '{"time":'})
         self.assertIn("openclaw_log_errors_24h 1\n", output)
 
+    def test_error_details_are_recent_sorted_bounded_and_redacted(self):
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp)
+            now = datetime.now(timezone.utc)
+            records = [{"time": (now - timedelta(minutes=i)).isoformat(),
+                        "_meta": {"logLevelName": "ERROR"},
+                        "message": 'Authorization: Bearer private-token\nemail=user@example.com password="super secret"',
+                        "session_id": "do-not-export"} for i in range(60)]
+            records.append({"time": (now - timedelta(hours=25)).isoformat(),
+                            "_meta": {"logLevelName": "ERROR"}, "message": "old"})
+            (directory / f"openclaw-{now:%Y-%m-%d}.log").write_text(
+                "".join(json.dumps(r) + "\n" for r in reversed(records)))
+            module = self.module(directory / "snapshot.json")
+            module.OPENCLAW_LOG_DIR = directory
+            self.assertTrue(hasattr(module, "openclaw_details"), "error detail endpoint is missing")
+            result = module.openclaw_details()
+            self.assertEqual(result["total"], 60)
+            self.assertEqual(len(result["errors"]), 50)
+            self.assertGreaterEqual(result["errors"][0]["time"], result["errors"][-1]["time"])
+            encoded = json.dumps(result)
+            for secret in ("private-token", "user@example.com", "super secret", "do-not-export"):
+                self.assertNotIn(secret, encoded)
+            self.assertIn("[REDACTED]", encoded)
+
+    def test_detail_read_failure_is_not_empty_success(self):
+        module = self.module(Path("/nonexistent/snapshot.json"))
+        module.OPENCLAW_LOG_DIR = Path("/nonexistent/openclaw")
+        self.assertTrue(hasattr(module, "openclaw_details"), "error detail endpoint is missing")
+        with self.assertRaises(OSError):
+            module.openclaw_details()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -74,7 +74,7 @@ Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존
   시간대 차이를 포함해 고르고, 실제 집계는 각 레코드의 시간대가 있는 `time`으로 제한합니다.
   보존 파일에 남은 로그 기준이며, 보존 기간 단축이나 회전 파일 초과 삭제로 사라진 로그는 복원하지
   않습니다. 파일 경로·프로필·로그 형식이 바뀌면 collector 계약도 갱신해야 합니다.
-- 로그 본문·사용자/세션 식별자는 내보내지 않습니다. 읽기·형식 오류 또는 최근 24시간 로그가
+- Prometheus에는 로그 본문·사용자/세션 식별자를 내보내지 않습니다. 읽기·형식 오류 또는 최근 24시간 로그가
   없으면 `openclaw_log_read_error=1`만 내보내고 건수는 숨깁니다. 정상 로그가 있고 에러가 없을 때만
   0건입니다. 쓰는 중인 마지막 미완성 줄은 다음 수집으로 넘깁니다.
 - 기존 ServiceMonitor가 1분마다 수집합니다. Grafana는 instant query로 최신 건수를 읽으며
@@ -90,3 +90,47 @@ Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존
   push하고 Argo CD 동기화와 이전 snapshot 수집을 확인하는 경로입니다.
 - 형식·마운트 참고: [OpenClaw logging](https://docs.openclaw.ai/logging),
   [Kubernetes hostPath](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath).
+
+## S3 저장량·예상 요금
+
+- `k8s/monitoring-config/yace-config.yaml`이 기존 YACE v0.63.0에 S3 customNamespace와
+  AWS/Billing static job을 추가합니다. 새 exporter·AWS 권한·유료 요청 메트릭은 만들지 않습니다.
+- 버킷 태그 없이 CloudWatch의 정확한 `BucketName, StorageType` 차원을 수집합니다. 소유 계정의
+  일반 버킷을 확인한 리전은 ap-northeast-2, ap-northeast-1, ap-south-1, us-east-1, eu-central-1입니다.
+  새 리전의 버킷을 추가하면 이 목록도 갱신합니다. directory/vector bucket은 별도 계측 대상입니다.
+- 저장량·객체 수는 AWS 일간 지표입니다. period 86400, length 259200으로 최근 3일의 최신 값을
+  요청하며 원래 CloudWatch timestamp를 Prometheus sample timestamp로 붙이지 않습니다.
+  오래된 일간 sample의 수집 거부를 피하기 위한 설정이며 실시간 저장량이라는 뜻은 아닙니다.
+  YACE의 기존 AWS polling은 5분, Prometheus scrape는 15분입니다. instant 패널은 최근 30분의
+  수집값을 사용하고 NaN은 0으로 채우지 않습니다. 신규 대시보드의 과거 추이는 수집 시작 이후만 있습니다.
+- 저장량은 모든 관측 StorageType을 합산하며 객체 수는 AllStorageTypes만 사용합니다.
+  복제된 exporter 시계열은 버킷/클래스 기준 max로 중복 제거합니다. 미관측 버킷은 0으로 추정하지
+  않고 관측 버킷 수를 함께 표시합니다. 현재/과거 객체 버전·메타데이터·미완료 multipart 등이
+  포함될 수 있으므로 현재 객체 목록 크기와 다를 수 있습니다.
+- 요금은 us-east-1의 AWS/Billing `EstimatedCharges{ServiceName=AmazonS3,Currency=USD}`이며
+  S3 계정 전체의 월 누적 예상 금액입니다. 다른 서비스/최종 청구액과 구분합니다. Free Tier API
+  전체 18개 혜택을 2026-11-26 확인했으나 S3 항목은 없었습니다. 5GB 무료 한도나 예산을
+  가정하지 않습니다. 월 예산은 사용자가 정한 뒤 사용률·잔액을 연결합니다.
+- S3는 저장 총량의 고정 한도/일괄 감속 구간이 없습니다. prefix별 최소 쓰기 3,500/s·읽기 5,500/s는
+  AWS가 안내하는 처리 성능 기준이며 고정 한도가 아닙니다. 현재 AWS/S3에는 저장량·객체 수만
+  있어 요청률·지연·503 성능 여유는 미측정입니다. 유료 request metrics 활성화는 별도 비용 승인
+  이후 대상 버킷·prefix와 지표를 정합니다.
+- ConfigMap 배포 후 YACE reload(실제 지원 여부 확인) 또는 대상 Deployment rollout을 실행하고
+  `/metrics`의 S3/요금 시계열과 Prometheus, Grafana 카드를 대조합니다. 복구는 변경 커밋 revert와
+  YACE rollout입니다. S3 버킷·객체·스토리지 클래스는 변경하지 않습니다.
+
+## OpenClaw 에러 내용
+
+- 기존 exporter의 `/openclaw/errors`는 최근 24시간 ERROR/FATAL 중 최신 50개의 발생 시각·레벨·
+  메시지(최대 2,000자)를 JSON으로 제공합니다. 인증된 Grafana의 Infinity datasource가 내부
+  ClusterIP Service로만 접근합니다. 외부 Ingress/NodePort나 로그 저장소를 새로 만들지 않습니다.
+- Bearer/API/AWS/GitHub/Slack 토큰, 비밀번호·쿠키·세션 키, 이메일·긴 숫자 식별자 등 알려진
+  패턴을 마스킹합니다. 임의의 모든 개인정보를 완벽히 판정하는 필터는 아니므로 로그에 비밀값을
+  쓰지 않는 원천 규칙은 계속 필요합니다. 원문 레코드나 trace/session 필드는 전송하지 않습니다.
+- 원천 오류는 HTTP 503이며 빈 목록 성공으로 숨기지 않습니다. 정상 무오류는 빈 표와 0건입니다.
+  메시지는 Prometheus label로 저장하지 않으며 JSON 응답은 no-store입니다. 상태 probe는
+  로그를 재집계하지 않는 `/healthz`로 분리했습니다.
+- Grafana Infinity `yesoreyeram-infinity-datasource@4.1.8`은 Space monitoring.tf에 선언합니다.
+  실제 ConfigMap의 기존 plugins 목록을 보존하여 추가하고 Grafana plugin API 설치/실제 로딩을
+  검증합니다. datasource 정본은 이 저장소 `k8s/monitoring-config/grafana-datasource.yaml`이며
+  allowedHosts는 해당 내부 Service만 허용합니다. OpenClaw 크론·설정·재시작은 바꾸지 않습니다.

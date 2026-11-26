@@ -24,6 +24,9 @@ resources:
 # Dashboard JSON → ConfigMap 자동 변환
 # Grafana sidecar가 label grafana_dashboard=1 을 감지하여 자동 로드
 configMapGenerator:
+  - name: grafana-dashboard-s3-storage
+    files:
+      - s3-storage.json=grafana/provisioning/dashboards/s3-storage.json
   - name: grafana-dashboard-layer-system
     files:
       - layer-system.json=grafana/provisioning/dashboards/layer-system.json

@@ -38,7 +38,7 @@ spec:
             - name: OPENCLAW_LOG_DIR
               value: /data/openclaw-logs
             - name: SOURCE_REVISION
-              value: openclaw-error-count-20261126
+              value: openclaw-error-details-20261126
           volumeMounts:
             - name: dispatcher-snapshot
               mountPath: /data/snapshot
@@ -48,15 +48,14 @@ spec:
               readOnly: true
           readinessProbe:
             httpGet:
-              path: /metrics
+              path: /healthz
               port: metrics
             initialDelaySeconds: 15
             periodSeconds: 15
-            # /metrics scans retained logs under the 100m CPU limit (~1.2s observed).
             timeoutSeconds: 5
           livenessProbe:
             httpGet:
-              path: /metrics
+              path: /healthz
               port: metrics
             initialDelaySeconds: 45
             periodSeconds: 30

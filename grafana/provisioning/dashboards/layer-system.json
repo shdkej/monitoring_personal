@@ -276,7 +276,7 @@
     {
       "id": 5,
       "type": "stat",
-      "title": "OpenClaw 에러 로그 수 · 최근 24시간",
+      "title": "OpenClaw 에러 수 · 24h",
       "description": "최근 24시간에 기록된 OpenClaw ERROR·FATAL 로그 건수입니다. WARN과 메시지 본문의 error 단어는 제외합니다. 1분마다 수집하며 로그를 읽지 못하거나 최근 로그가 없으면 N/A로 표시합니다.",
       "datasource": {
         "type": "prometheus",
@@ -285,7 +285,7 @@
       "gridPos": {
         "x": 0,
         "y": 16,
-        "w": 12,
+        "w": 3,
         "h": 8
       },
       "targets": [
@@ -328,6 +328,106 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "showPercentChange": false
+      }
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "OpenClaw 에러 내용 · 최근 24h",
+      "description": "최근 24시간 ERROR·FATAL 중 최신 50개입니다. 발생 시각·레벨·최대 2,000자의 메시지를 표시하며 알려진 토큰·인증정보·이메일 패턴은 마스킹합니다. 원문은 기존 호스트 로그에서 확인할 수 있습니다. 원천을 읽지 못하면 조회 오류를 표시합니다.",
+      "gridPos": {
+        "x": 3,
+        "y": 16,
+        "w": 9,
+        "h": 8
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "openclaw-errors"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "http://infinity-dispatcher-exporter.monitoring.svc:9102/openclaw/errors",
+          "url_options": {
+            "method": "GET"
+          },
+          "root_selector": "errors",
+          "columns": [
+            {
+              "selector": "time",
+              "text": "발생 시각",
+              "type": "timestamp"
+            },
+            {
+              "selector": "level",
+              "text": "레벨",
+              "type": "string"
+            },
+            {
+              "selector": "message",
+              "text": "에러 내용",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            },
+            "filterable": true
+          },
+          "noValue": "—"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "발생 시각"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              },
+              {
+                "id": "custom.width",
+                "value": 170
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "레벨"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "발생 시각",
+            "desc": true
+          }
+        ]
       }
     },
     {
@@ -387,8 +487,8 @@
     {
       "id": 7,
       "type": "stat",
-      "title": "자동 확장 여유",
-      "description": "HPA 현재/최대 replica 비율. HPA 대상 설정 필요 현재 Prometheus에 HPA series가 없어 N/A입니다.",
+      "title": "S3 사용량·이번 달 요금",
+      "description": "관측된 일반 버킷의 저장량·객체 수(일간)와 계정 전체 S3 월 누적 예상 요금(USD)입니다. 유료 사용은 저장·요청·전송량에 따라 과금됩니다. 총 저장량에 따른 고정 속도 제한은 없으며 요청 성능은 prefix·요청 패턴별로 봅니다. 상세 링크에서 버킷별 사용량과 성능 수집 상태를 확인하세요.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -407,20 +507,92 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(kube_horizontalpodautoscaler_status_current_replicas) / sum(kube_horizontalpodautoscaler_spec_max_replicas) * 100",
-          "range": true
+          "expr": "sum(max by (dimension_BucketName, dimension_StorageType) (last_over_time(aws_s3_bucket_size_bytes_average[30m])) >= 0)",
+          "legendFormat": "관측 저장량",
+          "range": false,
+          "instant": true
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(max by (dimension_BucketName) (last_over_time(aws_s3_number_of_objects_average{dimension_StorageType=\"AllStorageTypes\"}[30m])) >= 0)",
+          "legendFormat": "객체 수",
+          "range": false,
+          "instant": true
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max(last_over_time(aws_billing_estimated_charges_maximum{dimension_ServiceName=\"AmazonS3\",dimension_Currency=\"USD\"}[30m]))",
+          "legendFormat": "이번 달 예상 요금",
+          "range": false,
+          "instant": true
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "count(count by (dimension_BucketName) (last_over_time(aws_s3_bucket_size_bytes_average[30m]) >= 0))",
+          "legendFormat": "관측 버킷",
+          "range": false,
+          "instant": true
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
+          "unit": "none",
           "noValue": "N/A",
           "color": {
             "mode": "fixed",
             "fixedColor": "#9CA3AF"
-          }
+          },
+          "decimals": 0
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "관측 저장량"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "이번 달 예상 요금"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "reduceOptions": {
@@ -431,12 +603,19 @@
           "fields": ""
         },
         "orientation": "auto",
-        "textMode": "auto",
+        "textMode": "value_and_name",
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "showPercentChange": false
-      }
+      },
+      "links": [
+        {
+          "title": "S3 버킷별 사용량·비용·성능 기준",
+          "url": "/d/s3-storage",
+          "targetBlank": false
+        }
+      ]
     },
     {
       "id": 8,
@@ -538,5 +717,5 @@
   "uid": "layer-system",
   "version": 1,
   "weekStart": "",
-  "description": "노드 용량·네트워크·OpenClaw 에러 로그·AWS 자원 건강. 자동 확장 대상은 아직 미확인."
+  "description": "노드 용량·네트워크·OpenClaw 에러·S3 사용량과 요금·AWS 상태."
 }

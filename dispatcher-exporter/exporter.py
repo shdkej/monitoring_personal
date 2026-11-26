@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prometheus metrics for Infinity snapshots and OpenClaw log counts (no log text)."""
+"""Prometheus metrics and a private, redacted OpenClaw error detail endpoint."""
 import json
 import os
 import re
@@ -12,38 +12,65 @@ PORT = int(os.getenv("PORT", "9102"))
 OPENCLAW_LOG_DIR = Path(os.getenv("OPENCLAW_LOG_DIR", "/data/openclaw-logs"))
 
 
-def openclaw_metrics():
+def redact_message(message):
+    text = str(message)
+    text = re.sub(r"(?i)Bearer\s+[A-Za-z0-9._~+/=-]+", "Bearer [REDACTED]", text)
+    text = re.sub(r"(?i)((?:password|passwd|token|api[_-]?key|access[_-]?key|secret(?:[_-]?key)?|authorization|cookie|session[_-]?id)[\"']?\s*[:=]\s*)(?:\"[^\"]*\"|'[^']*'|[^\s,;}]+)", r"\1[REDACTED]", text)
+    text = re.sub(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\b(?:sk-|xox[baprs]-|gh[pousr]_)[A-Za-z0-9_-]{10,}", "[REDACTED]", text)
+    text = re.sub(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+", "[REDACTED]", text)
+    text = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "[REDACTED]", text)
+    text = re.sub(r"(https?://)[^/\s:@]+:[^/\s@]+@", r"\1[REDACTED]@", text)
+    text = re.sub(r"\b[0-9]{10,16}\b", "[REDACTED]", text)
+    text = re.sub(r"\x1b\[[0-9;]*[a-zA-Z]|[\x00-\x08\x0b-\x1f\x7f]", "", text)
+    return text[:2000]
+
+
+def recent_openclaw_records():
     now = datetime.now(timezone.utc)
     cutoff = now - timedelta(hours=24)
-    count, recent_records = 0, 0
+    recent_records = 0
+    for path in sorted(OPENCLAW_LOG_DIR.iterdir()):
+        match = re.fullmatch(r"openclaw-(\d{4}-\d{2}-\d{2})\.log(?:\.[1-5])?", path.name)
+        if not match or not (str((cutoff - timedelta(days=1)).date()) <= match[1]
+                             <= str((now + timedelta(days=1)).date())):
+            continue
+        with os.fdopen(os.open(path, os.O_RDONLY | os.O_NOFOLLOW), encoding="utf-8") as handle:
+            for line in handle:
+                if not line.endswith("\n"):
+                    break
+                if not line.strip():
+                    continue
+                record = json.loads(line)
+                timestamp = datetime.fromisoformat(record["time"].replace("Z", "+00:00"))
+                level = record["_meta"]["logLevelName"]
+                if timestamp.tzinfo is None or level not in (
+                        "SILLY", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"):
+                    raise ValueError("invalid log metadata")
+                if cutoff < timestamp <= now:
+                    recent_records += 1
+                    yield timestamp, level, record
+    if not recent_records:
+        raise ValueError("no recent readable log records")
+
+
+def openclaw_details():
+    count, errors = 0, []
+    for timestamp, level, record in recent_openclaw_records():
+        if level in ("ERROR", "FATAL"):
+            count += 1
+            errors.append({"time": timestamp.astimezone(timezone.utc).isoformat(),
+                           "level": level,
+                           "message": redact_message(record.get("message", record.get("0", "(메시지 없음)")))})
+            errors.sort(key=lambda row: row["time"], reverse=True)
+            del errors[50:]
+    return {"total": count, "errors": errors}
+
+
+def openclaw_metrics():
     out = ["# TYPE openclaw_log_read_error gauge"]
     try:
-        # Include neighboring host dates to handle timezone offsets and numbered rotations.
-        for path in sorted(OPENCLAW_LOG_DIR.iterdir()):
-            match = re.fullmatch(r"openclaw-(\d{4}-\d{2}-\d{2})\.log(?:\.[1-5])?", path.name)
-            if not match or not (str((cutoff - timedelta(days=1)).date()) <= match[1]
-                                 <= str((now + timedelta(days=1)).date())):
-                continue
-            with os.fdopen(os.open(path, os.O_RDONLY | os.O_NOFOLLOW), encoding="utf-8") as handle:
-                for line in handle:
-                    # The gateway may still be writing the last JSONL record.
-                    if not line.endswith("\n"):
-                        break
-                    if not line.strip():
-                        continue
-                    record = json.loads(line)
-                    timestamp = datetime.fromisoformat(record["time"].replace("Z", "+00:00"))
-                    level = record["_meta"]["logLevelName"]
-                    if timestamp.tzinfo is None or level not in (
-                            "SILLY", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"):
-                        raise ValueError("invalid log metadata")
-                    if cutoff < timestamp <= now:
-                        recent_records += 1
-                        count += level in ("ERROR", "FATAL")
-        if not recent_records:
-            raise ValueError("no recent readable log records")
+        count = sum(level in ("ERROR", "FATAL") for _, level, _ in recent_openclaw_records())
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
-        # Do not expose paths, messages or exceptions in metrics or server logs.
         return out + ["openclaw_log_read_error 1"]
     return out + ["openclaw_log_read_error 0",
                   "# TYPE openclaw_log_errors_24h gauge",
@@ -85,12 +112,23 @@ def render():
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path != "/metrics":
+        status, content_type = 200, "text/plain; version=0.0.4"
+        if self.path == "/metrics":
+            body = render().encode()
+        elif self.path == "/healthz":
+            body = b"ok\n"
+        elif self.path == "/openclaw/errors":
+            content_type = "application/json; charset=utf-8"
+            try:
+                body = json.dumps(openclaw_details(), ensure_ascii=False).encode()
+            except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                status, body = 503, b'{"error":"OpenClaw log source unavailable"}'
+        else:
             self.send_error(404)
             return
-        body = render().encode()
-        self.send_response(200)
-        self.send_header("Content-Type", "text/plain; version=0.0.4")
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
