@@ -105,12 +105,10 @@ function registerGA4(registry, {
     async collect() {
       this.reset();
       let report;
-      if (!api?.instagram.size) {
-        try { report = JSON.parse(await readInstagram()); } catch { /* Optional legacy file. */ }
-      }
+      try { report = JSON.parse(await readInstagram()); } catch { /* Optional Ego snapshot. */ }
       const legacy = report?.schemaVersion === 1 && report.source === 'instagram' && Array.isArray(report.rows) ? report.rows : [];
       const now = clock();
-      const accounts = apiRows(legacy, api?.instagram, now);
+      const accounts = apiRows(legacy.filter(row => row?.scope), api?.instagram, now);
       for (const account of ['minimal_collector', 'every.policy']) {
         const valid = accounts.filter(row => row?.scope === account);
         if (valid.length !== 1 || valid[0].status !== 'ok') continue;

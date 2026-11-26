@@ -64,3 +64,17 @@ test('Instagram handling preserves observed zero, separates app/handle and drops
   assert.deepEqual(await samples('instagram_account_discovery'), []);
   assert.deepEqual(await samples('ga4_app_instagram_acquisition'), []);
 });
+
+test('browser-only Instagram account stays available alongside the API-owned account', async () => {
+  const now = Date.now(), observedAt = new Date(now).toISOString();
+  const row = (scope, values) => ({scope, observedAt, observed: now, status: 'ok', values});
+  const registry = new Registry();
+  registerGA4(registry, {clock: () => now,
+    api: {instagram: new Map([['minimal_collector', row('minimal_collector', {reach: 3})]])},
+    readInstagram: () => JSON.stringify({schemaVersion: 1, source: 'instagram', rows: [
+      row('minimal_collector', {views: 10}), row('every.policy', {views: 8, viewers: 5})
+    ]})});
+  const result = await registry.getSingleMetric('instagram_account_discovery').get();
+  assert.deepEqual(result.values.map(r => [r.labels.account, r.labels.metric, r.value]),
+    [['minimal_collector', 'reach', 3], ['every.policy', 'views', 8], ['every.policy', 'viewers', 5]]);
+});
