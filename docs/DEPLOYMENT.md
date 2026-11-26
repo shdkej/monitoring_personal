@@ -36,6 +36,10 @@
 
 ## Dashboard 계약
 
+- **사용자가 명시적으로 요청하지 않으면 Grafana 대시보드를 새로 만들지 않습니다.**
+  지표 추가·교체, 로그 내용 표시, 상세 조회는 기존 대시보드의 패널을 수정하거나 확장합니다.
+  상세 화면이 편리하다는 판단만으로 별도 대시보드 UID·JSON·배포 ConfigMap을 추가하지 않습니다.
+  사용자 지시(2026-11-26): “내가 말하지 않는한 대시보드 새로 만들지 마.”
 - 패널은 exporter가 실제로 발행하는 지표만 조회합니다. exporter 지표를 바꾸면 dashboard
   PromQL도 같은 변경에서 함께 갱신합니다.
 - 정상 상태는 가능한 한 `0`으로 표시해 `No data`와 구분합니다. `No data`는 scrape·배포·쿼리
@@ -102,11 +106,13 @@ Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존
   요청하며 원래 CloudWatch timestamp를 Prometheus sample timestamp로 붙이지 않습니다.
   오래된 일간 sample의 수집 거부를 피하기 위한 설정이며 실시간 저장량이라는 뜻은 아닙니다.
   YACE의 기존 AWS polling은 5분, Prometheus scrape는 15분입니다. instant 패널은 최근 30분의
-  수집값을 사용하고 NaN은 0으로 채우지 않습니다. 신규 대시보드의 과거 추이는 수집 시작 이후만 있습니다.
+  수집값을 사용하고 NaN은 0으로 채우지 않습니다. 과거 추이는 수집 시작 이후만 있습니다.
 - 저장량은 모든 관측 StorageType을 합산하며 객체 수는 AllStorageTypes만 사용합니다.
   복제된 exporter 시계열은 버킷/클래스 기준 max로 중복 제거합니다. 미관측 버킷은 0으로 추정하지
   않고 관측 버킷 수를 함께 표시합니다. 현재/과거 객체 버전·메타데이터·미완료 multipart 등이
   포함될 수 있으므로 현재 객체 목록 크기와 다를 수 있습니다.
+- 요약 카드와 버킷별 표·추이·과금/성능 설명은 기존 시스템 레이어(`layer-system`)에 둡니다.
+  상세 패널은 하단의 접힌 `S3 상세` 행에 있으며, 별도 `s3-storage` 대시보드는 사용하지 않습니다.
 - 요금은 us-east-1의 AWS/Billing `EstimatedCharges{ServiceName=AmazonS3,Currency=USD}`이며
   S3 계정 전체의 월 누적 예상 금액입니다. 다른 서비스/최종 청구액과 구분합니다. Free Tier API
   전체 18개 혜택을 2026-11-26 확인했으나 S3 항목은 없었습니다. 5GB 무료 한도나 예산을

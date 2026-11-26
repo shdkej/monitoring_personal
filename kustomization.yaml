@@ -28,9 +28,6 @@ configMapGenerator:
   - name: grafana-dashboard-agent-metrics
     files:
       - agent-metrics.json=grafana/provisioning/dashboards/agent-metrics.json
-  - name: grafana-dashboard-s3-storage
-    files:
-      - s3-storage.json=grafana/provisioning/dashboards/s3-storage.json
   - name: grafana-dashboard-layer-system
     files:
       - layer-system.json=grafana/provisioning/dashboards/layer-system.json

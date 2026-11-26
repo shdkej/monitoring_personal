@@ -87,4 +87,4 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 - 새 지표를 추가할 때 exporter/Prometheus 쿼리와 Grafana 패널, 이 카탈로그의 상태를 같은 변경에서 갱신한다.
 - PostHog exporter는 원천 쿼리만 맡고 추정식으로 수익·고객·지원 문의를 만들어 내지 않는다.
 
-OpenClaw는 건수와 메시지 표를 나란히 배치하지만 같은 지표로 관리합니다. S3 상세 화면은 시스템 7번 지표의 드릴다운입니다.
+OpenClaw는 건수와 메시지 표를 나란히 배치하지만 같은 지표로 관리합니다. 시스템 7번 지표의 S3 상세는 같은 대시보드 하단의 접힌 행으로 제공합니다. 대시보드 생성 범위는 [Dashboard 계약](DEPLOYMENT.md#dashboard-계약)을 따릅니다.
