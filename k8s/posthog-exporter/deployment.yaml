@@ -18,6 +18,10 @@ spec:
         app: posthog-exporter
     spec:
       volumes:
+        - name: market-trends
+          secret:
+            secretName: market-trends-naver
+            optional: true
         - name: analytics-gmail
           secret:
             secretName: analytics-gmail-api
@@ -46,6 +50,9 @@ spec:
           image: node:20-alpine
           imagePullPolicy: IfNotPresent
           volumeMounts:
+            - name: market-trends
+              mountPath: /etc/market-trends
+              readOnly: true
             - name: analytics-gmail
               mountPath: /etc/analytics-gmail
               readOnly: true
@@ -65,7 +72,7 @@ spec:
           # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
             - name: SOURCE_REVISION
-              value: "instagram-ego-account-2026-11-27"
+              value: "market-search-trends-2026-11-27"
             - name: GMAIL_GOG_ENABLED
               value: "true"
             - name: GA4_API_ENABLED

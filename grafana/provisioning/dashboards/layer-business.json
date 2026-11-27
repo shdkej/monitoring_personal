@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "앱별 사업 성과. 매출/결제/광고비 원천과 앱별 북극성 정의가 연결되기 전까지는 N/A입니다.",
+  "description": "앱별 사업 성과와 공통 시장 검색 추이. 매출·결제·광고비와 앱별 북극성 지표는 원천 연결 전까지 N/A입니다.",
   "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -300,12 +300,12 @@
     },
     {
       "id": 6,
-      "type": "stat",
-      "title": "고객당 매출 (ARPPU)",
-      "description": "순매출 ÷ 유료 고객 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
+      "type": "timeseries",
+      "title": "시장 검색 추이 · 네이버",
+      "description": "네이버 통합검색의 최근 완료된 52주(월~일, 한국 시간). 매일 갱신하며 공통 최고 검색량을 100으로 환산한 상대지수입니다. 실제 검색 건수·고객 수·시장 규모가 아닙니다. 미니멀 / 변화추적·변화 추적·트래킹 / 에이전트 / 1인사업가·1인 사업가 / 밸런스. 전체 기기·연령·성별이며 지역 필터는 없습니다. 단어의 다른 의미도 포함됩니다. 반환되지 않은 주는 빈 구간이며 0으로 채우지 않습니다. 앱 선택과 무관한 공통 지표입니다. 기본 보기는 최근 1년이며 절대 기간을 선택하면 그 범위만 보입니다. 마지막 정상 수집 후 72시간이 지나면 데이터를 숨깁니다.",
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "market-trends"
       },
       "gridPos": {
         "x": 12,
@@ -313,44 +313,109 @@
         "w": 12,
         "h": 8
       },
+      "timeFrom": "1y",
+      "links": [
+        {
+          "title": "네이버 데이터랩 원천",
+          "url": "https://datalab.naver.com/keyword/trendSearch.naver",
+          "targetBlank": true
+        }
+      ],
       "targets": [
         {
           "refId": "A",
           "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "market-trends"
           },
-          "editorMode": "code",
-          "expr": "business_arppu{service=~\"${service:regex}\"}",
-          "range": true,
-          "legendFormat": "{{service}}"
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "http://posthog-exporter.monitoring.svc:9101/market-trends.json",
+          "url_options": {
+            "method": "GET"
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Time",
+              "type": "timestamp"
+            },
+            {
+              "selector": "미니멀",
+              "text": "미니멀",
+              "type": "number"
+            },
+            {
+              "selector": "변화추적(트래킹)",
+              "text": "변화추적(트래킹)",
+              "type": "number"
+            },
+            {
+              "selector": "에이전트",
+              "text": "에이전트",
+              "type": "number"
+            },
+            {
+              "selector": "1인사업가",
+              "text": "1인사업가",
+              "type": "number"
+            },
+            {
+              "selector": "밸런스",
+              "text": "밸런스",
+              "type": "number"
+            }
+          ]
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "noValue": "N/A",
+          "unit": "none",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "noValue": "—",
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "spanNulls": false,
+            "showPoints": "always",
+            "pointSize": 4,
+            "axisLabel": "검색지수",
+            "axisCenteredZero": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": false
         },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        }
       }
     },
     {

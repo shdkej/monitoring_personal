@@ -146,3 +146,35 @@ OpenClaw 메시지 표는 모바일에서 열이 찌그러지지 않도록 KST �
 ### 내 지표 지도
 
 `agent-metrics` ServiceMonitor가 default 네임스페이스의 앱 전용 metrics 포트를 1분마다 읽습니다. Grafana의 ‘내 지표 지도’(UID `agent-metrics-board`)는 저장한 정의가 있는 칸마다 최신 값과 원천 측정 시각을 표시합니다. 설정은 Metrics 앱에서 수정합니다. 수집 점검에는 `up{namespace="default",service="agent-metrics",endpoint="metrics"}`를 사용합니다.
+
+## 시장 검색 추이
+
+- 기존 비즈니스 대시보드 `layer-business`의 6번 ARPPU 패널을 교체합니다. 대시보드나 패널을
+  추가하지 않고 8개 지표를 유지합니다. 앱 선택과 무관한 공통 시장 검색어입니다.
+- 수집 정본은 `posthog-exporter/market-trends.js`와 `market-trends-keywords.json`입니다.
+  기존 exporter 프로세스가 [네이버 데이터랩 공식 검색 API](https://developers.naver.com/docs/serviceapi/datalab/search/search.md)를
+  매일 한 번 조회합니다. 검색어는 사용자 지정 5개이며 띄어쓰기와 트래킹 표현만 묶습니다.
+  검색어 그룹을 바꿀 때는 패널의 Infinity columns도 함께 바꿉니다.
+- Kubernetes Secret `monitoring/market-trends-naver`의 `client-id`, `client-secret`을
+  `/etc/market-trends`에 읽기 전용으로 마운트합니다. 기존 승인된 네이버 인증을 재사용하며
+  비밀값을 저장소·로그·Grafana에 넣지 않습니다. 누락되어도 기존 analytics 수집은 계속됩니다.
+- 한국 시간 기준 최근 완료된 월~일 52주입니다. 전체 기기·성별·연령이며 API에 지역 필터는
+  없습니다. 다섯 그룹·기간 전체의 공통 최고 검색량을 100으로 삼은 원천 상대지수를 유지합니다.
+  미반환 주는 null이고 선으로 잇거나 0으로 채우지 않습니다. 넓은 검색어의 다른 의미도 포함됩니다.
+- 성공 뒤 24시간, 실패 뒤 6시간 간격으로 재시도합니다. 실패 시 마지막 정상 응답과 원래 수집
+  시각을 유지하고, 72시간 초과 또는 최초 실패는 HTTP 503으로 표시합니다. 재시작 시 메모리
+  캐시를 다시 수집합니다. `market_trends_last_success_timestamp_seconds`와
+  `market_trends_refresh_error`로 신선도·실패를 확인합니다.
+- 기존 내부 Service의 `/market-trends.json`을 Infinity datasource `market-trends`가 읽습니다.
+  allowedHosts는 해당 내부 Service만 허용합니다. 외부 Ingress·새 플러그인·Prometheus 과거
+  데이터 적재는 필요하지 않습니다. 패널의 기본 상대 기간은 1년이고 절대 기간 선택 시 해당
+  범위만 표시됩니다. 원천 응답은 항상 현재 기준 최근 완료 52주입니다.
+- 검증 순서: `cd posthog-exporter && npm ci --ignore-scripts && node --test` →
+  `kubectl kustomize .` 및 Deployment/ConfigMap server dry-run → commit/push → Argo CD
+  revision·rollout → 내부 JSON의 52행/5열·누락값 → Grafana `/api/ds/query`와 실제 PC·모바일
+  렌더를 확인합니다. 소스 수정 시 `SOURCE_REVISION`도 갱신합니다. 복구는 변경 커밋 revert와
+  Argo CD 동기화이며 기존 analytics 설정과 다른 Secret은 유지합니다.
+- 2026-11-27 기존 인증으로 실제 API 응답을 확인했습니다. 이 레거시 API는
+  [공식 전환 공지](https://developers.naver.com/notice/article/32530)에 따라 **2027-06-30 종료**
+  예정이므로 그 전에 NAVER API HUB의 인증·요금·응답 계약을 확인해 이전해야 합니다.
+  Google Trends 공개 embed는 429, 공식 API는 신청이 필요한 상태여서 사용하지 않습니다.

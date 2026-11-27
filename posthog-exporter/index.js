@@ -6,6 +6,7 @@ const {projectMetrics, registerActivity} = require('./project-metrics');
 const {firstVisitMetrics} = require('./first-visit');
 const client = require('prom-client');
 const {collectSnapshot, createSnapshotCache} = require('./calendar');
+const {createMarketTrends} = require('./market-trends');
 
 // ============================================
 // 설정
@@ -28,6 +29,17 @@ if (!TOKEN) {
 // ============================================
 
 const register = new client.Registry();
+const marketTrends = createMarketTrends();
+new client.Gauge({
+  name: 'market_trends_last_success_timestamp_seconds',
+  help: 'Last successfully validated Naver market search snapshot', registers: [register],
+  collect() {this.set(marketTrends.lastSuccessAt / 1000);},
+});
+new client.Gauge({
+  name: 'market_trends_refresh_error',
+  help: 'Whether the last Naver market search refresh failed', registers: [register],
+  collect() {this.set(Number(marketTrends.failed));},
+});
 
 async function hogql(projectId, query) {
   const res = await fetch(`${POSTHOG_HOST}/api/projects/${projectId}/query/`, {
@@ -130,6 +142,12 @@ async function refreshCalendar() {
 // ============================================
 
 const app = express();
+app.get('/market-trends.json', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const snapshot = marketTrends.current;
+  if (!snapshot) return res.status(503).json({error: 'Market search trend source unavailable or stale'});
+  res.json(snapshot);
+});
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
@@ -145,6 +163,8 @@ app.get('/health', (req, res) => {
 
 // 첫 폴링을 끝낸 뒤 서빙 시작 (초기 데이터 보장). 실패해도 서버는 띄운다.
 async function start() {
+  void marketTrends.refresh();
+  setInterval(() => void marketTrends.refresh(), HOUR);
   const analyticsApi = createAnalyticsApi(register);
   registerSupport(register, undefined, undefined, analyticsApi);
   const refreshApi = () => analyticsApi.refresh().catch(() => console.error('Analytics API refresh failed'));

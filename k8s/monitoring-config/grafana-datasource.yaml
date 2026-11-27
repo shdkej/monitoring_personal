@@ -6,6 +6,19 @@ metadata:
   labels:
     grafana_datasource: "1"
 data:
+  market-trends.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Market search trends
+        type: yesoreyeram-infinity-datasource
+        uid: market-trends
+        access: proxy
+        editable: false
+        jsonData:
+          auth_method: none
+          allowedHosts:
+            - http://posthog-exporter.monitoring.svc:9101
+          timeoutInSeconds: 15
   ga4-datasource.yaml: |
     apiVersion: 1
     deleteDatasources:
