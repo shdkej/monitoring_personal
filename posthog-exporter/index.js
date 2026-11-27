@@ -3,6 +3,7 @@ const {registerGA4} = require('./ga4');
 const {registerSupport} = require('./support');
 const {createAnalyticsApi, HOUR} = require('./analytics-api');
 const {projectMetrics, registerActivity} = require('./project-metrics');
+const {createPmf, selectPmf} = require('./pmf');
 const {firstVisitMetrics} = require('./first-visit');
 const client = require('prom-client');
 const {collectSnapshot, createSnapshotCache} = require('./calendar');
@@ -58,6 +59,18 @@ async function hogql(projectId, query) {
   return data.results; // [[value], ...]
 }
 
+const pmf = createPmf(hogql);
+new client.Gauge({
+  name: 'posthog_pmf_current_week',
+  help: 'KST current week consented anonymous browser cohorts, not identified people',
+  labelNames: ['service', 'app', 'metric'], registers: [register],
+  collect() {
+    this.reset();
+    for (const row of pmf.current?.summary || []) {
+      for (const metric of ['entrants', 'activated']) this.set({service: row.service, app: row.app, metric}, row[metric]);
+    }
+  },
+});
 const privateProjects = projectMetrics(POSTHOG_HOST, TOKEN, hogql);
 registerActivity(client, register, privateProjects);
 // Only the previously approved app list is served by the Space publication endpoint.
@@ -142,6 +155,13 @@ async function refreshCalendar() {
 // ============================================
 
 const app = express();
+app.get('/pmf.json', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const snapshot = pmf.current;
+  if (!snapshot) return res.status(503).json({error: 'PMF source unavailable or older than 45 minutes'});
+  try { res.json(selectPmf(snapshot, req.query.service || 'all')); }
+  catch { res.status(400).json({error: 'Unsupported PMF app'}); }
+});
 app.get('/market-trends.json', (req, res) => {
   res.set('Cache-Control', 'no-store');
   const snapshot = marketTrends.current;
@@ -174,6 +194,9 @@ async function start() {
   const refreshGA4 = () => collectGA4().catch(err => console.error('GA4 피드 수집 실패:', err.message));
   const refreshHealth = () => privateProjects.refresh().catch(err => console.error('PostHog 앱 품질 수집 실패:', err.message));
   const refreshFirstVisits = () => firstVisits.refresh().catch(err => console.error('PostHog 첫 방문 수집 실패:', err.message));
+  const refreshPmf = () => pmf.refresh().catch(() => console.error('PMF cohort refresh failed'));
+  void refreshPmf();
+  setInterval(refreshPmf, 15 * 60 * 1000);
   void refreshFirstVisits();
   setInterval(refreshFirstVisits, 15 * 60 * 1000);
   void refreshHealth();

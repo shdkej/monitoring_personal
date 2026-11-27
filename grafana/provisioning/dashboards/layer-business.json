@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "앱별 사업 성과와 공통 시장 검색 추이. 매출·결제·광고비와 앱별 북극성 지표는 원천 연결 전까지 N/A입니다.",
+  "description": "유입을 만들고 PMF를 검증하는 단계의 운영 지표. 신규 유입 → 첫 핵심 행동 → 7일 재사용을 비율과 표본 수로 함께 봅니다. 익명 브라우저 기준, 동의·수신 범위만 관측합니다.",
   "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -26,8 +26,8 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "북극성 지표",
-      "description": "앱별 핵심 가치 이벤트와 단위 정의 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
+      "title": "북극성 · 이번 주 신규 활성 브라우저",
+      "description": "동의한 익명 브라우저 기준이며 실제 사람 수와 다를 수 있습니다. 앱·기기 간 중복 제거를 하지 않습니다. QA 트래픽은 제외합니다. PostHog 원천을 15분마다 조회하며 45분 넘게 갱신되지 않으면 숨깁니다. 한국 시간 월요일 00시부터 현재까지의 신규 유입 코호트. 상단 시간 선택과 무관한 고정 집계입니다. 첫 핵심 행동은 모두의정책의 사례 열람, Virtue의 덕행 저장입니다. 사례 열람은 잠정 가치 신호이며 PMF 달성을 의미하지 않습니다. ",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -36,7 +36,7 @@
         "x": 0,
         "y": 0,
         "w": 12,
-        "h": 8
+        "h": 5
       },
       "targets": [
         {
@@ -46,18 +46,21 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_north_star_value{service=~\"${service:regex}\"}",
-          "range": true,
-          "legendFormat": "{{service}}"
+          "expr": "posthog_pmf_current_week{metric=\"activated\",service=~\"${service:regex}\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{app}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "noValue": "N/A",
+          "unit": "none",
+          "decimals": 0,
+          "min": 0,
+          "noValue": "미수집",
           "color": {
             "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "fixedColor": "#73BF69"
           }
         },
         "overrides": []
@@ -70,19 +73,20 @@
           ],
           "fields": ""
         },
-        "orientation": "auto",
-        "textMode": "auto",
+        "orientation": "horizontal",
+        "textMode": "value_and_name",
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "wideLayout": false
       }
     },
     {
       "id": 2,
       "type": "stat",
-      "title": "순매출",
-      "description": "환불·할인 제외. 결제/회계 원천과 통화 정의 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
+      "title": "이번 주 신규 유입 · 브라우저",
+      "description": "동의한 익명 브라우저 기준이며 실제 사람 수와 다를 수 있습니다. 앱·기기 간 중복 제거를 하지 않습니다. QA 트래픽은 제외합니다. PostHog 원천을 15분마다 조회하며 45분 넘게 갱신되지 않으면 숨깁니다. 한국 시간 월요일 00시부터 현재까지의 신규 유입 코호트. 상단 시간 선택과 무관한 고정 집계입니다. 첫 핵심 행동은 모두의정책의 사례 열람, Virtue의 덕행 저장입니다. 사례 열람은 잠정 가치 신호이며 PMF 달성을 의미하지 않습니다. ",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -91,7 +95,563 @@
         "x": 12,
         "y": 0,
         "w": 12,
-        "h": 8
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "posthog_pmf_current_week{metric=\"entrants\",service=~\"${service:regex}\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{app}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "min": 0,
+          "noValue": "미수집",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "horizontal",
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "showPercentChange": false,
+        "wideLayout": false
+      }
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "첫 핵심 행동 · 완료율과 표본",
+      "description": "동의한 익명 브라우저 기준이며 실제 사람 수와 다를 수 있습니다. 앱·기기 간 중복 제거를 하지 않습니다. QA 트래픽은 제외합니다. PostHog 원천을 15분마다 조회하며 45분 넘게 갱신되지 않으면 숨깁니다. 한국 시간 월요일 00시부터 현재까지의 신규 유입 코호트. 상단 시간 선택과 무관한 고정 집계입니다. 첫 핵심 행동은 모두의정책의 사례 열람, Virtue의 덕행 저장입니다. 사례 열람은 잠정 가치 신호이며 PMF 달성을 의미하지 않습니다. 첫 방문 세션(30분 비활성, 최대 24시간)에서 완료했는지 봅니다. 완료율의 분자·분모 모두 진입 후 24시간이 지난 표본으로 제한합니다. 일찍 완료했어도 24시간 전에는 관찰 중입니다. 위의 신규 활성 수는 현재까지 완료한 전체 표본이므로 이 비율의 분자와 다를 수 있습니다.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "market-trends"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 6
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "market-trends"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "http://posthog-exporter.monitoring.svc:9101/pmf.json?service=${service:percentencode}",
+          "url_options": {
+            "method": "GET"
+          },
+          "root_selector": "summary",
+          "columns": [
+            {
+              "selector": "app",
+              "text": "앱",
+              "type": "string"
+            },
+            {
+              "selector": "activationPercent",
+              "text": "완료율",
+              "type": "number"
+            },
+            {
+              "selector": "activationSample",
+              "text": "완료 / 관측",
+              "type": "string"
+            },
+            {
+              "selector": "pending",
+              "text": "관찰 중",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "minWidth": 90
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "완료율"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "lg",
+        "footer": {
+          "show": false
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "table",
+      "title": "7일 재사용 · 완료율과 표본",
+      "description": "동의한 익명 브라우저 기준이며 실제 사람 수와 다를 수 있습니다. 앱·기기 간 중복 제거를 하지 않습니다. QA 트래픽은 제외합니다. PostHog 원천을 15분마다 조회하며 45분 넘게 갱신되지 않으면 숨깁니다. 최근 5개 주 유입 중 첫 완료 후 24시간부터 8일 미만까지 다시 핵심 행동을 했는지 봅니다. 분자·분모 모두 8일 관찰을 마친, 새 익명 ID로 연결 가능한 활성 브라우저만 포함합니다. 관찰 중·과거 미측정은 분모에서 제외합니다. 0명 관측은 —, 0%는 관측 표본이 있으나 재사용 0건인 경우입니다.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "market-trends"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 6
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "market-trends"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "http://posthog-exporter.monitoring.svc:9101/pmf.json?service=${service:percentencode}",
+          "url_options": {
+            "method": "GET"
+          },
+          "root_selector": "reuse",
+          "columns": [
+            {
+              "selector": "app",
+              "text": "앱",
+              "type": "string"
+            },
+            {
+              "selector": "reusePercent",
+              "text": "재사용률",
+              "type": "number"
+            },
+            {
+              "selector": "reuseSample",
+              "text": "재사용 / 관측",
+              "type": "string"
+            },
+            {
+              "selector": "reusePending",
+              "text": "관찰 중",
+              "type": "number"
+            },
+            {
+              "selector": "unlinked",
+              "text": "과거 미측정",
+              "type": "number"
+            },
+            {
+              "selector": "reuseStatus",
+              "text": "상태",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "minWidth": 90
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "재사용률"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "lg",
+        "footer": {
+          "show": false
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "유입 주차별 변화 · 최근 5주",
+      "description": "동의한 익명 브라우저 기준이며 실제 사람 수와 다를 수 있습니다. 앱·기기 간 중복 제거를 하지 않습니다. QA 트래픽은 제외합니다. PostHog 원천을 15분마다 조회하며 45분 넘게 갱신되지 않으면 숨깁니다. 상단 시간 선택과 무관하게 이번 주와 이전 4주를 PostHog에서 직접 재집계합니다. Prometheus의 3일 보관과 별개입니다. 계측 도입 전·동의 거부·차단된 방문은 복원하지 못하므로 수신 기록 없음은 실제 유입 0명이라는 뜻이 아닙니다. 각 비율의 관찰 기간과 분모는 위 패널과 같습니다.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "market-trends"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "market-trends"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "http://posthog-exporter.monitoring.svc:9101/pmf.json?service=${service:percentencode}",
+          "url_options": {
+            "method": "GET"
+          },
+          "root_selector": "cohorts",
+          "columns": [
+            {
+              "selector": "weekStart",
+              "text": "유입 주 · KST",
+              "type": "string"
+            },
+            {
+              "selector": "app",
+              "text": "앱",
+              "type": "string"
+            },
+            {
+              "selector": "entrants",
+              "text": "신규 유입",
+              "type": "number"
+            },
+            {
+              "selector": "activated",
+              "text": "첫 완료",
+              "type": "number"
+            },
+            {
+              "selector": "activationPercent",
+              "text": "완료율",
+              "type": "number"
+            },
+            {
+              "selector": "activationSample",
+              "text": "완료 / 관측",
+              "type": "string"
+            },
+            {
+              "selector": "pending",
+              "text": "관찰 중",
+              "type": "number"
+            },
+            {
+              "selector": "reusePercent",
+              "text": "재사용률",
+              "type": "number"
+            },
+            {
+              "selector": "reuseSample",
+              "text": "재사용 / 관측",
+              "type": "string"
+            },
+            {
+              "selector": "reusePending",
+              "text": "관찰 중",
+              "type": "number"
+            },
+            {
+              "selector": "unlinked",
+              "text": "과거 미측정",
+              "type": "number"
+            },
+            {
+              "selector": "coverage",
+              "text": "기록 상태",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "minWidth": 90
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "완료율"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "재사용률"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "lg",
+        "footer": {
+          "show": false
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "table",
+      "title": "공유 링크가 첫 이용으로 이어졌나 · 이번 주",
+      "description": "동의한 익명 브라우저 기준이며 실제 사람 수와 다를 수 있습니다. 앱·기기 간 중복 제거를 하지 않습니다. QA 트래픽은 제외합니다. PostHog 원천을 15분마다 조회하며 45분 넘게 갱신되지 않으면 숨깁니다. 한국 시간 월요일 00시부터 현재까지의 신규 유입 코호트. 상단 시간 선택과 무관한 고정 집계입니다. 최초 유입의 ref=share만 공유 링크로 분류합니다. 기타에는 출처 미지정이 포함되므로 특정 채널 성과로 해석하지 않습니다. 유입 출처는 이후 재방문으로 바뀌지 않습니다.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "market-trends"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 16,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "market-trends"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "http://posthog-exporter.monitoring.svc:9101/pmf.json?service=${service:percentencode}",
+          "url_options": {
+            "method": "GET"
+          },
+          "root_selector": "channels",
+          "columns": [
+            {
+              "selector": "app",
+              "text": "앱",
+              "type": "string"
+            },
+            {
+              "selector": "channel",
+              "text": "유입 구분",
+              "type": "string"
+            },
+            {
+              "selector": "entrants",
+              "text": "신규 유입",
+              "type": "number"
+            },
+            {
+              "selector": "activated",
+              "text": "첫 완료",
+              "type": "number"
+            },
+            {
+              "selector": "activationPercent",
+              "text": "완료율",
+              "type": "number"
+            },
+            {
+              "selector": "activationSample",
+              "text": "완료 / 관측",
+              "type": "string"
+            },
+            {
+              "selector": "pending",
+              "text": "관찰 중",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "minWidth": 90
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "완료율"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "lg",
+        "footer": {
+          "show": false
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "순매출 · 보조 지표",
+      "description": "환불·할인 제외. 결제/회계 원천과 통화 정의 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 20,
+        "w": 8,
+        "h": 7
       },
       "targets": [
         {
@@ -134,171 +694,6 @@
       }
     },
     {
-      "id": 3,
-      "type": "stat",
-      "title": "매출 성장률",
-      "description": "기간 비교. 매출 시계열 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "business_revenue_growth_percent{service=~\"${service:regex}\"}",
-          "range": true,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "noValue": "N/A",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
-      }
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "유료 고객 수",
-      "description": "기간 내 결제 완료한 고유 고객 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "business_paying_customers{service=~\"${service:regex}\"}",
-          "range": true,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "noValue": "N/A",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
-      }
-    },
-    {
-      "id": 5,
-      "type": "stat",
-      "title": "유료 전환율",
-      "description": "유료 고객 ÷ 적격 사용자. 결제 이벤트 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 16,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "business_paid_conversion_rate{service=~\"${service:regex}\"}",
-          "range": true,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "noValue": "N/A",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
-      }
-    },
-    {
       "id": 6,
       "type": "timeseries",
       "title": "시장 검색 추이 · 52주",
@@ -308,10 +703,10 @@
         "uid": "market-trends"
       },
       "gridPos": {
-        "x": 12,
-        "y": 16,
-        "w": 12,
-        "h": 8
+        "x": 0,
+        "y": 27,
+        "w": 24,
+        "h": 10
       },
       "timeFrom": "1y",
       "links": [
@@ -494,116 +889,6 @@
         }
       },
       "hideTimeOverride": true
-    },
-    {
-      "id": 7,
-      "type": "stat",
-      "title": "환불률",
-      "description": "환불 ÷ 결제. 결제·환불 이벤트 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 24,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "business_refund_rate{service=~\"${service:regex}\"}",
-          "range": true,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "noValue": "N/A",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
-      }
-    },
-    {
-      "id": 8,
-      "type": "stat",
-      "title": "고객 획득 비용 (CAC)",
-      "description": "광고비 ÷ 신규 유료 고객. 캠페인 비용 연결 필요 아직 exporter가 없는 placeholder metric이며, 결제·회계·광고비 및 앱별 핵심가치 정의 전까지 N/A입니다.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 24,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "business_cac{service=~\"${service:regex}\"}",
-          "range": true,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "noValue": "N/A",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
-      }
     }
   ],
   "refresh": "5m",
@@ -619,7 +904,7 @@
         "name": "service",
         "label": "앱",
         "type": "custom",
-        "query": "virtue,blog,afzma",
+        "query": "모두의정책 : policycock,Virtue : virtue",
         "current": {
           "selected": true,
           "text": "All",
@@ -633,30 +918,25 @@
           },
           {
             "selected": false,
-            "text": "virtue",
+            "text": "모두의정책",
+            "value": "policycock"
+          },
+          {
+            "selected": false,
+            "text": "Virtue",
             "value": "virtue"
-          },
-          {
-            "selected": false,
-            "text": "blog",
-            "value": "blog"
-          },
-          {
-            "selected": false,
-            "text": "afzma",
-            "value": "afzma"
           }
         ],
         "hide": 0,
         "includeAll": true,
         "multi": false,
         "skipUrlSync": false,
-        "allValue": ".*"
+        "allValue": "policycock|virtue"
       }
     ]
   },
   "time": {
-    "from": "now-30d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {

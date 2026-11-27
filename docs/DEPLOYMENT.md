@@ -239,3 +239,15 @@ OpenClaw 메시지 표는 모바일에서 열이 찌그러지지 않도록 KST �
   참고: [Grafana 쿠키 보호](https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-security-hardening/),
   [K3s 저장 암호화](https://docs.k3s.io/cli/secrets-encrypt),
   [Kubernetes NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/).
+
+
+## PMF 계측과 코호트
+
+- 정본: `posthog-exporter/pmf.js`, `grafana/provisioning/dashboards/layer-business.json`. 기존 UID·패널 8개를 유지하며 Overview의 비즈니스 요약도 같은 북극성을 표시한다.
+- 입력: PostHog 프로젝트 424014의 `first_session_started`, `first_session_activated`, `pmf_core_completed`. app_id는 policycock/virtue, traffic_kind=user만 허용한다. 명시적 ID를 결과에 내보내지 않고 app+distinct_id별 시간·완료 여부만 서버에서 집계한다. 50,001행이면 전체 실패로 처리하여 잘린 결과를 0이나 완전한 수치로 표시하지 않는다.
+- 새 첫 방문 이벤트의 `pmf_identity_version=1` 표본만 재사용률 분모에 들어간다. 첫 완료 후 `[24시간, 8일)`의 핵심 행동을 보고, 8일이 지난 표본만 분자·분모에 포함한다. 늦게 유입한 표본·미연결 과거 표본·분모 없음·원천 장애를 각각 구분한다.
+- 서버 내부 `/pmf.json?service=all|policycock|virtue`(Grafana All의 `policycock|virtue`도 허용), `posthog_pmf_current_week{service,app,metric}`를 제공한다. 브라우저 ID·키·원문은 응답에 없다. Infinity의 기존 내부 호스트 허용 목록을 재사용하며 외부 공개 피드에는 추가하지 않는다.
+- 15분 갱신, 마지막 정상 관측 45분 후 JSON은 503·게이지는 숨김. 장애 때 정상 캐시를 그 범위에서만 유지한다. 선택 기간과 무관한 KST 이번 주 및 이전 4주를 PostHog에서 다시 계산한다. Prometheus 3일 보관·emptyDir·보류 중인 AMD 이전은 변경하지 않는다.
+- 앱 소스: Policycock은 Space `infra-aws-static-sites/sites/policycock/dist/first-visit.js`, Virtue는 독립 `virtue-rebirth-app/apps/web/public/first-visit.js`. 동일 프로토콜을 두 소유 저장소에서 검증한다. 동의 v2를 새로 받아 30일 익명 브라우저 ID를 저장하고 핵심 행동 때만 재사용 이벤트를 보낸다. 기존 동의를 확대하지 않는다. 동의 철회는 로컬 ID·미전송 큐를 제거하며, QA는 별도 ID와 synthetic 라벨을 쓴다.
+- 전송 실패는 동일 UUID·시각으로 재시도한다. 미전송 핵심 행동은 브라우저당 최근 50개까지 보관한다. 로컬 저장소·Web Locks가 차단되면 계측하지 않는다. 기존 사용자는 새 유입으로 재등록하지 않는다. 동의 거부·차단·삭제·다른 기기 사용으로 관측이 빠질 수 있다.
+- 검증: `node --test posthog-exporter/*.test.js`, `kubectl kustomize .`, HogQL 실제 집계와 분자·분모 대조, 앱 동의·재방문·철회 테스트, Grafana 실제 데스크톱/모바일 렌더 및 앱 필터. 기본 브랜치 push 후 Argo `monitoring-config` Synced/Healthy·실제 exporter `/pmf.json`·Grafana 조회를 확인한다. 변경 전 커밋으로 revert하면 복구할 수 있다.

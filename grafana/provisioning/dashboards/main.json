@@ -39,8 +39,8 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "비즈니스 · 북극성 지표",
-      "description": "앱별 핵심 고객가치 이벤트 정의 필요",
+      "title": "비즈니스 · 이번 주 신규 활성",
+      "description": "동의한 익명 브라우저 기준이며 실제 사람 수와 다를 수 있습니다. 앱·기기 간 중복 제거를 하지 않습니다. QA 트래픽은 제외합니다. PostHog 원천을 15분마다 조회하며 45분 넘게 갱신되지 않으면 숨깁니다. 한국 시간 월요일 00시부터 현재까지의 신규 유입 코호트. 상단 시간 선택과 무관한 고정 집계입니다. 첫 핵심 행동은 모두의정책의 사례 열람, Virtue의 덕행 저장입니다. 사례 열람은 잠정 가치 신호이며 PMF 달성을 의미하지 않습니다. ",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -59,14 +59,22 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "business_north_star_value{service=\"virtue\"}",
-          "range": true
+          "expr": "posthog_pmf_current_week{metric=\"activated\"}",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{app}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "noValue": "N/A",
+          "unit": "none",
+          "decimals": 0,
+          "min": 0,
+          "noValue": "미수집",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#73BF69"
+          },
           "links": [
             {
               "title": "비즈니스 레이어 자세히 보기",
@@ -75,27 +83,7 @@
               "keepTime": true,
               "includeVars": false
             }
-          ],
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          }
+          ]
         },
         "overrides": []
       },
@@ -107,12 +95,13 @@
           ],
           "fields": ""
         },
-        "orientation": "auto",
-        "textMode": "auto",
+        "orientation": "horizontal",
+        "textMode": "value_and_name",
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "wideLayout": false
       }
     },
     {
