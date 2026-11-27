@@ -25,6 +25,28 @@
 5. dashboard 변경은 Grafana sidecar reload 로그를 확인하고, 인증된 Grafana 화면이 가능하면
    실제 패널 렌더까지 확인합니다. 화면 검증이 불가능하면 그 경계를 완료 보고에 남깁니다.
 
+## 시계열 보관과 기간 집계
+
+- 2026-11-27 live flags·Prometheus CR·Pod volume과 Space `modules/k3s-apps/monitoring.tf`를
+  대조했습니다. 현재 **retention 3d, emptyDir**이며 장기 보관용 PVC가 없습니다. TSDB의 가장
+  오래된 시각은 2026-11-23 18:00 UTC였고, 대표 지표 5종의 최근 35일 조회에서 7일 이전
+  샘플은 없었습니다. 기본 대시보드의 Last 30 days가 30일 보관을 의미하지 않습니다.
+- emptyDir는 Pod 삭제·교체 시 없어집니다. 같은 Pod 안의 컨테이너 재시작과는 구분합니다.
+  장기 보관을 변경할 때는 용량·백업·기존 기록 이전을 검토하고, 현재 데이터 보존 전에
+  Prometheus Pod를 재생성하지 않습니다. 이 점검에서는 운영 설정을 변경하지 않았습니다.
+- 실제 scrape 간격은 node-exporter 30초, dispatcher 1분, PostHog/analytics 5분, YACE 15분입니다.
+  원천 갱신은 별개입니다: PostHog 15분, GA4/Instagram API·Gmail 1시간, S3 저장량은 AWS 일간
+  지표입니다. scrape 성공과 원천 관측 시각·오류를 함께 확인합니다.
+- 최근 7일 합계 gauge를 시간에 따라 저장한 곡선은 달력 일간·주간·월간 집계가 아닙니다.
+  시간 선택만 바꿔도 집계 기간은 바뀌지 않습니다. 반복 관측값을 sum/increase로 더해 주·월
+  합계를 만들지 않으며, 고유 사용자·세션·비율·백분위는 해당 기간의 원천에서 다시 산출합니다.
+- PostHog의 일부 지표만 완료 일간 7개·주간 4개·월간 2개를 원천에서 다시 조회합니다.
+  이 과거 기간 label은 오래 보관된 Prometheus sample과 다릅니다. 현재 제품 세션 패널은
+  `period="rolling7d"`만 사용합니다. 레이어별 실측 범위와 미연결 항목은
+  [기간별 수집 현황](business-layer-design.md#기간별-수집-현황-2026-11-27)을 따릅니다.
+- 참고: [Prometheus 보관 설정](https://prometheus.io/docs/prometheus/latest/storage/),
+  [Kubernetes emptyDir 수명](https://kubernetes.io/docs/reference/storage/volume-types/#emptydir).
+
 ## 대시보드 탐색과 제거
 
 - `main-overview`의 상단에는 비즈니스·고객·제품·시스템 상세 대시보드로 가는 네 링크가 보입니다.

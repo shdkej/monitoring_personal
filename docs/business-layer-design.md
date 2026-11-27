@@ -4,7 +4,7 @@
 
 Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살핀다. 각 레이어는 대표 지표 8개로 고정하되, 실제 원천이 연결되지 않은 값은 0으로 꾸미지 않고 `N/A`로 표시한다. 현재 저장소에 쿼리가 있다는 사실과 데이터가 실제로 유입된다는 사실은 구분한다.
 
-- **GA4**: Space의 GA4 속성별 신규 사용자·세션. 4개 속성의 채널별 최근 7일 집계와 blog·afzma의 일간 직접 조회
+- **GA4**: 4개 속성의 API 신규 사용자·세션·채널별 최근 완료 7일 집계와 Grafana의 일간 직접 조회
 - **PostHog**: 공유 프로젝트의 앱별 사용·재방문·품질. 판정 시도→저장 퍼널은 프로젝트 단위
 - **CloudWatch / Prometheus**: 노드 계측은 연결됨. YACE exporter는 scrape되나 Lambda 유효 샘플·DynamoDB throttling·RUM 데이터는 확인되지 않음
 - **이메일/CS**: 지정된 지원 수신함에서 최근 7일의 앱 태그 문의 대화를 집계한다. 메일 원문·개인정보는 모니터링에 저장하지 않는다.
@@ -41,7 +41,7 @@ Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살
 
 | # | 지표 | 산출 기준 | 현재 상태 / 필요한 입력 |
 |---|---|---|---|
-| 1 | 신규 사용자 | 앱별 GA4 신규 사용자 | Space GA4 피드 4개 속성의 지난 7일 값 |
+| 1 | 신규 사용자 | 앱별 GA4 신규 사용자 | GA4 API 4개 속성의 최근 완료 7일 값 |
 | 2 | 유입 채널별 세션 | 앱·유입 채널별 세션 | 앱·채널별 일간 그래프와 최근 완료 7일 요약을 한 패널에 표시. Instagram 유입과 계정 지표를 함께 표시 |
 | 3 | 이탈 사용자 수 | 앞 7일간 페이지를 보고 최근 7일에는 방문하지 않은 사용자 | 앱별 PostHog 코호트 |
 | 4 | 7일 재방문율 | 두 7일 구간에 모두 방문한 사용자 ÷ 앞 7일 방문자 | 앱별 PostHog 코호트. 분모가 없으면 N/A |
@@ -55,7 +55,7 @@ Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살
 | # | 지표 | 산출 기준 | 현재 상태 / 필요한 입력 |
 |---|---|---|---|
 | 1 | 화면 전환 지연 p95 | CloudWatch RUM 탐색 시간 p95 | 입력 필요: Prometheus에 RUM 시계열이 아직 없음 |
-| 2 | 세션당 참여시간 | GA4 속성별 지난 7일 총 참여시간 ÷ 총 세션 수 (초) | GA4 홈에서 일 단위로 갱신. 세션이 없는 속성은 N/A |
+| 2 | 세션당 참여시간 | GA4 속성별 지난 7일 총 참여시간 ÷ 총 세션 수 (초) | GA4 API에서 시간별 갱신. 세션이 없는 속성은 N/A |
 | 3 | 프론트엔드 예외 | PostHog `$exception` 건수 | 연결됨. PostHog 앱별 최근 7일 예외 건수 |
 | 4 | Core Web Vitals | LCP·INP의 지정 백분위 | 부분 연결. 앱별 PostHog 실측 LCP·INP의 최근 30일 p75. 표본이 없으면 N/A |
 | 5 | 로그인 성공률 | 성공 로그인 ÷ 로그인 시도 | 입력 필요: 로그인 시도·성공 이벤트 |
@@ -78,9 +78,33 @@ CloudWatch RUM의 페이지 탐색 지연은 API 응답시간과 같지 않다. 
 | 7 | S3 사용량·요금 | 일간 저장량·객체 수·관측 버킷 수와 S3 월 누적 예상 요금 | 연결됨: AWS/S3·AWS/Billing. 무료 혜택·월 예산·요청 성능은 실제 확인 상태와 구분 |
 | 8 | 의존 서비스 포화·오류 | Lambda 오류·스로틀, DynamoDB 제한·지연 | 부분 연결: YACE scrape는 up. 현재 Lambda 호출·오류 샘플은 NaN, DynamoDB throttling series는 없음. 기대 리소스·CloudWatch 데이터 확인 필요 |
 
+## 기간별 수집 현황 (2026-11-27)
+
+현재 수집기의 정상 동작과 일간·주간·월간 보고서 완성 여부는 다릅니다. Live Prometheus에서
+관련 scrape target은 모두 up이었고 GA4·Instagram·Gmail 연속 실패는 0이었습니다.
+Prometheus 보관은 3일·emptyDir이므로 주·월 추이를 지속 보존하는 상태는 아닙니다.
+[보관·갱신 계약](DEPLOYMENT.md#시계열-보관과-기간-집계)을 확인합니다.
+
+| 구분 | 실제 수집·표시 범위 | 일·주·월 비교의 공백 |
+|---|---|---|
+| 비즈니스 | 시장 검색 52주. 나머지 7개 business_* 지표는 series 없음 | 매출·결제·북극성 등 원천 미연결 |
+| 고객 GA4 | 신규 사용자·채널·참여시간 등 최근 완료 7일 값을 매시간 갱신. 채널 패널은 네 속성의 일간 조회도 수행 | 일간 조회 200 응답 중 blog·policycock만 유효 시계열, afzma·purple-place-bb6ce는 빈 응답. 주간·월간 달력 집계 없음 |
+| 고객 PostHog·문의 | 이탈·재방문·첫 방문·공유·문의는 최근 7일 기준. 분모 없는 비율은 숨김 | 최근 7일 곡선이며 완료 주간·월간 코호트 보고서가 아님 |
+| 제품 PostHog | 6개 scope의 이벤트·페이지뷰·세션·세션 ID 있는 이벤트를 일간 7개·주간 4개·월간 2개로 별도 집계 | 세션 패널은 rolling7d만 사용. 핵심 작업·예외는 7일, Web Vitals는 30일 p75이며 일·주·월 전환 없음 |
+| 시스템 | CPU·메모리·디스크·네트워크 시계열 정상. OpenClaw는 최근 24시간 건수와 최신 메시지, S3는 일간 저장량 및 당월 누적 예상 요금 | 장기 시계열은 3일 보관에 제한. OpenClaw 월간 로그 보관이나 S3 월별 청구 이력 수집이 아님 |
+
+PostHog 달력 집계는 한국 시간 기준 2026-11-20~26의 7일, 2026-10-26~11-22의 완료 4주,
+9월·10월의 완료 2개월을 확인했습니다. UTC 최근 완료 7일 합계도 별도로 있습니다.
+이는 원천에서 과거 기간을 다시 조회한 값이며 Prometheus에 두 달 치 sample이 있다는 뜻이 아닙니다.
+GA4 일간 직접 조회에는 오늘의 미완료 구간도 포함됩니다. GA4 속성 시간대·KST·UTC 집계를
+동일한 날짜 경계로 가정하지 않습니다. 중복되는 최근 7일 값을 합산해 월간 수치를 만들지 않습니다.
+
+제품의 화면 로딩 p95·로그인 성공률·결제 성공률은 live series가 없습니다. 시스템의 Lambda
+호출·오류는 NaN이고 DynamoDB throttling은 series가 없습니다. 0이나 정상으로 판정하지 않습니다.
+
 ## 앱·데이터 원천 현황
 
-- 2026-11-26 원천 대조에서 GA4 계정 3개와 속성 4개(blog, afzma, policycock, purple-place-bb6ce)를 확인했다. Grafana의 GA4 직접 연결 권한은 blog·afzma에 있으며, 네 속성의 공통 지표는 Space의 일간 집계 피드에서 읽는다.
+- 2026-11-27 GA4 계정 3개와 속성 4개(blog, afzma, policycock, purple-place-bb6ce)의 Grafana 직접 조회 응답을 확인했다. 네 속성의 최근 완료 7일 공통 지표는 클러스터 API collector가 소유한다. Space 일간 집계 피드는 기존 공개 피드이며 활성화된 private API collector 값을 덮어쓰지 않는다.
 - PostHog 접근 가능 프로젝트는 424014 한 개이다. 등록 범위는 policycock, miniapp-image-tools, Infinity, shdkej.com, Virtue와 앱 미지정이다. 최근 90일의 명시적 앱 ID는 policycock·miniapp-image-tools였다. 2026-11-26 전환 이후 `service="virtue"`도 Virtue 앱만 집계한다. 과거 시계열에는 공유 프로젝트 전체 값이 남아 있다. 앱별 패널은 `scope`를 사용한다.
 - YACE exporter와 ServiceMonitor scrape target은 정상(up)이다. YACE `/metrics`에는 Lambda invocation/error 및 DynamoDB capacity metric names가 있지만, 확인 시 Lambda samples는 NaN, DynamoDB consumed capacity는 0, throttling series는 없었다. CloudWatch RUM 로그에는 `No metrics data found`가 반복되고 RUM Prometheus series도 없다. 값이 0인지 데이터/리소스 범위가 잘못됐는지 임의 추정하지 않는다.
 - 노드 CPU·메모리·디스크·네트워크·헬스 시계열은 Prometheus에 있다. HPA와 black-box latency probe 시계열은 없다.
