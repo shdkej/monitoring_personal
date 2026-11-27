@@ -210,7 +210,7 @@
               "type": "auto"
             },
             "filterable": false,
-            "minWidth": 90
+            "minWidth": 85
           }
         },
         "overrides": [
@@ -238,11 +238,26 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false
         }
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "앱": 0,
+              "완료율": 1,
+              "완료 / 관측": 2,
+              "관찰 중": 3
+            },
+            "renameByName": {}
+          }
+        }
+      ]
     },
     {
       "id": 4,
@@ -323,7 +338,7 @@
               "type": "auto"
             },
             "filterable": false,
-            "minWidth": 90
+            "minWidth": 85
           }
         },
         "overrides": [
@@ -346,16 +361,57 @@
                 "value": 100
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "재사용 / 관측"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 125
+              }
+            ]
           }
         ]
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false
         }
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "앱": 0,
+              "재사용률": 1,
+              "재사용 / 관측": 2,
+              "관찰 중": 3,
+              "과거 미측정": 4,
+              "상태": 5
+            },
+            "renameByName": {}
+          }
+        }
+      ]
     },
     {
       "id": 5,
@@ -421,7 +477,7 @@
             },
             {
               "selector": "pending",
-              "text": "관찰 중",
+              "text": "첫 완료 관찰 중",
               "type": "number"
             },
             {
@@ -436,7 +492,7 @@
             },
             {
               "selector": "reusePending",
-              "text": "관찰 중",
+              "text": "재사용 관찰 중",
               "type": "number"
             },
             {
@@ -466,7 +522,7 @@
               "type": "auto"
             },
             "filterable": false,
-            "minWidth": 90
+            "minWidth": 85
           }
         },
         "overrides": [
@@ -514,11 +570,40 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false
+        },
+        "sortBy": [
+          {
+            "displayName": "유입 주 · KST",
+            "desc": true
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "유입 주 · KST": 0,
+              "앱": 1,
+              "신규 유입": 2,
+              "첫 완료": 3,
+              "완료율": 4,
+              "완료 / 관측": 5,
+              "첫 완료 관찰 중": 6,
+              "재사용률": 7,
+              "재사용 / 관측": 8,
+              "재사용 관찰 중": 9,
+              "과거 미측정": 10,
+              "기록 상태": 11
+            },
+            "renameByName": {}
+          }
         }
-      }
+      ]
     },
     {
       "id": 7,
@@ -604,7 +689,7 @@
               "type": "auto"
             },
             "filterable": false,
-            "minWidth": 90
+            "minWidth": 85
           }
         },
         "overrides": [
@@ -632,11 +717,29 @@
       },
       "options": {
         "showHeader": true,
-        "cellHeight": "lg",
+        "cellHeight": "sm",
         "footer": {
           "show": false
         }
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "앱": 0,
+              "유입 구분": 1,
+              "신규 유입": 2,
+              "첫 완료": 3,
+              "완료율": 4,
+              "완료 / 관측": 5,
+              "관찰 중": 6
+            },
+            "renameByName": {}
+          }
+        }
+      ]
     },
     {
       "id": 8,
