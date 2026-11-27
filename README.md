@@ -15,6 +15,9 @@ Overview 상단의 비즈니스·고객·제품·시스템 링크로 각 상세 
 Grafana 변경은 [Dashboard 계약](docs/DEPLOYMENT.md#dashboard-계약)에 따라 기존 대시보드에서 처리하며,
 새 대시보드는 사용자가 명시적으로 요청한 경우에만 만듭니다.
 
+시스템 레이어의 노드 헬스체크는 노드 이름과 수집 정상·수집 실패·미수집 상태를 타일로 표시합니다.
+조회 시점의 수집 상태이며, CPU·메모리·디스크 상태는 각 패널에서 확인합니다.
+
 시스템 레이어는 최근 24시간 OpenClaw 에러 로그 수를 표시합니다. 기존 dispatcher exporter가
 호스트 로그를 읽기 전용으로 집계하며, Prometheus에는 건수만 전송합니다. 같은 영역의 표에는 마스킹한 최근 오류 메시지 50개를 표시합니다. 회귀 검증은
 `python3 -m unittest discover -s dispatcher-exporter -v`로 실행합니다.

@@ -87,6 +87,25 @@
 
 Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존 일일 Ego 작업이 비공개 ConfigMap에 전달합니다. 마지막 관측 후 30시간이 지나면 숨기며 API가 담당하는 `@minimal_collector`는 기존 시간별 API 값을 사용합니다.
 
+## 노드 헬스체크 표시
+
+- 기존 `layer-system`의 6번 패널을 재사용합니다. Grafana 기본 Stat 타일에 노드 이름과
+  `수집 정상`(초록)·`수집 실패`(빨강)·`미수집`(회색)을 함께 표시합니다. 숫자 0/1과 긴
+  수집 label, 일정한 sparkline을 화면에 노출하지 않습니다. 새 대시보드·플러그인은 없습니다.
+- `up{job="node-exporter"}`를 instant query로 읽고 `kube_node_info`의 `internal_ip:9100`과
+  연결해 `node` 이름을 붙입니다. 현재 node-exporter의 포트 9100 기준이며 포트 변경 시
+  쿼리의 연결 조건도 갱신합니다. 같은 노드의 시계열은 하나로 집계합니다.
+- node-exporter의 `up=0`은 수집 실패, 정상적으로 수집된 Kubernetes 노드 목록에 있지만
+  node-exporter 대상이 없으면 `-1` 미수집입니다. `kube-state-metrics`의 `up=1`로 목록의
+  수집 상태를 확인하며 목록 자체를 확인할 수 없으면 데이터 없음으로 표시합니다.
+  이 상태는 Kubernetes Ready나 CPU·메모리·디스크의 종합 건강 판정이 아닙니다.
+- 범위 조회의 과거 정상값을 마지막 값으로 남기지 않습니다. 대시보드 조회 범위의 종료
+  시점을 평가하며, Prometheus의 최근 샘플 선택·staleness 규칙은 그대로 적용됩니다.
+- 검증은 JSON/Kustomize 빌드 → live PromQL의 정상·실패·대상 누락·목록 누락 사례 →
+  Argo CD revision/ConfigMap/Grafana 패널 설정 일치 → 데스크톱·모바일 실제 렌더 순서입니다.
+  복구는 해당 패널 JSON 변경을 되돌려 같은 GitOps 경로로 반영합니다. 수집기 재시작과
+  Prometheus 이전·스토리지 변경은 필요하지 않습니다.
+
 ## OpenClaw 에러 로그 수
 
 - 시스템 레이어 5번 패널은 네트워크 지연 대신 `openclaw_log_errors_24h`를 표시합니다.

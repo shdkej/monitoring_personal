@@ -395,7 +395,7 @@
       "id": 6,
       "type": "stat",
       "title": "노드 헬스체크",
-      "description": "Prometheus node-exporter scrape 상태",
+      "description": "조회 시점의 노드별 지표 수집 상태입니다. 초록은 수집 정상, 빨강은 수집 실패, 회색은 등록된 노드의 수집 대상 없음입니다. 노드 목록도 확인할 수 없으면 데이터 없음으로 표시합니다. CPU·메모리·디스크 상태와는 별개입니다.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -414,18 +414,70 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "up{job=\"node-exporter\"}",
-          "range": true
+          "expr": "max by (node) (up{job=\"node-exporter\"} * on(instance) group_left(node) label_replace((max by (node, internal_ip) (kube_node_info{job=\"kube-state-metrics\"} and on(job, instance) (up{job=\"kube-state-metrics\"} == 1))), \"instance\", \"$1:9100\", \"internal_ip\", \"(.+)\")) or on(node) (max by (node) (max by (node, internal_ip) (kube_node_info{job=\"kube-state-metrics\"} and on(job, instance) (up{job=\"kube-state-metrics\"} == 1))) * 0 - 1)",
+          "legendFormat": "{{node}}",
+          "instant": true,
+          "range": false
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "noValue": "N/A",
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "데이터 없음",
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
-          }
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#424957",
+                "value": null
+              },
+              {
+                "color": "#7D3840",
+                "value": 0
+              },
+              {
+                "color": "#285B46",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "미수집",
+                  "color": "#424957",
+                  "index": 0
+                },
+                "0": {
+                  "text": "수집 실패",
+                  "color": "#7D3840",
+                  "index": 1
+                },
+                "1": {
+                  "text": "수집 정상",
+                  "color": "#285B46",
+                  "index": 2
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "데이터 없음",
+                  "color": "#424957",
+                  "index": 3
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -433,16 +485,21 @@
         "reduceOptions": {
           "values": false,
           "calcs": [
-            "lastNotNull"
+            "last"
           ],
           "fields": ""
         },
         "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "showPercentChange": false,
+        "wideLayout": false,
+        "text": {
+          "titleSize": 14,
+          "valueSize": 24
+        }
       }
     },
     {
