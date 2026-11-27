@@ -87,6 +87,23 @@
 
 Instagram의 `@every.policy` 조회수·조회한 사람 수는 SAM-PC의 기존 일일 Ego 작업이 비공개 ConfigMap에 전달합니다. 마지막 관측 후 30시간이 지나면 숨기며 API가 담당하는 `@minimal_collector`는 기존 시간별 API 값을 사용합니다.
 
+## Office 제품 지표의 원천 시각
+
+- `posthog-exporter/project-metrics.js`는 기존 앱별 성공 스냅샷의 `health.observedAt`을
+  `product_last_success_timestamp_seconds{service}` 값으로 내보냅니다. 같은 성공 스냅샷에서
+  제품 수치와 시각을 읽으며, 반복 scrape나 API 실패가 성공 시각을 갱신하지 않습니다.
+  기존 45분 유효기간을 지난 스냅샷은 수치·시각 모두 내보내지 않습니다.
+- Space Status의 `system-dashboard/collector/office.py`가 같은 Prometheus 묶음 쿼리에서
+  이 값을 읽습니다. 공개 JSON의 `observedAt`은 Prometheus 표본 시각이고
+  `upstreamObservedAt`은 PostHog 성공 관측 시각입니다. 앱별 45분 초과는 `stale`,
+  누락·0·미래 시각은 `unknown`으로 남기며 다른 앱의 시각으로 채우지 않습니다.
+- 검증은 `cd posthog-exporter && node --test`, `kubectl kustomize .`, 기본 브랜치 게시 후
+  `monitoring-config` revision·exporter rollout, PromQL `product_last_success_timestamp_seconds`,
+  Office JSON 순서입니다. `SOURCE_REVISION` 변경은 exporter만 다시 시작합니다.
+  Office는 기존 10분 timer 또는 `office.py --output <기존 로컬 경로> --publish`로 게시합니다.
+- 복구는 exporter 소스와 `SOURCE_REVISION`, Office 소스·manifest를 이 변경 이전으로
+  되돌려 같은 경로로 반영합니다. Prometheus 보관·스토리지·인증은 변경하지 않습니다.
+
 ## 노드 헬스체크 표시
 
 - 기존 `layer-system`의 6번 패널을 재사용합니다. Grafana 기본 Stat 타일에 노드 이름과

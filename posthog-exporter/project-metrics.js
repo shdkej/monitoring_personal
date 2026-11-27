@@ -34,6 +34,7 @@ function projectMetrics(host, token, hogql) {
 function registerActivity(client, register, source) {
   const metrics = [
     ['product_app_connected', 'Known PostHog app connection', () => 1],
+    ['product_last_success_timestamp_seconds', 'Source observation time of the last successful PostHog app collection', (_r, _p, health) => health.observedAt / 1000],
     ['product_active_users','Unique pageview users over the last day or week', (r,p) => p==='1d'?r.activity.dau:r.activity.wau, ['1d','7d']],
     ['product_page_views','Pageviews over the last week',r=>r.activity.pageviews,['7d']],
     ['product_sessions','Identified sessions over the last week',r=>r.activity.sessions],
@@ -57,7 +58,7 @@ function registerActivity(client, register, source) {
         if (name === 'product_app_connected' && row.scope.endsWith('앱 미지정')) continue;
         connected.add(service);
         for (const period of periods || [null]) {
-          const n=value(row, period);
+          const n=value(row, period, health);
           if (Number.isFinite(n)) this.set(period ? {service,period} : {service},n);
         }
       }

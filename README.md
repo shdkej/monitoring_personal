@@ -12,6 +12,8 @@ Overview 상단의 비즈니스·고객·제품·시스템 링크로 각 상세 
 
 구성요소 관계, 변경 순서와 운영 검증 기준은 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)에
 정리합니다.
+Office가 읽는 제품 지표는 `product_last_success_timestamp_seconds{service}`로 앱별 PostHog
+성공 관측 시각도 제공합니다. scrape 시각과 구분하며 [원천 시각 계약](docs/DEPLOYMENT.md#office-제품-지표의-원천-시각)을 따릅니다.
 Grafana 변경은 [Dashboard 계약](docs/DEPLOYMENT.md#dashboard-계약)에 따라 기존 대시보드에서 처리하며,
 새 대시보드는 사용자가 명시적으로 요청한 경우에만 만듭니다.
 
