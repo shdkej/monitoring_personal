@@ -18,6 +18,10 @@ spec:
         app: posthog-exporter
     spec:
       volumes:
+        - name: analytics-threads
+          secret:
+            secretName: analytics-threads-api
+            optional: true
         - name: market-trends
           secret:
             secretName: market-trends-naver
@@ -50,6 +54,9 @@ spec:
           image: node:20-alpine
           imagePullPolicy: IfNotPresent
           volumeMounts:
+            - name: analytics-threads
+              mountPath: /etc/analytics-threads
+              readOnly: true
             - name: market-trends
               mountPath: /etc/market-trends
               readOnly: true
@@ -72,7 +79,7 @@ spec:
           # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
             - name: SOURCE_REVISION
-              value: "pmf-cohorts-2026-11-27"
+              value: "threads-discovery-2026-11-27"
             - name: GMAIL_GOG_ENABLED
               value: "true"
             - name: GA4_API_ENABLED

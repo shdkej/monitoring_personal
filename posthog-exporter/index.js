@@ -8,6 +8,7 @@ const {firstVisitMetrics} = require('./first-visit');
 const client = require('prom-client');
 const {collectSnapshot, createSnapshotCache} = require('./calendar');
 const {createMarketTrends} = require('./market-trends');
+const {createThreads} = require('./threads');
 
 // ============================================
 // 설정
@@ -185,6 +186,9 @@ app.get('/health', (req, res) => {
 async function start() {
   void marketTrends.refresh();
   setInterval(() => void marketTrends.refresh(), HOUR);
+  const threads = createThreads(register);
+  void threads.refresh();
+  setInterval(() => void threads.refresh(), HOUR);
   const analyticsApi = createAnalyticsApi(register);
   registerSupport(register, undefined, undefined, analyticsApi);
   const refreshApi = () => analyticsApi.refresh().catch(() => console.error('Analytics API refresh failed'));

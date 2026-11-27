@@ -35,3 +35,8 @@ Grafana 변경은 [Dashboard 계약](docs/DEPLOYMENT.md#dashboard-계약)에 따
 표시합니다. 첫 완료율·7일 재사용률을 분자/분모·관찰 중·과거 미측정 수와 함께 보여주며,
 KST 최근 5주 코호트를 PostHog에서 재조회합니다. 개인·기기·앱 간 중복 제거는 하지 않습니다.
 [계측·검증·배포 계약](docs/DEPLOYMENT.md#pmf-계측과-코호트)을 따릅니다.
+
+고객 레이어의 기존 유입 패널 하단에 Threads `@minimal_collector`·`@_archivenoh`의
+프로필 조회·좋아요·답글·재게시·인용을 비교합니다. 최근 완료 7개 원천 일간 구간을 매시간
+조회하도록 준비했습니다. 현재 Threads 인증은 미연결이며 실제 수치는 미수집입니다.
+연결 전·수집 장애를 0으로 채우지 않습니다. [Threads 연결·검증 절차](docs/DEPLOYMENT.md#threads-조회와-반응)를 따릅니다.
