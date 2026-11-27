@@ -178,3 +178,23 @@ OpenClaw 메시지 표는 모바일에서 열이 찌그러지지 않도록 KST �
   [공식 전환 공지](https://developers.naver.com/notice/article/32530)에 따라 **2027-06-30 종료**
   예정이므로 그 전에 NAVER API HUB의 인증·요금·응답 계약을 확인해 이전해야 합니다.
   Google Trends 공개 embed는 429, 공식 API는 신청이 필요한 상태여서 사용하지 않습니다.
+
+### 인증정보 보호와 점검 범위
+
+- 네이버 키는 exporter의 Secret 파일에서 읽고 고정된 공식 HTTPS API 요청에만 사용합니다.
+  Grafana datasource에는 네이버 인증정보를 넣지 않습니다. JSON 응답은 허용된 집계 필드만
+  만들며 원천 응답·요청 헤더·예외 본문을 로그로 출력하지 않습니다.
+- 2026-11-27 현재 키와 관리자 비밀번호를 원문·base64·URL 인코딩 형태로 대조했습니다.
+  이 저장소 전체 Git 이력의 파일 객체 484개, 이번 작업의 Space/KL 커밋, ConfigMap,
+  최근 2시간 exporter/Grafana 로그, 현재 데이터·대시보드·datasource 응답에서 일치가 없었습니다.
+  전체 호스트 포렌식이나 모든 과거 자격증명에 대한 검사는 아닙니다.
+- 공개 Grafana의 비로그인 dashboard/datasource/proxy/query 요청은 모두 401입니다.
+  exporter는 ClusterIP이고 외부 Ingress가 없습니다. 서비스 계정의 Secret get/list는 거부됩니다.
+  내부 endpoint는 애플리케이션 인증이 없으므로 ClusterIP를 Grafana 전용 접근 통제로 간주하지 않습니다.
+- 남은 기존 설정: K3s Secret 저장 암호화가 꺼져 있고, 실제 HTTPS 로그인 쿠키에도 Secure 속성이
+  없습니다. HTTPS 리다이렉트·HSTS·HttpOnly는 확인했습니다. monitoring NetworkPolicy도 없어
+  Pod 사이 접근을 격리하지 않습니다. 검토에서 운영 설정은 변경하지 않았습니다. 우선 Secure 쿠키,
+  이어 저장 암호화 및 Grafana/Prometheus 소비 경로를 보존하는 네트워크 제한을 별도 보강합니다.
+  참고: [Grafana 쿠키 보호](https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-security-hardening/),
+  [K3s 저장 암호화](https://docs.k3s.io/cli/secrets-encrypt),
+  [Kubernetes NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/).
