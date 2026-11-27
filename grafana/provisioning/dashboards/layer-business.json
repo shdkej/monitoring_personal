@@ -73,13 +73,17 @@
           ],
           "fields": ""
         },
-        "orientation": "horizontal",
+        "orientation": "auto",
         "textMode": "value_and_name",
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "showPercentChange": false,
-        "wideLayout": false
+        "wideLayout": false,
+        "text": {
+          "value": 48,
+          "title": 14
+        }
       }
     },
     {
@@ -132,13 +136,17 @@
           ],
           "fields": ""
         },
-        "orientation": "horizontal",
+        "orientation": "auto",
         "textMode": "value_and_name",
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "showPercentChange": false,
-        "wideLayout": false
+        "wideLayout": false,
+        "text": {
+          "value": 48,
+          "title": 14
+        }
       }
     },
     {
@@ -793,7 +801,11 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
-        "showPercentChange": false
+        "showPercentChange": false,
+        "text": {
+          "value": 36,
+          "title": 14
+        }
       }
     },
     {

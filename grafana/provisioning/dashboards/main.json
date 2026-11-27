@@ -95,13 +95,17 @@
           ],
           "fields": ""
         },
-        "orientation": "horizontal",
+        "orientation": "auto",
         "textMode": "value_and_name",
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "showPercentChange": false,
-        "wideLayout": false
+        "wideLayout": false,
+        "text": {
+          "value": 48,
+          "title": 14
+        }
       }
     },
     {
