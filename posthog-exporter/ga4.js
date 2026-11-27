@@ -81,7 +81,7 @@ function registerGA4(registry, {
         const channels = Object.entries(row.channelSessions);
         if (channels.length > 32 || !Number.isSafeInteger(row.sessions) || row.sessions < 0 ||
             !channels.every(([name, count]) => name.length > 0 && name.length <= 48 && Number.isSafeInteger(count) && count >= 0) ||
-            channels.reduce((sum, [, count]) => sum + count, 0) !== row.sessions) continue;
+            (!api?.ga4.size && channels.reduce((sum, [, count]) => sum + count, 0) !== row.sessions)) continue;
         for (const [channel, count] of channels) this.set({scope: row.scope, channel}, count);
       }
     },

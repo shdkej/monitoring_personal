@@ -13,7 +13,7 @@ function reports(rows) {
   })});
 }
 
-test('Data API preserves distinct acquisition attribution and verifies channel/source totals', async () => {
+test('Data API preserves distinct acquisition attribution and rejects duplicate sources', async () => {
   const totals = [[3, 8, 13]], channels = [['Direct', 2], ['Referral', 6]];
   const sessions = [['instagram', 4], ['L.Instagram.com', 1], ['instagram.com.example', 3]];
   const users = [['(direct)', 2], ['ig', 1]];
@@ -26,7 +26,7 @@ test('Data API preserves distinct acquisition attribution and verifies channel/s
   assert.equal(empty.sessions, 0);
   assert.equal(empty.seconds, null);
   assert.deepEqual(empty.instagramAcquisition, {sessions: 0, newUsers: 0});
-  await assert.rejects(read([totals, channels, sessions.slice(0, 1), users]), /Incomplete GA4 sources/);
+  await assert.rejects(read([totals, channels, [sessions[0], sessions[0]], users]), /Incomplete GA4 sources/);
 });
 
 test('Instagram verifies account and seven-day account totals, and keeps missing reach unavailable', async () => {
@@ -62,9 +62,12 @@ test('cutover survives restart and expired direct samples never revive browser v
   await refresh(never);
   const values = async name => (await r.getSingleMetric(name).get()).values;
   assert.deepEqual(await values('ga4_app_rolling7d_count'), []);
-  const data = [ [[0, 1, 0]], [['Direct', 1]], [['(direct)', 1]], [] ];
+  // The unsegmented count and independently estimated breakdowns can differ.
+  const data = [ [[0, 1, 0]], [['Direct', 2]], [['instagram', 2]], [] ];
   api.ga4.set('blog', await readProperty('blog', '123', 'example', now, reports(data)));
   assert.deepEqual((await values('ga4_app_rolling7d_count')).map(m => m.value), [0, 1]);
+  assert.equal((await values('ga4_app_channel_sessions'))[0].value, 2);
+  assert.equal((await values('ga4_app_instagram_acquisition'))[0].value, 2);
   assert.equal((await values('ga4_app_session_engagement_seconds'))[0].value, 0);
   assert.equal((await values('instagram_account_discovery'))[0].value, 3);
   now += 3 * HOUR + 1;

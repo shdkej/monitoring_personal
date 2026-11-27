@@ -23,9 +23,8 @@ function gaReport(metrics, dimensions = []) {
   return {dateRanges: [gaRange], metrics: metrics.map(name => ({name})), dimensions: dimensions.map(name => ({name})),
     keepEmptyRows: true, limit: '10000'};
 }
-function attributed(rows, expected) {
-  if (rows.some(([source]) => typeof source !== 'string' || !source) || new Set(rows.map(([source]) => source)).size !== rows.length ||
-      rows.reduce((sum, [, count]) => sum + count, 0) !== expected) throw new Error('Incomplete GA4 sources');
+function attributed(rows) {
+  if (rows.some(([source]) => typeof source !== 'string' || !source) || new Set(rows.map(([source]) => source)).size !== rows.length) throw new Error('Incomplete GA4 sources');
   const instagram = /^(?:ig|instagram|(?:[a-z0-9-]+\.)*instagram\.com|com\.instagram\.android)$/i;
   return rows.reduce((sum, [source, count]) => instagram.test(source) ? sum + count : sum, 0);
 }
@@ -63,12 +62,11 @@ async function readProperty(scope, property, token, now, get = request) {
   const [total, channels, sourcedSessions, sourcedUsers] = reports.map((report, i) => parseReport(report, queries[i]));
   if (total.length > 1) throw new Error('Unexpected GA4 total rows');
   const [newUsers, sessions, duration] = total[0] || [0, 0, 0];
-  const instagramAcquisition = {sessions: attributed(sourcedSessions, sessions), newUsers: attributed(sourcedUsers, newUsers)};
+  const instagramAcquisition = {sessions: attributed(sourcedSessions), newUsers: attributed(sourcedUsers)};
   const channelSessions = Object.fromEntries(channels);
   if (channels.length > 32 || channels.some(([name]) => typeof name !== 'string' || !name || name.length > 48) ||
-      Object.keys(channelSessions).length !== channels.length || channels.reduce((sum, [, n]) => sum + n, 0) !== sessions ||
-      instagramAcquisition.sessions > sessions || instagramAcquisition.newUsers > newUsers)
-    throw new Error('Inconsistent GA4 totals');
+      Object.keys(channelSessions).length !== channels.length)
+    throw new Error('Invalid GA4 channels');
   return {scope, observed: now, observedAt: new Date(now).toISOString(), status: sessions ? 'ok' : 'no_sessions',
     values: {sessions, newUsers}, sessions, seconds: sessions ? duration / sessions : null, channelSessions, instagramAcquisition};
 }
