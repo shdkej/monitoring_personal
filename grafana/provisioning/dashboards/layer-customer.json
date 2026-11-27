@@ -239,7 +239,7 @@
         "overrides": []
       },
       "options": {
-        "getOption": "const properties = {A: 'blog', B: 'afzma', J: 'policycock', K: 'purple-place-bb6ce'};\nconst filter = new RegExp('^(?:' + context.grafana.replaceVariables('${app:regex}') + ')$');\nconst apps = [...new Set(Object.values(properties))].filter(name => filter.test(name));\nconst summaries = new Map(apps.map(name => [name, {channels: new Map()}]));\nconst accounts = new Map();\nconst threads = new Map(['minimal_collector', '_archivenoh'].map(account => [account, {}]));\nconst lines = [];\nfor (const frame of context.panel.data.series) {\n  const app = properties[frame.refId];\n  const time = frame.fields.find(f => f.type === 'time');\n  for (const field of frame.fields.filter(f => f.type === 'number')) {\n    if (app) {\n      if (!summaries.has(app) || !time) continue;\n      const channel = (field.config?.displayName || frame.name || '').split('|')[0];\n      const data = Array.from(time.values, (t, i) => [Number(t), field.values[i]]);\n      if (data.length) lines.push({name: app + ' · ' + channel, type: 'line', data, symbolSize: 5});\n      continue;\n    }\n    const value = field.values[field.values.length - 1];\n    if (!Number.isFinite(value)) continue;\n    const {scope, channel, account} = field.labels || {};\n    const row = summaries.get(scope);\n    if (row) {\n      if (frame.refId === 'C') row.total = value;\n      if (frame.refId === 'D') row.channels.set(channel, value);\n      if (frame.refId === 'E') row.sessions = value;\n      if (frame.refId === 'F') row.users = value;\n    }\n    if (threads.has(account)) {\n      if (frame.refId === 'L') threads.get(account)[field.labels.metric] = value;\n      if (frame.refId === 'M') threads.get(account).state = value;\n    }\n    if (account && ['G', 'H', 'I'].includes(frame.refId)) {\n      if (!accounts.has(account)) accounts.set(account, {});\n      accounts.get(account)[frame.refId] = value;\n    }\n  }\n}\n\nconst height = context.panel.chart.getHeight();\nfunction layout(width) {\nconst compact = width < 600;\nconst columns = Math.max(1, Math.min(apps.length, compact ? 1 : width < 1000 ? 2 : 4));\nconst rows = Math.ceil(apps.length / columns);\nconst fmt = value => Number.isFinite(value) ? value.toLocaleString('ko-KR') : '—';\nconst titles = [];\nfunction heading(text, left, top, subtext = '') {\n  titles.push({text, left, top, subtext, itemGap: 4, textStyle: {fontSize: 13},\n    subtextStyle: {fontSize: 12, lineHeight: 18}});\n}\nconst channelNames = [...new Set([...summaries.values()].flatMap(row => [...row.channels.keys()]))];\nconst maxChannels = Math.max(1, ...[...summaries.values()].map(row => row.channels.size));\nconst rowHeight = compact ? 64 : 70 + maxChannels * 18;\nconst threadColumns = width >= 600 ? 2 : 1;\nconst threadHeight = 30 + Math.ceil(threads.size / threadColumns) * 96;\nconst accountHeight = 32 + Math.max(1, accounts.size) * (compact ? 62 : 20);\nconst summaryY = Math.max(135, height - (rows * rowHeight + accountHeight + threadHeight + 48));\nheading('GA4 · 일별 채널 세션', 4, 0);\nif (!lines.length) heading('일별 세션 데이터 없음', 'center', 60);\nheading('최근 완료 7일 · 앱별 유입', 4, summaryY);\napps.forEach((name, i) => {\n  const row = summaries.get(name);\n  const channels = channelNames.filter(c => row.channels.has(c))\n    .map(c => c + '  ' + fmt(row.channels.get(c)));\n  heading(name + ' · 전체 ' + fmt(row.total) + '세션', (100 * (i % columns) / columns) + '%',\n    summaryY + 26 + Math.floor(i / columns) * rowHeight,\n    [...(compact ? [] : channels), 'IG 유입 ' + fmt(row.sessions) + '세션', 'IG 첫 유입 신규 ' + fmt(row.users) + '명'].join('\\n'));\n});\nif (!apps.length) heading('선택한 앱의 GA4 속성 없음', 4, summaryY + 23);\nconst accountY = summaryY + 32 + Math.max(rows * rowHeight, 26);\nconst accountLines = [...accounts].map(([name, data]) => '@' + name + (compact ? '\\n조회 ' : ' · 조회 ') + fmt(data.G) + '회 · 도달 ' + fmt(data.H) + '계정' +\n  (data.I === undefined ? '' : (compact ? '\\n조회한 사람 ' : ' · 조회한 사람 ') + fmt(data.I) + '명'));\nheading('Instagram 계정 · 최근 완료 7일', 4, accountY, accountLines.join('\\n') || '데이터 없음');\nconst threadsY = accountY + accountHeight;\nheading('Threads · 조회와 반응 · 최근 완료 7일', 4, threadsY);\n[...threads].forEach(([account, data], i) => {\n  const summary = data.state === 2 ? [\n    '프로필 조회 ' + fmt(data.views) + '회',\n    '좋아요 ' + fmt(data.likes) + ' · 답글 ' + fmt(data.replies),\n    '재게시 ' + fmt(data.reposts) + ' · 인용 ' + fmt(data.quotes),\n  ].join('\\n') : data.state === 1 ? '인증·수집 확인 필요\\n조회·반응 미수집' : 'Threads 인사이트 연결 필요\\n조회·반응 미수집';\n  heading('@' + account, (100 * (i % threadColumns) / threadColumns) + '%',\n    threadsY + 28 + Math.floor(i / threadColumns) * 96, summary);\n});\n\nreturn {title: titles, grid: {left: 12, right: 18, top: 60, height: Math.max(48, summaryY - 72), containLabel: true}};\n}\nreturn {\n  baseOption: {\n    backgroundColor: 'transparent',\n    tooltip: {trigger: 'axis', renderMode: 'richText'},\n    legend: {type: 'scroll', top: 25, left: 5, right: 12, data: lines.map(line => line.name)},\n    xAxis: {type: 'time', show: !!lines.length, axisLabel: {formatter: '{MM}/{dd}'}},\n    yAxis: {type: 'value', show: !!lines.length, minInterval: 1}, series: lines\n  },\n  media: [\n    {query: {maxWidth: 599}, option: layout(340)},\n    {query: {minWidth: 600, maxWidth: 999}, option: layout(800)},\n    {query: {minWidth: 1000}, option: layout(1400)}\n  ]\n};",
+        "getOption": "const properties = {A: 'blog', B: 'afzma', J: 'policycock', K: 'purple-place-bb6ce'};\nconst appColors = {\"blog\": \"#73BF69\", \"afzma\": \"#FF9830\", \"policycock\": \"#5794F2\", \"purple-place-bb6ce\": \"#F28BC2\"};\nconst channelMarks = {\n  'Direct': ['solid', 'circle'], 'Organic Search': ['dashed', 'diamond'],\n  'Referral': ['dotted', 'triangle'], 'Organic Social': ['solid', 'rect'],\n  'Unassigned': ['dashed', 'pin'], 'Paid Search': ['dotted', 'diamond'],\n  'Email': ['dashed', 'triangle'], 'Cross-network': ['solid', 'diamond']\n};\nconst filter = new RegExp('^(?:' + context.grafana.replaceVariables('${app:regex}') + ')$');\nconst apps = [...new Set(Object.values(properties))].filter(name => filter.test(name));\nconst summaries = new Map(apps.map(name => [name, {channels: new Map()}]));\nconst accounts = new Map();\nconst threads = new Map(['minimal_collector', '_archivenoh'].map(account => [account, {}]));\nconst lines = [];\nfor (const frame of context.panel.data.series) {\n  const app = properties[frame.refId];\n  const time = frame.fields.find(f => f.type === 'time');\n  for (const field of frame.fields.filter(f => f.type === 'number')) {\n    if (app) {\n      if (!summaries.has(app) || !time) continue;\n      const channel = (field.config?.displayName || frame.name || '').split('|')[0];\n      const data = Array.from(time.values, (t, i) => [Number(t), field.values[i]]);\n      const [type, symbol] = channelMarks[channel] || ['dotted', 'circle'];\n      if (data.length) lines.push({name: app + ' · ' + channel, type: 'line', data, symbol, symbolSize: 5, lineStyle: {type, color: appColors[app]}, itemStyle: {color: appColors[app]}});\n      continue;\n    }\n    const value = field.values[field.values.length - 1];\n    if (!Number.isFinite(value)) continue;\n    const {scope, channel, account} = field.labels || {};\n    const row = summaries.get(scope);\n    if (row) {\n      if (frame.refId === 'C') row.total = value;\n      if (frame.refId === 'D') row.channels.set(channel, value);\n      if (frame.refId === 'E') row.sessions = value;\n      if (frame.refId === 'F') row.users = value;\n    }\n    if (threads.has(account)) {\n      if (frame.refId === 'L') threads.get(account)[field.labels.metric] = value;\n      if (frame.refId === 'M') threads.get(account).state = value;\n    }\n    if (account && ['G', 'H', 'I'].includes(frame.refId)) {\n      if (!accounts.has(account)) accounts.set(account, {});\n      accounts.get(account)[frame.refId] = value;\n    }\n  }\n}\n\nconst height = context.panel.chart.getHeight();\nfunction layout(width) {\nconst compact = width < 600;\nconst columns = Math.max(1, Math.min(apps.length, compact ? 1 : width < 1000 ? 2 : 4));\nconst rows = Math.ceil(apps.length / columns);\nconst fmt = value => Number.isFinite(value) ? value.toLocaleString('ko-KR') : '—';\nconst titles = [];\nfunction heading(text, left, top, subtext = '', color) {\n  titles.push({text, left, top, subtext, itemGap: 4, textStyle: {fontSize: 13, color},\n    subtextStyle: {fontSize: 12, lineHeight: 18}});\n}\nconst channelNames = [...new Set([...summaries.values()].flatMap(row => [...row.channels.keys()]))];\nconst maxChannels = Math.max(1, ...[...summaries.values()].map(row => row.channels.size));\nconst rowHeight = compact ? 64 : 70 + maxChannels * 18;\nconst threadColumns = width >= 600 ? 2 : 1;\nconst threadHeight = 30 + Math.ceil(threads.size / threadColumns) * 96;\nconst accountHeight = 32 + Math.max(1, accounts.size) * (compact ? 62 : 20);\nconst summaryY = Math.max(135, height - (rows * rowHeight + accountHeight + threadHeight + 48));\nheading('GA4 · 일별 채널 세션', 4, 0);\nif (!lines.length) heading('일별 세션 데이터 없음', 'center', 60);\nheading('최근 완료 7일 · 앱별 유입', 4, summaryY);\napps.forEach((name, i) => {\n  const row = summaries.get(name);\n  const channels = channelNames.filter(c => row.channels.has(c))\n    .map(c => c + '  ' + fmt(row.channels.get(c)));\n  heading(name + ' · 전체 ' + fmt(row.total) + '세션', (100 * (i % columns) / columns) + '%',\n    summaryY + 26 + Math.floor(i / columns) * rowHeight,\n    [...(compact ? [] : channels), 'IG 유입 ' + fmt(row.sessions) + '세션', 'IG 첫 유입 신규 ' + fmt(row.users) + '명'].join('\\n'), appColors[name]);\n});\nif (!apps.length) heading('선택한 앱의 GA4 속성 없음', 4, summaryY + 23);\nconst accountY = summaryY + 32 + Math.max(rows * rowHeight, 26);\nconst accountLines = [...accounts].map(([name, data]) => '@' + name + (compact ? '\\n조회 ' : ' · 조회 ') + fmt(data.G) + '회 · 도달 ' + fmt(data.H) + '계정' +\n  (data.I === undefined ? '' : (compact ? '\\n조회한 사람 ' : ' · 조회한 사람 ') + fmt(data.I) + '명'));\nheading('Instagram 계정 · 최근 완료 7일', 4, accountY, accountLines.join('\\n') || '데이터 없음');\nconst threadsY = accountY + accountHeight;\nheading('Threads · 조회와 반응 · 최근 완료 7일', 4, threadsY);\n[...threads].forEach(([account, data], i) => {\n  const summary = data.state === 2 ? [\n    '프로필 조회 ' + fmt(data.views) + '회',\n    '좋아요 ' + fmt(data.likes) + ' · 답글 ' + fmt(data.replies),\n    '재게시 ' + fmt(data.reposts) + ' · 인용 ' + fmt(data.quotes),\n  ].join('\\n') : data.state === 1 ? '인증·수집 확인 필요\\n조회·반응 미수집' : 'Threads 인사이트 연결 필요\\n조회·반응 미수집';\n  heading('@' + account, (100 * (i % threadColumns) / threadColumns) + '%',\n    threadsY + 28 + Math.floor(i / threadColumns) * 96, summary);\n});\n\nreturn {title: titles, grid: {left: 12, right: 18, top: 60, height: Math.max(48, summaryY - 72), containLabel: true}};\n}\nreturn {\n  baseOption: {\n    backgroundColor: 'transparent',\n    tooltip: {trigger: 'axis', renderMode: 'richText'},\n    legend: {type: 'scroll', top: 25, left: 5, right: 12, data: lines.map(line => line.name)},\n    xAxis: {type: 'time', show: !!lines.length, axisLabel: {formatter: '{MM}/{dd}'}},\n    yAxis: {type: 'value', show: !!lines.length, minInterval: 1}, series: lines\n  },\n  media: [\n    {query: {maxWidth: 599}, option: layout(340)},\n    {query: {minWidth: 600, maxWidth: 999}, option: layout(800)},\n    {query: {minWidth: 1000}, option: layout(1400)}\n  ]\n};",
         "renderer": "svg"
       }
     },
@@ -276,7 +276,7 @@
           "unit": "short",
           "min": 0,
           "color": {
-            "mode": "palette-classic"
+            "mode": "palette-classic-by-name"
           },
           "custom": {
             "lineInterpolation": "stepAfter",
@@ -284,7 +284,143 @@
             "spanNulls": false
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "policycock"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Virtue"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B39DDB"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "blog"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "afzma"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "purple-place-bb6ce"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F28BC2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Infinity"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#56C8C8"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "miniapp-image-tools"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F2CC0C"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "shdkej.com"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E98479"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱 미지정"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9CA3AF"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -331,7 +467,7 @@
           "unit": "short",
           "min": 0,
           "color": {
-            "mode": "palette-classic"
+            "mode": "palette-classic-by-name"
           },
           "custom": {
             "lineInterpolation": "stepAfter",
@@ -339,7 +475,143 @@
             "spanNulls": false
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "policycock"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Virtue"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B39DDB"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "blog"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "afzma"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "purple-place-bb6ce"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F28BC2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Infinity"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#56C8C8"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "miniapp-image-tools"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F2CC0C"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "shdkej.com"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E98479"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱 미지정"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9CA3AF"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -386,7 +658,7 @@
           "unit": "percent",
           "min": 0,
           "color": {
-            "mode": "palette-classic"
+            "mode": "palette-classic-by-name"
           },
           "custom": {
             "lineInterpolation": "stepAfter",
@@ -394,7 +666,143 @@
             "spanNulls": false
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "policycock"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Virtue"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B39DDB"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "blog"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "afzma"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "purple-place-bb6ce"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F28BC2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Infinity"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#56C8C8"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "miniapp-image-tools"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F2CC0C"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "shdkej.com"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E98479"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱 미지정"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9CA3AF"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -438,7 +846,7 @@
         }
       ],
       "options": {
-        "getOption": "const selected = new RegExp('^(?:' + context.grafana.replaceVariables('${app:regex}') + ')$');\nconst apps = [\n  {scope: 'policycock', name: '정책콕', action: '사례 열람', drop: '열람 전 이탈'},\n  {scope: 'Virtue', name: 'Virtue', action: '덕행 저장', drop: '저장 전 이탈'}\n].filter(app => selected.test(app.scope));\nif (!apps.length) {\n  return {title: {text: '정책콕 또는 Virtue를 선택해 주세요', left: 'center', top: 'middle', textStyle: {fontSize: 14}}};\n}\n\nconst counts = new Map();\nfor (const frame of context.panel.data.series) {\n  for (const field of frame.fields) {\n    if (field.type === 'number' && field.labels && field.values.length) {\n      counts.set(field.labels.scope + '/' + field.labels.metric, field.values[field.values.length - 1]);\n    }\n  }\n}\n\nconst title = [];\nconst series = [];\nfor (const [index, app] of apps.entries()) {\n  const left = index * 100 / apps.length;\n  const group = {id: app.scope, left: (left + 1) + '%', top: 0, text: app.name + ' · ' + app.action,\n    textStyle: {fontSize: 15}, subtextStyle: {fontSize: 12}, itemGap: 6};\n  title.push(group);\n  const cells = ['sharedActivated', 'sharedPending', 'otherActivated', 'otherPending', 'sharedDropped', 'otherDropped']\n    .map(metric => counts.get(app.scope + '/' + metric));\n  if (cells.some(value => value === undefined)) {\n    group.subtext = '집계 대기 중';\n    continue;\n  }\n  const [sa, sp, oa, op, sd, od] = cells;\n  const total = sa + sp + oa + op;\n  const dropped = sd + od;\n  const open = sp + op - dropped;\n  group.subtext = '첫 방문 ' + total + '건 · 이탈 ' + dropped + '건 · 관찰 중 ' + open + '건';\n  if (!total) continue;\n\n  const edges = [\n    ['공유 링크', app.action, sa], ['공유 링크', app.drop, sd], ['공유 링크', '관찰 중', sp - sd],\n    ['그 외 유입', app.action, oa], ['그 외 유입', app.drop, od], ['그 외 유입', '관찰 중', op - od]\n  ];\n  const links = edges.filter(([, , value]) => value > 0).map(([source, target, value]) => ({source, target, value}));\n  const totals = new Map([['공유 링크', sa + sp], ['그 외 유입', oa + op], [app.action, sa + oa], [app.drop, dropped], ['관찰 중', open]]);\n  series.push({id: app.scope, name: app.name, type: 'sankey', left: (left + 2) + '%',\n    right: (100 - left - 100 / apps.length + 2) + '%', top: 58, bottom: 12, nodeWidth: 12,\n    data: [...totals].filter(([, n]) => n > 0).map(([name]) => ({name})), links,\n    levels: [{depth: 0, label: {position: 'right'}}, {depth: 1, label: {position: 'left'}}],\n    label: {formatter: p => p.name + '\\n' + totals.get(p.name) + '건'},\n    lineStyle: {color: 'gradient', opacity: 0.4}, emphasis: {focus: 'adjacency'}});\n}\nreturn {title, series, tooltip: {trigger: 'item'}};",
+        "getOption": "const selected = new RegExp('^(?:' + context.grafana.replaceVariables('${app:regex}') + ')$');\nconst apps = [\n  {scope: 'policycock', color: '#5794F2', name: '정책콕', action: '사례 열람', drop: '열람 전 이탈'},\n  {scope: 'Virtue', color: '#B39DDB', name: 'Virtue', action: '덕행 저장', drop: '저장 전 이탈'}\n].filter(app => selected.test(app.scope));\nif (!apps.length) {\n  return {title: {text: '정책콕 또는 Virtue를 선택해 주세요', left: 'center', top: 'middle', textStyle: {fontSize: 14}}};\n}\n\nconst counts = new Map();\nfor (const frame of context.panel.data.series) {\n  for (const field of frame.fields) {\n    if (field.type === 'number' && field.labels && field.values.length) {\n      counts.set(field.labels.scope + '/' + field.labels.metric, field.values[field.values.length - 1]);\n    }\n  }\n}\n\nconst title = [];\nconst series = [];\nfor (const [index, app] of apps.entries()) {\n  const left = index * 100 / apps.length;\n  const group = {id: app.scope, left: (left + 1) + '%', top: 0, text: app.name + ' · ' + app.action,\n    textStyle: {fontSize: 15, color: app.color}, subtextStyle: {fontSize: 12}, itemGap: 6};\n  title.push(group);\n  const cells = ['sharedActivated', 'sharedPending', 'otherActivated', 'otherPending', 'sharedDropped', 'otherDropped']\n    .map(metric => counts.get(app.scope + '/' + metric));\n  if (cells.some(value => value === undefined)) {\n    group.subtext = '집계 대기 중';\n    continue;\n  }\n  const [sa, sp, oa, op, sd, od] = cells;\n  const total = sa + sp + oa + op;\n  const dropped = sd + od;\n  const open = sp + op - dropped;\n  group.subtext = '첫 방문 ' + total + '건 · 이탈 ' + dropped + '건 · 관찰 중 ' + open + '건';\n  if (!total) continue;\n\n  const edges = [\n    ['공유 링크', app.action, sa], ['공유 링크', app.drop, sd], ['공유 링크', '관찰 중', sp - sd],\n    ['그 외 유입', app.action, oa], ['그 외 유입', app.drop, od], ['그 외 유입', '관찰 중', op - od]\n  ];\n  const links = edges.filter(([, , value]) => value > 0).map(([source, target, value]) => ({source, target, value}));\n  const totals = new Map([['공유 링크', sa + sp], ['그 외 유입', oa + op], [app.action, sa + oa], [app.drop, dropped], ['관찰 중', open]]);\n  series.push({id: app.scope, name: app.name, type: 'sankey', left: (left + 2) + '%',\n    right: (100 - left - 100 / apps.length + 2) + '%', top: 58, bottom: 12, nodeWidth: 12,\n    data: [...totals].filter(([, n]) => n > 0).map(([name]) => name === '공유 링크' || name === '그 외 유입' ? {name, itemStyle: {color: app.color}} : {name}), links,\n    levels: [{depth: 0, label: {position: 'right'}}, {depth: 1, label: {position: 'left'}}],\n    label: {formatter: p => p.name + '\\n' + totals.get(p.name) + '건'},\n    lineStyle: {color: 'gradient', opacity: 0.4}, emphasis: {focus: 'adjacency'}});\n}\nreturn {title, series, tooltip: {trigger: 'item'}};",
         "renderer": "svg"
       },
       "fieldConfig": {
@@ -481,7 +889,7 @@
           "unit": "percent",
           "min": 0,
           "color": {
-            "mode": "palette-classic"
+            "mode": "palette-classic-by-name"
           },
           "custom": {
             "lineInterpolation": "stepAfter",
@@ -489,7 +897,143 @@
             "spanNulls": false
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "policycock"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Virtue"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B39DDB"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "blog"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "afzma"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "purple-place-bb6ce"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F28BC2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Infinity"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#56C8C8"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "miniapp-image-tools"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F2CC0C"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "shdkej.com"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E98479"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱 미지정"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9CA3AF"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -536,7 +1080,7 @@
           "unit": "short",
           "min": 0,
           "color": {
-            "mode": "palette-classic"
+            "mode": "palette-classic-by-name"
           },
           "custom": {
             "lineInterpolation": "stepAfter",
@@ -544,7 +1088,143 @@
             "spanNulls": false
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "policycock"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Virtue"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B39DDB"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "blog"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "afzma"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "purple-place-bb6ce"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F28BC2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Infinity"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#56C8C8"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "miniapp-image-tools"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F2CC0C"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "shdkej.com"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E98479"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱 미지정"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9CA3AF"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -592,12 +1272,147 @@
           "unit": "short",
           "noValue": "N/A",
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#9CA3AF"
+            "mode": "palette-classic-by-name"
           },
           "decimals": 0
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "policycock"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Virtue"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B39DDB"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "blog"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "afzma"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "purple-place-bb6ce"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F28BC2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Infinity"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#56C8C8"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "miniapp-image-tools"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F2CC0C"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "shdkej.com"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E98479"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱 미지정"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9CA3AF"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "reduceOptions": {
