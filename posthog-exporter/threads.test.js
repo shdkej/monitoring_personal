@@ -11,9 +11,15 @@ function fixture(account = 'minimal_collector') {
     assert.ok(!url.includes(token));
     if (url.includes('/me?')) return {id:'123456789',username:account};
     const params=new URL(url).searchParams;
-    if(params.get('metric')==='views') return {data:[{name:'views',period:'day',values:Array.from({length:8},(_,i)=>({value:i,end_time:new Date((until-(7-i)*86400)*1000).toISOString()}))}]};
-    assert.equal(Number(params.get('until'))-Number(params.get('since')),7*86400);
-    return {data:[
+    const next = new URL(url);
+    next.pathname = '/v1.0/987654321/threads_insights';
+    next.searchParams.set('since', String(Number(params.get('until')) + 1));
+    next.searchParams.set('until', String(Number(params.get('until')) + 86400));
+    const paging = {next:next.href};
+    if(params.get('metric')==='views') return {paging,data:[{name:'views',period:'day',values:Array.from({length:8},(_,i)=>({value:i,end_time:new Date((until-(7-i)*86400)*1000).toISOString()}))}]};
+    assert.equal(Number(params.get('since')),until - 6*86400);
+    assert.equal(Number(params.get('until')),until);
+    return {paging,data:[
       {name:'views',period:'day',values:Array.from({length:7},(_,i)=>({value:i,end_time:new Date((until-(6-i)*86400)*1000).toISOString()}))},
       ...['likes','replies','reposts','quotes'].map(name=>({name,period:'day',total_value:{value:0}}))
     ]};
@@ -34,6 +40,29 @@ test('empty, partial, duplicate and invalid provider metrics never become zero c
     await assert.rejects(readThreadsAccount('minimal_collector','private-test-token',now,get));
   }
 });
+test('rejects paging that may contain more data in the requested interval', async()=>{
+  for (const stage of ['views', 'views,likes,replies,reposts,quotes']) {
+    for (const mutate of [
+      (page, request) => page.searchParams.set('since', request.searchParams.get('until')),
+      page => page.searchParams.set('after', 'next-cursor'),
+      page => {page.pathname = '/another/endpoint';},
+    ]) {
+      const original = fixture();
+      const get = async (url, token) => {
+        const response = await original(url, token);
+        const request = new URL(url);
+        if (request.searchParams.get('metric') === stage) {
+          const page = new URL(response.paging.next);
+          mutate(page, request);
+          response.paging.next = page.href;
+        }
+        return response;
+      };
+      await assert.rejects(readThreadsAccount('minimal_collector','private-test-token',now,get));
+    }
+  }
+});
+
 test('missing authentication exposes connection state, no metrics, and each account fails independently', async()=>{
   let time=now;const tokens=new Map();let fail=false;
   const registry=new Registry();

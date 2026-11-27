@@ -79,7 +79,7 @@ spec:
           # 런타임 clone은 컨테이너 시작 때만 수행하므로 exporter 소스 변경 시 SOURCE_REVISION도 갱신한다.
           env:
             - name: SOURCE_REVISION
-              value: "threads-discovery-2026-11-27"
+              value: "threads-inclusive-days-2026-11-27"
             - name: GMAIL_GOG_ENABLED
               value: "true"
             - name: GA4_API_ENABLED

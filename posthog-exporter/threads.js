@@ -10,6 +10,17 @@ async function request(url, token) {
   if (!response.ok) throw Error('Threads HTTP ' + response.status);
   return response.json();
 }
+// Meta returns navigation to adjacent time ranges even when the requested range is complete.
+function checkNextPage(next, until) {
+  if (!next) return;
+  const page = new URL(next);
+  const params = page.searchParams;
+  // Navigation links can use a different provider-side ID than /me.
+  if (page.origin !== 'https://graph.threads.com' || !/^\/v1\.0\/\d+\/threads_insights$/.test(page.pathname) || params.has('after') || params.has('before') ||
+      Number(params.get('since')) !== until + 1 || !(Number(params.get('until')) > until)) {
+    throw Error('Incomplete Threads insights');
+  }
+}
 async function readThreadsAccount(account, token, now, get = request) {
   if (!ACCOUNTS.includes(account)) throw Error('Unsupported Threads account');
   const base = 'https://graph.threads.com/v1.0/';
@@ -17,10 +28,12 @@ async function readThreadsAccount(account, token, now, get = request) {
   if (profile.username !== account || !/^\d{5,30}$/.test(profile.id)) throw Error('Threads account mismatch');
   // Meta's documented day boundaries are not midnight UTC. Discover eight
   // consecutive completed boundaries; the oldest is the start of seven days.
+  const endpoint = base + profile.id + '/threads_insights';
   const probe = new URLSearchParams({metric:'views', since:String(Math.floor(now/1000)-10*DAY), until:String(Math.floor(now/1000))});
-  const daily = await get(base + profile.id + '/threads_insights?' + probe, token);
+  const daily = await get(endpoint + '?' + probe, token);
+  checkNextPage(daily.paging?.next, Number(probe.get('until')));
   if (daily.data?.length !== 1 || daily.data[0].name !== 'views' || daily.data[0].period !== 'day' ||
-      !Array.isArray(daily.data[0].values) || daily.paging?.next) throw Error('Missing Threads day boundaries');
+      !Array.isArray(daily.data[0].values)) throw Error('Missing Threads day boundaries');
   const ends = daily.data[0].values.map(item => {
     const end = Date.parse(item.end_time);
     if (!Number.isFinite(end) || !validCount(item.value)) throw Error('Invalid Threads day');
@@ -30,9 +43,11 @@ async function readThreadsAccount(account, token, now, get = request) {
       ends.slice(1).some((end,i) => ![23,24,25].includes((end-ends[i])/3600000)) ||
       Math.abs(ends[7]-ends[0]-7*DAY*1000) > 3600000) throw Error('Incomplete Threads days');
   const since = ends[0]/1000, until = ends[7]/1000;
-  const params = new URLSearchParams({metric: METRICS.join(','), since: String(since), until: String(until)});
-  const response = await get(base + profile.id + '/threads_insights?' + params, token);
-  if (!Array.isArray(response.data) || response.data.length !== METRICS.length || response.paging?.next)
+  // The API includes both requested day labels, including for reaction totals.
+  const params = new URLSearchParams({metric: METRICS.join(','), since: String(ends[1]/1000), until: String(until)});
+  const response = await get(endpoint + '?' + params, token);
+  checkNextPage(response.paging?.next, until);
+  if (!Array.isArray(response.data) || response.data.length !== METRICS.length)
     throw Error('Incomplete Threads insights');
   const values = {};
   for (const metric of METRICS) {
