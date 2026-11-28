@@ -333,11 +333,12 @@
           "fields": ""
         },
         "orientation": "auto",
-        "textMode": "auto",
+        "textMode": "value_and_name",
         "colorMode": "value",
         "graphMode": "area",
-        "justifyMode": "auto",
-        "showPercentChange": false
+        "justifyMode": "center",
+        "showPercentChange": false,
+        "wideLayout": false
       }
     },
     {
