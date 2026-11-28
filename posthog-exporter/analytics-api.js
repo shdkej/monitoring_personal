@@ -3,7 +3,8 @@ const {JWT} = require('google-auth-library');
 const {Gauge} = require('prom-client');
 const {readGmail} = require('./gmail');
 
-const PROPERTIES = {blog: '252603434', afzma: '523848883', policycock: '565383231', Virtue: '566078860'};
+const PROPERTIES = {blog: '252603434', afzma: '523848883', policycock: '565383231', Virtue: '566078860',
+  'miniapp-image-tools': '566086976', Infinity: '566021124'};
 const INSTAGRAM = 'minimal_collector';
 const HOUR = 3600000;
 const MAX_AGE = 3 * HOUR;
