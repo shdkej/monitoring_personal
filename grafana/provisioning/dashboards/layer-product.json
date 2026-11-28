@@ -1142,11 +1142,10 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values({__name__=~\"ga4_app_rolling7d_count|posthog_app_calendar_count\"}, scope)",
-        "query": "label_values({__name__=~\"ga4_app_rolling7d_count|posthog_app_calendar_count\"}, scope)",
+        "definition": "label_values({__name__=~\"ga4_app_rolling7d_count|posthog_app_calendar_count\",scope!~\"purple-place-bb6ce|shdkej[.]com\"}, scope)",
+        "query": "label_values({__name__=~\"ga4_app_rolling7d_count|posthog_app_calendar_count\",scope!~\"purple-place-bb6ce|shdkej[.]com\"}, scope)",
         "multi": true,
         "includeAll": true,
-        "allValue": ".*",
         "current": {
           "selected": true,
           "text": "All",
