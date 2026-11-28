@@ -190,6 +190,14 @@ async function start() {
   void threads.refresh();
   setInterval(() => void threads.refresh(), HOUR);
   const analyticsApi = createAnalyticsApi(register);
+  for (const source of ['ga4', 'instagram']) {
+    app.get('/analytics-' + source + '.json', (req, res) => {
+      res.set('Cache-Control', 'no-store');
+      const snapshot = analyticsApi.publicSnapshot(source);
+      if (!snapshot) return res.status(503).json({error: 'Awaiting verified aggregates'});
+      res.json(snapshot);
+    });
+  }
   registerSupport(register, undefined, undefined, analyticsApi);
   const refreshApi = () => analyticsApi.refresh().catch(() => console.error('Analytics API refresh failed'));
   void refreshApi();

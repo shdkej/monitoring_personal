@@ -50,6 +50,14 @@ function parseReport(report, query) {
   });
 }
 
+function publicRow(scope, now, timeZone, method, values) {
+  const day = new Intl.DateTimeFormat('en-CA', {timeZone, year: 'numeric', month: '2-digit', day: '2-digit'}).format(now);
+  const midnight = Date.parse(day + 'T00:00:00Z');
+  const daysAgo = n => new Date(midnight - n * 86400000).toISOString().slice(0, 10);
+  return {scope, observedAt: new Date(now).toISOString(), status: 'ok', method, timeZone,
+    periodStart: daysAgo(7), periodEnd: daysAgo(1), values};
+}
+
 async function readProperty(scope, property, token, now, get = request) {
   const queries = [
     gaReport(['newUsers', 'sessions', 'userEngagementDuration']),
@@ -68,6 +76,9 @@ async function readProperty(scope, property, token, now, get = request) {
       Object.keys(channelSessions).length !== channels.length)
     throw new Error('Invalid GA4 channels');
   return {scope, observed: now, observedAt: new Date(now).toISOString(), status: sessions ? 'ok' : 'no_sessions',
+    publicRow: reports[0].metadata?.timeZone === 'Asia/Seoul'
+      ? publicRow(scope, now, 'Asia/Seoul', 'GA4 Data API', total.length ? {sessions, newUsers} : {sessions: null, newUsers: null})
+      : null,
     values: {sessions, newUsers}, sessions, seconds: sessions ? duration / sessions : null, channelSessions, instagramAcquisition};
 }
 
@@ -76,10 +87,10 @@ async function readAccount(token, accountId, now, get = request, graphHost = 'gr
   if (!['graph.instagram.com', 'graph.facebook.com'].includes(graphHost)) throw new Error('Invalid Instagram API host');
   if (graphHost === 'graph.facebook.com' && accountId === 'me') throw new Error('Instagram account ID required for this login');
   const base = 'https://' + graphHost + '/v27.0/';
-  const profile = await get(base + accountId + '?fields=id,username', token);
+  const profile = await get(base + accountId + '?fields=id,username,followers_count', token);
   if (profile.username !== INSTAGRAM || !/^\d{5,30}$/.test(profile.id)) throw new Error('Unexpected Instagram account');
   const until = Math.floor(now / 86400000) * 86400;
-  const params = new URLSearchParams({metric: 'views,reach', metric_type: 'total_value', period: 'day',
+  const params = new URLSearchParams({metric: 'views,reach,total_interactions,profile_views', metric_type: 'total_value', period: 'day',
     since: String(until - 7 * 86400), until: String(until)});
   const {data} = await get(base + profile.id + '/insights?' + params, token);
   if (!Array.isArray(data)) throw new Error('Missing Instagram insights');
@@ -91,7 +102,15 @@ async function readAccount(token, accountId, now, get = request, graphHost = 'gr
     if (rows.length !== 1 || !Number.isSafeInteger(value) || value < 0) throw new Error('Invalid Instagram insights');
     values[name] = value;
   }
-  return {scope: INSTAGRAM, observed: now, observedAt: new Date(now).toISOString(), status: 'ok', values};
+  const expanded = {views: values.views, viewers: values.reach, followers: profile.followers_count};
+  for (const [name, key] of [['total_interactions', 'interactions'], ['profile_views', 'profileVisits']]) {
+    const matches = data.filter(row => row.name === name);
+    if (matches.length === 1) expanded[key] = matches[0]?.total_value?.value;
+  }
+  const complete = ['views', 'viewers', 'followers', 'interactions', 'profileVisits']
+    .every(key => Number.isSafeInteger(expanded[key]) && expanded[key] >= 0);
+  return {scope: INSTAGRAM, observed: now, observedAt: new Date(now).toISOString(), status: 'ok', values,
+    publicRow: complete ? publicRow(INSTAGRAM, now, 'UTC', 'Instagram Insights API', expanded) : null};
 }
 
 async function optionalSecret(path) {
@@ -163,7 +182,16 @@ function createAnalyticsApi(registry, {
   if (gmailEnabled) sources.push(() => update('gmail', 'customer-support', gmail, () => readGmail(clock())));
   const collectors = sources.map(onceAtATime);
   const refresh = () => Promise.all(collectors.map(collect => collect()));
-  return {ga4, instagram, gmail, refresh};
+  function publicSnapshot(source) {
+    const cache = source === 'ga4' ? ga4 : instagram;
+    const now = clock();
+    const rows = Array.from(cache, ([scope, row]) =>
+      row?.publicRow && now >= row.observed && now - row.observed <= MAX_AGE
+        ? row.publicRow : {scope, status: 'unavailable'});
+    const times = rows.filter(row => row.status === 'ok').map(row => row.observedAt).sort();
+    return times.length ? {schemaVersion: 1, source, rows, observedAt: times.at(-1)} : null;
+  }
+  return {ga4, instagram, gmail, refresh, publicSnapshot};
 }
 
 // Keep browser data only for scopes that have not been cut over.

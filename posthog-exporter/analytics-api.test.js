@@ -7,7 +7,7 @@ const {registerGA4} = require('./ga4');
 function reports(rows) {
   return async (url, token, {requests}) => ({reports: requests.map((q, i) => {
     const dimensions = q.dimensions.length;
-    return {metricHeaders: q.metrics, dimensionHeaders: q.dimensions, rowCount: rows[i].length,
+    return {metadata: {timeZone: "Asia/Seoul"}, metricHeaders: q.metrics, dimensionHeaders: q.dimensions, rowCount: rows[i].length,
       rows: rows[i].map(row => ({dimensionValues: row.slice(0, dimensions).map(value => ({value})),
         metricValues: row.slice(dimensions).map(value => ({value: String(value)}))}))};
   })});
@@ -23,6 +23,7 @@ test('Data API preserves distinct acquisition attribution and rejects duplicate 
   assert.equal(row.seconds, 13 / 8);
   assert.deepEqual(row.channelSessions, {Direct: 2, Referral: 6});
   const empty = await read([[], [], [], []]);
+  assert.deepEqual(empty.publicRow.values, {sessions: null, newUsers: null});
   assert.equal(empty.sessions, 0);
   assert.equal(empty.seconds, null);
   assert.deepEqual(empty.instagramAcquisition, {sessions: 0, newUsers: 0});
@@ -73,4 +74,19 @@ test('cutover survives restart and expired direct samples never revive browser v
   now += 3 * HOUR + 1;
   assert.deepEqual(await values('ga4_app_rolling7d_count'), []);
   assert.equal(legacyCalls, 0);
+});
+
+test('one Meta profile and one insights response supply both projections', async () => {
+  const now = Date.parse('2026-11-28T01:00:00Z');
+  const calls = [];
+  const row = await readAccount('test', '123456789', now, async url => {
+    calls.push(url);
+    if (url.includes('fields=')) return {id: '123456789', username: 'minimal_collector', followers_count: 2};
+    return {data: ['views', 'reach', 'profile_views', 'total_interactions'].map((name, i) =>
+      ({name, total_value: {value: i}}))};
+  });
+  assert.equal(calls.length, 2);
+  assert.deepEqual(row.values, {views: 0, reach: 1});
+  assert.deepEqual(row.publicRow.values, {views: 0, viewers: 1, followers: 2, profileVisits: 2, interactions: 3});
+  assert.equal(row.publicRow.periodEnd, '2026-11-27');
 });

@@ -78,6 +78,8 @@
 - GA4 네 속성의 API 보고서와 Instagram 인사이트의 exporter 설정은 `k8s/posthog-exporter/deployment.yaml`에 있습니다. `analytics_api_last_success_timestamp_seconds`와 `analytics_api_consecutive_failures`로 원천별 성공 시각과 연속 실패 횟수를 조회합니다. 고객 대시보드의 유입 패널은 GA4 일간 추이, 최근 완료 7일의 앱별 유입, Instagram 계정 조회·도달을 동시에 표시합니다. 계정별 조회와 앱 유입은 서로 다른 집계입니다.
 - exporter 소스를 수정하면 Deployment의 `SOURCE_REVISION`을 갱신하여 새 Pod가 코드를 읽게 합니다. 회귀 검사는 `cd posthog-exporter && node --test`로 실행합니다.
 - 세션당 참여시간은 GA4 참여 시간(초)을 세션 수로 나눕니다. 세션이 없는 속성의 평균은 비워 둡니다. GA4 API의 전체 세션과 채널·유입처별 수치는 각각 해당 보고서 값을 사용합니다. 보고서별 열·행 수와 샘플링·누락 여부를 검증하며, 차원별 추정치의 합은 전체와 다를 수 있습니다. Instagram 신규 사용자는 첫 사용자 소스, 유입 세션은 세션 소스를 사용합니다. 완료 구간의 가로축은 Prometheus 수집 시각입니다. GA4 속성 추가 시 API 속성 매핑과 읽기 권한을 함께 확인합니다.
+- 내부 서비스의 `/analytics-ga4.json`과 `/analytics-instagram.json`은 시간별 API 캐시에서 공개 집계 필드만 반환합니다. 이 경로를 읽을 때 외부 API를 호출하지 않습니다. GA4 무응답 행의 공개 측정값은 null이며 Instagram 공개 필드가 일부 비면 해당 공개 관측은 사용할 수 없습니다. Grafana는 기존 관측 필드를 사용합니다.
+
 - 운영 GA4 네 속성과 Instagram `@minimal_collector`는 클러스터에서 매시간 API를 직접 조회합니다. Instagram은 지정 계정의 UTC 최근 완료 7일 조회수와 도달 계정 수를 조회합니다. 시스템 사용자 인증은 `monitoring/analytics-instagram-api`의 `access-token`, `account-id`, `graph-host`를 읽습니다. 운영 호스트는 `graph.facebook.com`입니다. 연결 해제나 권한 회수 후에는 해당 Secret을 갱신하고 실제 계정과 보고서를 재검증합니다. 전환된 원천에서 3시간 넘게 검증된 새 관측이 없으면 값을 숨깁니다.
 - 공개 Space 피드와 개인 Grafana는 각각의 공개 범위를 사용합니다. 공개 달력 피드의 앱 등록은 Space의 `analytics-inventory.json`과 함께 확인합니다.
 - 변경 완료 보고에는 수정한 문서, source commit, Argo CD revision, Prometheus/Grafana 검증
