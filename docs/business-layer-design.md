@@ -4,7 +4,7 @@
 
 Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살핀다. 각 레이어는 대표 지표 8개로 고정하되, 실제 원천이 연결되지 않은 값은 0으로 꾸미지 않고 `N/A`로 표시한다. 현재 저장소에 쿼리가 있다는 사실과 데이터가 실제로 유입된다는 사실은 구분한다.
 
-- **GA4**: 4개 속성의 API 신규 사용자·세션·채널별 최근 완료 7일 집계와 Grafana의 일간 직접 조회
+- **GA4**: 6개 속성의 API 신규 사용자·세션·채널별 최근 완료 7일 집계와 Grafana의 일간 직접 조회
 - **PostHog**: 공유 프로젝트의 앱별 사용·재방문·품질. 판정 시도→저장 퍼널은 프로젝트 단위
 - **CloudWatch / Prometheus**: 노드 계측은 연결됨. YACE exporter는 scrape되나 Lambda 유효 샘플·DynamoDB throttling·RUM 데이터는 확인되지 않음
 - **이메일/CS**: 지정된 지원 수신함에서 최근 7일의 앱 태그 문의 대화를 집계한다. 메일 원문·개인정보는 모니터링에 저장하지 않는다.
@@ -49,7 +49,7 @@ Grafana에서 비즈니스·고객·제품·시스템의 상태를 앱별로 살
 
 | # | 지표 | 산출 기준 | 현재 상태 / 필요한 입력 |
 |---|---|---|---|
-| 1 | 신규 사용자 | 앱별 GA4 신규 사용자 | GA4 API 4개 속성의 최근 완료 7일 값 |
+| 1 | 신규 사용자 | 앱별 GA4 신규 사용자 | GA4 API 6개 속성의 최근 완료 7일 값 |
 | 2 | 유입 채널별 세션 | 앱·유입 채널별 세션 | 앱·채널별 일간 그래프와 최근 완료 7일 요약을 한 패널에 표시. Instagram 유입·계정 지표 및 Threads 두 계정의 조회·반응을 함께 표시 |
 | 3 | 이탈 사용자 수 | 앞 7일간 페이지를 보고 최근 7일에는 방문하지 않은 사용자 | 앱별 PostHog 코호트 |
 | 4 | 7일 재방문율 | 두 7일 구간에 모두 방문한 사용자 ÷ 앞 7일 방문자 | 앱별 PostHog 코호트. 분모가 없으면 N/A |
@@ -118,8 +118,9 @@ GA4 일간 직접 조회에는 오늘의 미완료 구간도 포함됩니다. GA
 
 ## 앱·데이터 원천 현황
 
-- 2026-11-27 GA4 계정 3개와 속성 4개(blog, afzma, policycock, purple-place-bb6ce)의 Grafana 직접 조회 응답을 확인했다. 네 속성의 최근 완료 7일 공통 지표는 클러스터 API collector가 소유한다. Space 일간 집계 피드는 기존 공개 피드이며 활성화된 private API collector 값을 덮어쓰지 않는다.
-- PostHog 접근 가능 프로젝트는 424014 한 개이다. 등록 범위는 policycock, miniapp-image-tools, Infinity, shdkej.com, Virtue와 앱 미지정이다. 최근 90일의 명시적 앱 ID는 policycock·miniapp-image-tools였다. 2026-11-26 전환 이후 `service="virtue"`도 Virtue 앱만 집계한다. 과거 시계열에는 공유 프로젝트 전체 값이 남아 있다. 앱별 패널은 `scope`를 사용한다.
+- 2026-11-28부터 GA4와 PostHog에서 blog, afzma, policycock, Virtue, miniapp-image-tools, Infinity를 조회한다. GA4는 앱별 속성을 사용하고 PostHog는 프로젝트 424014에서 앱 ID와 기존 호스트 기록을 함께 조회한다. ‘앱 미지정’은 PostHog에서 어느 앱인지 식별할 수 없는 이벤트다.
+- GA4의 Virtue·이미지 작업대·Infinity는 새 웹 스트림에서 방문자가 허용한 이후의 방문을 집계한다. 당시 각 배포 사이트에서 동의 전 무전송, 허용 후 페이지 조회 요청, 철회 후 계측 중단을 브라우저에서 검사했다. Purple Place 속성 376243766은 사용자 확인 후 휴지통으로 옮겼다.
+- 블로그의 기존 PostHog 호스트 shdkej.com은 GA4 블로그 스트림과 주소가 일치한다. 2026-08-23 이후 수집 공백이 있었다. 블로그와 AFZMA 배포 후 각 사이트의 테스트 이벤트를 PostHog 원천에서 확인했다. 합성 이벤트는 앱 지표에서 제외한다.
 - YACE exporter와 ServiceMonitor scrape target은 정상(up)이다. YACE `/metrics`에는 Lambda invocation/error 및 DynamoDB capacity metric names가 있지만, 확인 시 Lambda samples는 NaN, DynamoDB consumed capacity는 0, throttling series는 없었다. CloudWatch RUM 로그에는 `No metrics data found`가 반복되고 RUM Prometheus series도 없다. 값이 0인지 데이터/리소스 범위가 잘못됐는지 임의 추정하지 않는다.
 - 노드 CPU·메모리·디스크·네트워크·헬스 시계열은 Prometheus에 있다. HPA와 black-box latency probe 시계열은 없다.
 - 클러스터 exporter의 읽기 전용 gog 조회는 제목 맨 앞의 [등록된 앱 이름]을 분류한다. [모두의정책]은 policycock의 별칭이다. [AI 브리핑]과 일반 메일은 집계에서 제외한다.
