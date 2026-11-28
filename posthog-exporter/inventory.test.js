@@ -7,7 +7,7 @@ test('private discovery keeps verified apps together and separates new projects 
   const groups = projectScopes('424014', [['virtue',null],['policycock',null],['new-app',null],
     [null,'new.aws.shdkej.com'],[null,'not-owned.example'],["bad'quote",null]]);
   assert.deepEqual(groups.map(g=>g.name), ['policycock','miniapp-image-tools','Infinity','blog',
-    'Virtue','host:new.aws.shdkej.com','app:new-app','앱 미지정']);
+    'Virtue','afzma','host:new.aws.shdkej.com','app:new-app','앱 미지정']);
   const {attribution,filter} = scopeSQL(groups,true);
   assert.match(attribution, /properties.app_id = 'virtue'/);
   assert.match(filter,/synthetic/);

@@ -16,7 +16,7 @@ test('complete Korean calendar periods, UTC rolling range, and missing session c
     assert.match(q, /synthetic/);
     assert.match(q, /virtue.aws.shdkej.com/);
   }
-  assert.equal(feed.rows.length, 6);
+  assert.equal(feed.rows.length, 7);
   const row = feed.rows[0];
   assert.deepEqual([row.periodStart, row.periodEnd], ['2026-02-22', '2026-02-28']);
   assert.equal(row.eventsWithSessionId, 0);
