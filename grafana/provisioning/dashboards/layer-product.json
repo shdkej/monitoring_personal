@@ -161,7 +161,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#E98479"
+                  "fixedColor": "#73BF69"
                 }
               }
             ]
@@ -337,7 +337,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#E98479"
+                  "fixedColor": "#73BF69"
                 }
               }
             ]
@@ -567,7 +567,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#E98479"
+                  "fixedColor": "#73BF69"
                 }
               }
             ]
@@ -743,7 +743,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#E98479"
+                  "fixedColor": "#73BF69"
                 }
               }
             ]
@@ -923,14 +923,14 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": "/^shdkej\\.com · (LCP|INP)$/"
+              "options": "/^shdkej[.]com · (LCP|INP)$/"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#E98479"
+                  "fixedColor": "#73BF69"
                 }
               }
             ]
