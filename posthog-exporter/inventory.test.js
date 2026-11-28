@@ -6,7 +6,7 @@ const {collectSnapshot, scopeSQL} = require('./calendar');
 test('private discovery keeps verified apps together and separates new projects and app IDs', async () => {
   const groups = projectScopes('424014', [['virtue',null],['policycock',null],['new-app',null],
     [null,'new.aws.shdkej.com'],[null,'not-owned.example'],["bad'quote",null]]);
-  assert.deepEqual(groups.map(g=>g.name), ['policycock','miniapp-image-tools','Infinity','shdkej.com',
+  assert.deepEqual(groups.map(g=>g.name), ['policycock','miniapp-image-tools','Infinity','blog',
     'Virtue','host:new.aws.shdkej.com','app:new-app','앱 미지정']);
   const {attribution,filter} = scopeSQL(groups,true);
   assert.match(attribution, /properties.app_id = 'virtue'/);

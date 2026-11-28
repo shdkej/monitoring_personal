@@ -4,8 +4,8 @@ const scopes = [
   {name: 'policycock', appId: 'policycock'},
   {name: 'miniapp-image-tools', appId: 'miniapp-image-tools'},
   {name: 'Infinity', appId: 'infinity', hosts: ['infinity.aws.shdkej.com']},
-  {name: 'shdkej.com', hosts: ['shdkej.com']},
-  {name: 'Virtue', appId: 'virtue', hosts: ['virtue.aws.shdkej.com', 'virtue.oracle.shdkej.com']},
+  {name: 'blog', appId: 'blog', hosts: ['shdkej.com']},
+  {name: 'Virtue', appId: 'virtue', hosts: ['virtue.minimalcollector.com', 'virtue.aws.shdkej.com', 'virtue.oracle.shdkej.com']},
   {name: '앱 미지정'},
 ];
 const DAY = 86400000;

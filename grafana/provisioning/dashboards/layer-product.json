@@ -124,21 +124,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "purple-place-bb6ce"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#F28BC2"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Infinity"
             },
             "properties": [
@@ -308,21 +293,6 @@
                 "value": {
                   "mode": "fixed",
                   "fixedColor": "#FF9830"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "purple-place-bb6ce"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#F28BC2"
                 }
               }
             ]
@@ -560,21 +530,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "purple-place-bb6ce"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#F28BC2"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Infinity"
             },
             "properties": [
@@ -744,21 +699,6 @@
                 "value": {
                   "mode": "fixed",
                   "fixedColor": "#FF9830"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "purple-place-bb6ce"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#F28BC2"
                 }
               }
             ]
@@ -946,21 +886,6 @@
                 "value": {
                   "mode": "fixed",
                   "fixedColor": "#FF9830"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "/^purple-place-bb6ce · (LCP|INP)$/"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#F28BC2"
                 }
               }
             ]
